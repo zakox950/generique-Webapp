@@ -1,0 +1,88 @@
+// Atelier Kern — demo data
+
+const KERN_PRODUCTS = [
+  {
+    id: 'p1',
+    name: 'Kouign-amann',
+    price: 6,
+    category: 'Viennoiserie',
+    tag: 'Signature',
+    tone: 0,
+    size: 'tall',
+    desc: "Pâte feuilletée au beurre Bordier, caramélisée au sucre muscovado. Cuit 48 minutes, consommer tiède.",
+  },
+  {
+    id: 'p2',
+    name: 'Tarte citron',
+    price: 8,
+    category: 'Tarte',
+    tag: null,
+    tone: 1,
+    size: 'normal',
+    desc: "Sablé breton, crème de citron de Menton non tamisée, meringue italienne légèrement brûlée au chalumeau.",
+  },
+  {
+    id: 'p3',
+    name: 'Paris-Brest',
+    price: 9,
+    category: 'Classique',
+    tag: null,
+    tone: 2,
+    size: 'normal',
+    desc: "Pâte à choux, praliné maison noisettes du Piémont torréfiées à 160°C, crème mousseline légère.",
+  },
+  {
+    id: 'p4',
+    name: 'Éclair café',
+    price: 7,
+    category: 'Classique',
+    tag: null,
+    tone: 0,
+    size: 'wide',
+    desc: "Choux long, crème pâtissière infusée aux grains de café éthiopien, glaçage fondant café.",
+  },
+  {
+    id: 'p5',
+    name: 'Millefeuille vanille',
+    price: 9,
+    category: 'Classique',
+    tag: 'Nouveau',
+    tone: 1,
+    size: 'normal',
+    desc: "Feuilletage inversé 6 tours, crème légère à la vanille Bourbon de Madagascar, glaçage fondant et chocolat noir.",
+  },
+  {
+    id: 'p6',
+    name: 'Saint-Honoré',
+    price: 11,
+    category: 'Signature',
+    tag: null,
+    tone: 2,
+    size: 'tall',
+    desc: "Feuilletage, choux caramélisés, crème chiboust à la vanille. Assemblé à la commande.",
+  },
+  {
+    id: 'p7',
+    name: 'Tarte au chocolat',
+    price: 8,
+    category: 'Tarte',
+    tag: null,
+    tone: 0,
+    size: 'normal',
+    desc: "Pâte sablée cacao, ganache chocolat Valrhona 70%, fleur de sel de Guérande.",
+  },
+  {
+    id: 'p8',
+    name: 'Canelé',
+    price: 3,
+    category: 'Viennoiserie',
+    tag: null,
+    tone: 2,
+    size: 'wide',
+    desc: "Moule en cuivre, pâte reposée 48h, rhum AOC Martinique, vanille. Cuisson haute température.",
+  },
+];
+
+const KERN_CATEGORIES = ['Tout', 'Signature', 'Classique', 'Tarte', 'Viennoiserie'];
+
+Object.assign(window, { KERN_PRODUCTS, KERN_CATEGORIES });
