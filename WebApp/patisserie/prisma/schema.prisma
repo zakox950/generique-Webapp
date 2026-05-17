@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("passwordhash") @db.VarChar(255)
+  role         String?   @default("admin") @db.VarChar(50)
+  createdAt    DateTime? @default(now()) @map("createdat") @db.Timestamp(6)
+
+  @@map("admin")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Catalogue {
+  id              Int                  @id @default(autoincrement())
+  nom             String               @unique @db.VarChar(255)
+  prix            Decimal              @db.Decimal(10, 2)
+  ingredient      String?
+  description     String?
+  isActif         Boolean?             @default(true) @map("isactif")
+  modeVente       String?              @default("make_to_order") @map("modevente") @db.VarChar(20)
+  stockDisponible Int?                 @default(0) @map("stockdisponible")
+  dateDebutActif  DateTime?            @map("datedebutactif") @db.Date
+  dateFinActif    DateTime?            @map("datefinactif") @db.Date
+  prixOptions     Json?                @map("prixoptions")
+  devisItems      CatalogueDevisItem[]
+  items           CatalogueItem[]
+  dayLimits       DayLimit[]
+  photos          Photo[]
+  weekLimits      WeekLimit[]
+
+  @@map("catalogue")
+}
+
+model CatalogueDevisItem {
+  id          Int       @id @default(autoincrement())
+  idDevis     Int       @map("iddevis")
+  idCatalogue Int       @map("idcatalogue")
+  quantite    Int?      @default(1)
+  prixUnite   Decimal   @map("prixunite") @db.Decimal(10, 2)
+  options     Json?
+  catalogue   Catalogue @relation(fields: [idCatalogue], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  devis       Devis     @relation(fields: [idDevis], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("cataloguedevisitem")
+}
+
+model CatalogueItem {
+  id             Int            @id @default(autoincrement())
+  idCommande     Int            @map("idcommande")
+  idCatalogue    Int            @map("idcatalogue")
+  quantite       Int?           @default(1)
+  prixUnite      Decimal        @map("prixunite") @db.Decimal(10, 2)
+  options        Json?
+  catalogue      Catalogue      @relation(fields: [idCatalogue], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  commandeDirect CommandeDirect @relation(fields: [idCommande], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("catalogueitem")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model CommandeDirect {
+  id             Int             @id @default(autoincrement())
+  dateCommande   DateTime?       @default(now()) @map("datecommande") @db.Timestamp(6)
+  dateRetrait    DateTime        @map("dateretrait") @db.Date
+  prixTotal      Decimal         @map("prixtotal") @db.Decimal(10, 2)
+  nom            String          @db.VarChar(255)
+  mail           String
+  noteClient     String?         @map("noteclient")
+  paiementChoisi String?         @map("paiementchoisi") @db.VarChar(20)
+  items          CatalogueItem[]
+
+  @@map("commandedirect")
+}
+
+model Config {
+  id           Int     @id @default(autoincrement())
+  nameVariable String  @unique @map("namevariable") @db.VarChar(255)
+  valeur       String
+  description  String?
+
+  @@map("config")
+}
+
+model DayLimit {
+  id          Int       @id @default(autoincrement())
+  dayStart    DateTime? @default(dbgenerated("CURRENT_DATE")) @map("daystart") @db.Date
+  idCatalogue Int       @map("idcatalogue")
+  limitPerDay Int       @default(10) @map("limitperday")
+  isActif     Boolean?  @default(false) @map("isactif")
+  catalogue   Catalogue @relation(fields: [idCatalogue], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("daylimit")
+}
+
+model Devis {
+  id            Int                  @id @default(autoincrement())
+  statutEnum    StatutTypeDevis?     @default(en_attente) @map("statutenum")
+  dateCommande  DateTime?            @default(now()) @map("datecommande") @db.Timestamp(6)
+  dateRetrait   DateTime             @map("dateretrait") @db.Date
+  dateSouhaitee DateTime             @map("datesouhaitee") @db.Timestamp(6)
+  acompte       Decimal              @db.Decimal(10, 2)
+  prixTotal     Decimal              @map("prixtotal") @db.Decimal(10, 2)
+  dejaPaye      Decimal?             @default(0) @map("dejapaye") @db.Decimal(10, 2)
+  typeEvenement String?              @map("typeevenement") @db.VarChar(255)
+  numeroTel     String               @map("numerotel") @db.VarChar(255)
+  expireAt      DateTime?            @map("expireat") @db.Timestamp(6)
+  nom           String               @db.VarChar(255)
+  mail          String
+  noteClient    String?              @map("noteclient")
+  noteAdmin     String?              @map("noteadmin")
+  items         CatalogueDevisItem[]
+
+  @@map("devis")
+}
+
+model Photo {
+  id          Int       @id @default(autoincrement())
+  idCatalogue Int       @map("idcatalogue")
+  photoUrl    String?   @map("photo_url")
+  catalogue   Catalogue @relation(fields: [idCatalogue], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("photo")
+}
+
+model WeekLimit {
+  id           Int       @id @default(autoincrement())
+  weekStart    DateTime? @default(dbgenerated("CURRENT_DATE")) @map("weekstart") @db.Date
+  idCatalogue  Int       @map("idcatalogue")
+  limitPerWeek Int       @default(10) @map("limitperweek")
+  isActif      Boolean?  @default(false) @map("isactif")
+  catalogue    Catalogue @relation(fields: [idCatalogue], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("weeklimit")
+}
+
+enum StatutTypeDevis {
+  en_attente
+  valide
+  acompte_paye
+  pret
+  annule
+  expire
+
+  @@map("statut_type_devis")
+}
