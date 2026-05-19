@@ -272,21 +272,6 @@ Time:        0.217s
 
 ---
 
-## Problèmes rencontrés et solutions
-
-| Problème | Cause | Solution |
-|---|---|---|
-| `import { PrismaClient } from "@prisma/client"` échoue | Depuis Prisma 6.6+, le client n'est plus généré dans `node_modules`. Il est généré dans le projet à l'emplacement défini dans `schema.prisma` | Importer depuis `../../app/generated/prisma/client` |
-| `new PrismaClient()` échoue avec "Expected 1 arguments, but got 0" | Prisma 7 a supprimé son moteur Rust interne. Un driver adapter est maintenant obligatoire pour se connecter à la base | Passer `{ adapter }` au constructeur avec `@prisma/adapter-pg` |
-| `DATABASE_URL` ignorée par Prisma, connexion impossible | Espace autour du `=` dans le fichier `.env` (`DATABASE_URL= "..."` au lieu de `DATABASE_URL="..."`). Les fichiers `.env` ne tolèrent aucun espace autour du signe égal | Supprimer l'espace : `DATABASE_URL="postgresql://..."` |
-| `docker compose up -d` retourne "empty compose file" | Le service `app` dans le `docker-compose.yml` référençait un `Dockerfile` inexistant. Docker ne pouvait pas builder l'image | Retirer le service `app` du `docker-compose.yml` en développement. Le Dockerfile sera ajouté au moment du déploiement |
-| Le dossier `patisserie` s'affiche comme sous-module Git sur GitHub | Le dossier contenait son propre `.git` interne. GitHub interprète un dossier avec un `.git` comme un sous-module et ne peut pas afficher son contenu | `rm -rf patisserie/.git` puis `git rm --cached WebApp/patisserie` et re-commit |
-| `setupFilesAfterFramework` n'existe pas dans le type `Config` de Jest | Faute de frappe dans le nom de la propriété de configuration Jest | Corriger en `setupFilesAfterEnv` |
-| `SyntaxError: Cannot use 'import.meta' outside a module` dans les tests | Le client Prisma généré utilise la syntaxe ESM (`import.meta.url`). Jest fonctionne en CommonJS par défaut et ne comprend pas cette syntaxe | Ajouter une entrée dans `moduleNameMapper` de `jest.config.ts` pour rediriger l'import vers un fichier mock local |
-| `Cannot read properties of undefined (reading 'map')` dans les tests de limites | `jest.clearAllMocks()` dans `setup.ts` efface le `.mockResolvedValue([])` configuré pour `commandeDirect.findMany`. La fonction retournait `undefined` au lieu d'un tableau vide, et `.map()` sur `undefined` plantait | Ajouter un `beforeEach` local dans `limites.service.test.ts` qui remet le mock à `[]` avant chaque test |
-| `Argument of type Decimal is not assignable to parameter of type string / number` | Prisma stocke les champs `DECIMAL` avec son propre type `Decimal`, pas le `number` natif JavaScript. La fonction `formatPrix` n'acceptait que `number / string` | Modifier `formatPrix` pour accepter aussi `{ toNumber: () => number }` et appeler `.toNumber()` si c'est un objet |
-| `Return type of constructor signature must be assignable to the instance type of the class` | Le constructeur du mock `Decimal` retournait directement une valeur primitive (`number`). TypeScript interdit qu'un constructeur retourne une valeur primitive — le retour doit être une instance de la classe | Stocker la valeur dans `this.value` et l'exposer via une méthode `toNumber()` |
-
 ## Variables d'environnement (.env)
 
 ```
@@ -303,3 +288,313 @@ REPLY_TO_EMAIL="contact@tondomaine.be"
 - Création : 1500€ – 2500€ one-shot
 - Maintenance : 70€ – 100€/mois
 - Services tiers configurés par le développeur, passés au client. Dépassement du tier gratuit géré par le client.
+
+---
+
+# [2025-05-19] Validators Zod et Routes API
+
+---
+
+## Pourquoi les validators Zod
+
+Les validators sont la première ligne de défense du backend. Quand un client envoie des données vers une route API, on ne peut pas faire confiance à ce qu'il envoie. Sans validator, une donnée mal formée peut aller jusqu'en base de données et provoquer une erreur PostgreSQL — un message technique incompréhensible pour le client. Avec Zod, l'erreur est interceptée au plus tôt avec un message précis et le service n'est jamais appelé si les données sont invalides.
+
+Zod apporte trois choses en une : la validation, le typage TypeScript automatique via `z.infer<typeof Schema>`, et des messages d'erreur précis indiquant exactement quel champ pose problème.
+
+---
+
+## src/validators/commande.validator.ts
+
+### `ItemCommandeSchema`
+
+Schéma interne non exporté qui valide un item du panier. Chaque item doit avoir :
+- `idCatalogue` : entier positif — l'identifiant du produit dans la base
+- `quantite` : entier entre 1 et 500 — on interdit 0 et on limite à 500 pour éviter les abus
+- `options` : objet clé/valeur optionnel pour les variantes (ex: `{ "taille": "10 personnes" }`)
+
+### `CreateCommandeSchema`
+
+Valide le body d'une requête `POST /api/commande`. Champs :
+- `nom` : string obligatoire, max 255 caractères
+- `mail` : email valide via `z.string().email()`
+- `dateRetrait` : date convertie automatiquement depuis string ISO via `z.coerce.date()`. Validée pour ne pas être dans le passé — le délai minimum réel est vérifié dans le service car il dépend de la config en base
+- `noteClient` : string optionnelle, max 2000 caractères
+- `paiementChoisi` : optionnel, accepte uniquement `"en_ligne"` ou `"sur_place"`. Pertinent uniquement si `mode_paiement = "au_choix_client"` dans Config
+- `items` : tableau d'au moins 1 item et au maximum 50
+
+### `PanierSchema`
+
+Schéma léger pour valider le contenu du panier avant soumission. Utilisé par le frontend pour vérifier dynamiquement si le panier dépasse le seuil devis sans soumettre de formulaire.
+
+---
+
+## src/validators/devis.validator.ts
+
+### `ItemDevisSchema`
+
+Identique à `ItemCommandeSchema` — même structure, même contraintes. Séparé intentionnellement pour permettre des évolutions indépendantes.
+
+### `CreateDevisSchema`
+
+Valide le body d'une requête `POST /api/devis`. Champs supplémentaires par rapport à la commande :
+- `numeroTel` : obligatoire pour les devis car le contact direct est souvent nécessaire pour affiner la commande. Validé avec une regex qui accepte les formats internationaux (`+32 478 12 34 56`, `02/123.45.67`, etc.)
+- `dateSouhaitee` : date idéale exprimée par le client, doit être dans le futur
+- `dateRetrait` : doit être dans le futur ET supérieure ou égale à `dateSouhaitee` — validé via `.refine()` global sur le schéma entier
+- `typeEvenement` : optionnel (mariage, anniversaire, baptême...)
+
+**`.refine()`** — méthode Zod pour les validations conditionnelles qui dépendent de plusieurs champs à la fois. Un seul champ ne suffit pas pour vérifier que `dateRetrait >= dateSouhaitee`. Le `.refine()` reçoit l'objet complet et retourne `false` pour déclencher l'erreur.
+
+---
+
+## src/validators/catalogue.validator.ts
+
+### `PrixOptionsSchema`
+
+Schéma interne pour les variantes produit. Format attendu :
+```json
+{ "taille": { "6 personnes": 0, "10 personnes": 15.00 } }
+```
+C'est un objet imbriqué — catégorie → option → surcoût en euros. Le surcoût peut être 0 (option sans supplément).
+
+### `CreateCatalogueSchema`
+
+Valide la création d'un produit. Points notables :
+- `prix` : doit être positif et ne pas avoir plus de 2 décimales — `.multipleOf(0.01)` rejette `1.505`
+- `modeVente` : `"make_to_order"` ou `"make_to_stock"` uniquement
+- `stockDisponible` : entier >= 0, pertinent uniquement si `modeVente = "make_to_stock"`
+- `dateDebutActif` / `dateFinActif` : dates optionnelles pour les produits saisonniers. Le `.refine()` vérifie que si les deux sont renseignées, `dateDebutActif < dateFinActif`
+
+### `UpdateCatalogueSchema`
+
+Version modification — tous les champs sont optionnels. On ne modifie que ce qu'on envoie. Les champs `dateDebutActif`, `dateFinActif` et `prixOptions` sont `nullable().optional()` — on peut les supprimer en envoyant `null`.
+
+La différence entre `optional()` et `nullable()` : `optional()` = le champ peut être absent du body. `nullable()` = le champ peut être présent mais valoir `null`. Les deux ensemble couvrent tous les cas.
+
+### `AddPhotoSchema`
+
+Valide l'URL d'une photo via `z.string().url()` — Zod vérifie que c'est une URL valide.
+
+---
+
+## src/validators/admin.validator.ts
+
+### `PatchCommandeSchema`
+
+Valide les actions admin sur une commande directe. Seule action disponible : `"marquer_prete"`. Structure simple avec `z.enum(["marquer_prete"])`.
+
+### `PatchDevisSchema`
+
+Le validator le plus complexe — utilise `z.discriminatedUnion("action", [...])`. C'est une union discriminée : selon la valeur du champ `action`, Zod sait exactement quels autres champs sont requis.
+
+Avantage majeur : dans les routes API, quand on fait un `switch` sur `data.action`, TypeScript sait dans chaque `case` exactement quels champs existent. Dans `case "acompte_paye"`, TypeScript sait que `data.montant` existe. Dans `case "valider"`, il sait que `data.montant` n'existe pas. Zéro vérification manuelle nécessaire.
+
+Actions supportées :
+- `"valider"` : note admin optionnelle
+- `"refuser"` : note admin optionnelle
+- `"acompte_paye"` : montant obligatoire et positif
+- `"marquer_pret"` : aucun champ supplémentaire
+- `"modifier_prix"` : nouveauPrix obligatoire et positif
+- `"modifier_date_retrait"` : dateRetrait obligatoire, convertie via `z.coerce.date()`
+
+### `PatchConfigSchema`
+
+Valide la modification d'une variable Config. `nameVariable` obligatoire non vide, `valeur` peut être une string vide (pour vider le nom de la boutique par exemple).
+
+### `PatchStockSchema`
+
+Autre `discriminatedUnion` sur `action` :
+- `"reapprovisionner"` : quantite entier strictement positif (0 interdit — pas de sens d'approvisionner 0)
+- `"set_stock"` : quantite entier >= 0 (0 autorisé — vider le stock manuellement)
+
+Cette distinction est intentionnelle : réapprovisionner 0 est une erreur, mais mettre le stock à 0 est une action valide.
+
+### `SetLimiteSchema`
+
+Valide la création d'une limite de production. `type` : `"jour"` ou `"semaine"`. `valeur` : entier strictement positif. `date` : date de début de la limite.
+
+---
+
+## Routes API — Architecture générale
+
+Toutes les routes suivent le même pattern :
+
+```
+1. Recevoir la requête
+2. Valider avec Zod → erreur 400 si invalide
+3. Appeler le service → erreur 422 si règle métier non respectée
+4. Retourner la réponse JSON
+5. Attraper les erreurs inattendues → erreur 500
+```
+
+Les routes ne contiennent aucune logique métier. Elles sont le pont entre le frontend et les services.
+
+### Status codes utilisés
+
+| Code | Signification |
+|---|---|
+| 200 | Succès lecture/modification |
+| 201 | Succès création |
+| 400 | Données invalides (Zod) |
+| 403 | Action non autorisée par la config |
+| 404 | Ressource introuvable |
+| 422 | Règle métier non respectée (service) |
+| 500 | Erreur inattendue serveur |
+
+---
+
+## Routes API publiques
+
+### `GET /api/catalogue` — `app/api/catalogue/route.ts`
+
+Route la plus simple du projet. Appelle `getProduitActifs()` et retourne le tableau JSON. Aucun paramètre, aucune validation nécessaire. Accessible sans authentification. Retourne les produits actifs avec leurs photos, filtres saisonniers appliqués automatiquement.
+
+### `POST /api/commande` — `app/api/commande/route.ts`
+
+Route critique — crée une commande directe. Logique de la route :
+
+1. Valide le body avec `CreateCommandeSchema`
+2. Lit `mode_commande` depuis Config via `getModeCommande()`
+3. Si `mode_commande = "devis_only"` → retourne 403 avec message explicite
+4. Si `mode_commande = "seuil"` → calcule le total de pièces et compare avec `getSeuilDevis()`. Si dépassé → retourne 422 avec `{ redirect: "devis" }` pour que le frontend redirige vers le formulaire devis
+5. Si tout est ok → appelle `creerCommande()` du service
+6. Retourne la commande créée en 201
+
+Le `redirect: "devis"` dans la réponse 422 est une convention entre le frontend et le backend — le frontend lit ce champ et redirige automatiquement.
+
+### `POST /api/devis` — `app/api/devis/route.ts`
+
+Similaire à la route commande mais plus simple — pas de vérification de seuil ici. Le seuil est géré côté commande pour rediriger, pas côté devis. Vérifie uniquement que `mode_commande !== "direct_only"`. Retourne le devis créé en 201.
+
+---
+
+## Routes API admin
+
+### `GET /api/admin/catalogue` — `app/api/admin/catalogue/route.ts`
+
+Retourne tous les produits sans filtre `isActif`, avec photos et limites actives. L'admin voit tout y compris les produits désactivés.
+
+### `POST /api/admin/catalogue` — même fichier
+
+Crée un nouveau produit. Valide avec `CreateCatalogueSchema`, appelle `creerProduit()`. Retourne 201.
+
+### `PATCH /api/admin/catalogue/[id]` — `app/api/admin/catalogue/[id]/route.ts`
+
+Route dynamique — le `[id]` dans l'URL est capturé via `params`. En Next.js 15, `params` est une Promise — il faut `await params` pour récupérer l'id.
+
+Gère plusieurs actions selon le champ `action` dans le body :
+- `"toggle_actif"` → appelle `toggleActif()`
+- `"ajouter_photo"` → valide avec `AddPhotoSchema`, appelle `ajouterPhoto()`
+- `"supprimer_photo"` → valide `photoId`, appelle `supprimerPhoto()`
+- Pas d'`action` → valide avec `UpdateCatalogueSchema`, appelle `modifierProduit()`
+
+### `GET /api/admin/commandes` — `app/api/admin/commandes/route.ts`
+
+Retourne toutes les commandes avec leurs items pour le dashboard. Triées par date de commande décroissante.
+
+### `GET /api/admin/commandes/[id]` — `app/api/admin/commandes/[id]/route.ts`
+
+Retourne une commande spécifique avec ses items et les infos produit. Retourne 404 si introuvable.
+
+### `PATCH /api/admin/commandes/[id]` — même fichier
+
+Valide avec `PatchCommandeSchema`. Seule action : `"marquer_prete"`. TODO noté dans le code pour ajouter l'envoi d'email "commande prête" — la fonction n'existe pas encore dans `commande.service.ts`.
+
+### `DELETE /api/admin/commandes/[id]` — même fichier
+
+Supprime une commande et ses items. Le service s'occupe de supprimer d'abord les items pour respecter les contraintes de clé étrangère.
+
+### `GET /api/admin/devis` — `app/api/admin/devis/route.ts`
+
+Supporte un query param optionnel `?statut=en_attente`. Si présent, valide que le statut est dans la liste des statuts valides et appelle `getDevisByStatut()`. Sinon appelle `getDevis()` pour tout retourner. Exemple d'usage : `GET /api/admin/devis?statut=en_attente` pour voir uniquement les devis en attente de traitement.
+
+### `GET /api/admin/devis/[id]` — `app/api/admin/devis/[id]/route.ts`
+
+Retourne un devis spécifique avec ses items et les infos produit.
+
+### `PATCH /api/admin/devis/[id]` — même fichier
+
+La route admin la plus riche. Valide avec `PatchDevisSchema` (discriminatedUnion), puis dispatche vers la bonne fonction du service via un `switch` sur `data.action`. Grâce au discriminatedUnion, TypeScript garantit dans chaque case que les bons champs sont disponibles — pas de vérification manuelle nécessaire.
+
+### `GET /api/admin/config` — `app/api/admin/config/route.ts`
+
+Retourne toutes les variables Config pour affichage dans le dashboard admin.
+
+### `PATCH /api/admin/config` — même fichier
+
+Valide avec `PatchConfigSchema`, appelle `setConfig()`. Permet de modifier n'importe quelle variable Config depuis le dashboard sans redéploiement.
+
+### `GET /api/admin/stock` — `app/api/admin/stock/route.ts`
+
+Retourne uniquement les produits en mode `make_to_stock` avec leur stock actuel.
+
+### `PATCH /api/admin/stock` — même fichier
+
+Valide `idCatalogue` dans le body, puis dispatche selon `action` :
+- `"reapprovisionner"` → ajoute la quantité au stock
+- `"set_stock"` → définit le stock à une valeur absolue
+
+---
+
+## Problèmes rencontrés et solutions — validators et routes
+
+### Zod 4 — `errorMap` n'existe plus
+
+Dans Zod 3, on personnalisait les messages d'erreur avec `errorMap: () => ({ message: "..." })`. En Zod 4, cette propriété s'appelle simplement `error`. Correction : remplacer `errorMap` par `error` partout dans les schémas `.enum()`.
+
+### Zod 4 — `.errors` renommé en `.issues`
+
+La propriété `ZodError.errors` qui retournait le tableau d'erreurs s'appelle maintenant `ZodError.issues`. Correction dans toutes les routes : `error.errors` → `error.issues`.
+
+### Next.js 15 — `params` est une Promise
+
+Dans Next.js 14, les params des routes dynamiques étaient synchrones. En Next.js 15, ils sont devenus des Promises. Il faut écrire `const { id } = await params` au lieu de `const { id } = params`. Sans ce `await`, l'id est undefined.
+
+### `tsconfig.json` — alias `@/*` pointait vers la racine
+
+`create-next-app` avait configuré `"@/*": ["./*"]` — l'alias pointait vers la racine du projet. Les services étant dans `src/`, l'import `@/lib/services/...` cherchait dans `patisserie/lib/` qui n'existe pas. Correction : `"@/*": ["./src/*"]`.
+
+### Import `StatutTypeDevis` — mauvais chemin
+
+Depuis `app/api/admin/devis/route.ts`, le chemin vers le client Prisma généré est `../../../generated/prisma/client` — trois niveaux à remonter (`devis/` → `admin/` → `api/`), puis descendre dans `generated/`. Un mauvais conseil avait été donné initialement avec quatre niveaux — corrigé.
+
+### `require()` interdit par ESLint
+
+La règle `no-require-imports` interdit `require()` dans les fichiers TypeScript. Un test utilisait `const { getCommandes } = require(...)` à l'intérieur d'un `it()`. Correction : utiliser `await import()` dynamique ou ajouter la fonction aux imports statiques en haut du fichier.
+
+### Chemins d'import dans les tests de routes
+
+Depuis `src/__tests__/routes.test.ts`, les routes se trouvent dans `app/api/` à la racine du projet. Le chemin correct est `../../app/api/...` — deux niveaux à remonter (`__tests__/` → `src/`) puis descendre dans `app/`. La version initiale utilisait `../app/api/...` — un niveau de moins, ce qui cherchait dans `src/app/` qui n'existe pas.
+
+---
+
+## Roadmap mise à jour
+
+### Terminé
+- [x] Schéma SQL validé et documenté
+- [x] Docker + PostgreSQL configuré
+- [x] Projet Next.js initialisé
+- [x] Prisma 7 configuré avec driver adapter
+- [x] prisma db pull + prisma generate
+- [x] src/lib/prisma.ts
+- [x] src/lib/config.ts
+- [x] src/lib/services/catalogue.service.ts
+- [x] src/lib/services/commande.service.ts
+- [x] src/lib/services/devis.service.ts
+- [x] src/lib/services/limites.service.ts
+- [x] src/lib/services/stock.service.ts
+- [x] src/lib/services/mail.service.ts
+- [x] Jest configuré + 43 tests services passent
+- [x] src/validators/commande.validator.ts
+- [x] src/validators/devis.validator.ts
+- [x] src/validators/catalogue.validator.ts
+- [x] src/validators/admin.validator.ts
+- [x] Routes API publiques (catalogue, commande, devis)
+- [x] Routes API admin (commandes, devis, catalogue, config, stock)
+- [x] Tests validators (40 tests)
+- [x] Tests routes API
+
+### À faire
+- [ ] Middleware next-auth — protection des routes /admin
+- [ ] Frontend client (accueil, catalogue, panier)
+- [ ] Frontend admin (dashboard, commandes, devis, catalogue, config, stock)
+- [ ] Déploiement Coolify + Dockerfile
