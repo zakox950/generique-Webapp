@@ -1,11 +1,12 @@
 export const Prisma = {
   JsonNull: "JsonNull",
   Decimal: class Decimal {
+    private value: number;
     constructor(value: number) {
-      return value;
+      this.value = value;
     }
     toNumber() {
-      return 0;
+      return this.value;
     }
   },
 };

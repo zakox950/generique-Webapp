@@ -17,7 +17,7 @@ jest.mock("../lib/prisma", () => ({
       delete: jest.fn(),
     },
     commandeDirect: {
-      findMany: jest.fn(),
+      findMany: jest.fn().mockResolvedValue([]), // ← ajoute .mockResolvedValue([])
       findUnique: jest.fn(),
       create: jest.fn(),
       delete: jest.fn(),
