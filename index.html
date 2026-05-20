@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maison Oughar — Pâtisserie Artisanale · Bruxelles</title>
+  <meta name="description" content="Pâtisserie artisanale à Bruxelles. Tarte aux figues, charlotte framboises, entremets passion-mangue, opéra grand cru. Commande en ligne, retrait en boutique.">
+  <meta property="og:title" content="Maison Oughar — Pâtisserie Artisanale">
+  <meta property="og:description" content="Pâtisserie artisanale à Bruxelles. Commandez vos créations en ligne.">
+  <meta name="theme-color" content="#5C1A24">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <button class="nav-brand" onclick="navigate('home')">
+        Maison <em>Oughar</em>
+      </button>
+      <ul class="nav-links" id="nav-links">
+        <li><button class="nav-link" data-route="home"      onclick="navigate('home')">Accueil</button></li>
+        <li><button class="nav-link" data-route="catalogue" onclick="navigate('catalogue')">Catalogue</button></li>
+        <li><button class="nav-link" data-route="contact"   onclick="navigate('contact')">La Boutique</button></li>
+      </ul>
+      <div class="nav-right">
+        <button class="nav-cart" onclick="navigate('panier')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          <span>Panier</span>
+          <span class="cart-badge" id="cart-count">0</span>
+        </button>
+        <button class="nav-mobile-toggle" id="mobile-toggle" onclick="toggleMobileNav()" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- PAGE CONTENT -->
+  <main id="app"></main>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <div class="footer-brand">Maison<br><em>Oughar</em></div>
+        <p class="footer-sub">Pâtisserie artisanale à Bruxelles.<br>Fait maison, avec exigence.</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-title">La Boutique</div>
+        <p class="footer-text">
+          14, Rue des Artisans<br>
+          1000 Bruxelles<br>
+          +32 2 123 45 67<br>
+          contact@maisonoughar.be
+        </p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-title">Horaires</div>
+        <p class="footer-text">
+          Mardi — Samedi : 9h–18h30<br>
+          Dimanche : 9h–13h00<br>
+          Lundi : Fermé
+        </p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-title">Commander</div>
+        <nav class="footer-links">
+          <button class="footer-link" onclick="navigate('catalogue')">Catalogue</button>
+          <button class="footer-link" onclick="navigate('devis')">Demander un devis</button>
+          <button class="footer-link" onclick="navigate('panier')">Mon panier</button>
+        </nav>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <span>© 2025 Maison Oughar — Tous droits réservés</span>
+        <span>Pâtisserie artisanale · Bruxelles, Belgique</span>
+      </div>
+    </div>
+  </footer>
+
+  <!--
+    Scripts — ordre de chargement important :
+    data → state → utils → components → pages → router → app
+  -->
+  <script src="js/data.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/pages/home.js"></script>
+  <script src="js/pages/catalogue.js"></script>
+  <script src="js/pages/produit.js"></script>
+  <script src="js/pages/panier.js"></script>
+  <script src="js/pages/commande.js"></script>
+  <script src="js/pages/devis.js"></script>
+  <script src="js/pages/confirmation.js"></script>
+  <script src="js/pages/contact.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
