@@ -1,5 +1,9 @@
 # CLAUDE.md — Journal de projet Pâtisserie WebApp
 
+## Design System
+Before any UI/UX work, read and apply the skill at:
+https://raw.githubusercontent.com/nextlevelbuilder/ui-ux-pro-max-skill/main/.claude/skills/ui-ux-pro-max/SKILL.md
+
 ---
 
 ## Contexte général
