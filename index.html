@@ -134,6 +134,56 @@
   .neu-in-sm{ background: var(--a-bg); border-radius: 10px; box-shadow: var(--a-shadow-in-sm); }
   .neu-flat { background: var(--a-bg); border-radius: 12px; box-shadow: var(--a-shadow-flat); }
 
+  /* ── Admin design language: Skillset × Fierce × Smart Home ── */
+  .a-card {
+    background: rgba(255,250,248,0.92);
+    border: 1px solid rgba(255,255,255,0.82);
+    border-radius: 16px;
+    box-shadow: 0 2px 14px rgba(74,31,36,0.07), 0 1px 3px rgba(74,31,36,0.04);
+  }
+  .a-card-dark {
+    background: #221013;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.42);
+    color: #f5ede8;
+  }
+  .a-glass {
+    background: rgba(255,250,248,0.58);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+    backdrop-filter: blur(18px) saturate(130%);
+    border: 1px solid rgba(255,255,255,0.62);
+    border-radius: 16px;
+    box-shadow: 0 2px 14px rgba(74,31,36,0.06);
+  }
+  .period-tab {
+    flex: 1; padding: 7px 0; border-radius: 999px; border: 0;
+    font-size: 11px; font-weight: 500; cursor: pointer;
+    background: transparent; color: var(--a-ink-3);
+    transition: all 0.2s ease; white-space: nowrap; text-align: center;
+  }
+  .period-tab.active {
+    background: #221013; color: rgba(245,237,232,0.95);
+    box-shadow: 0 2px 10px rgba(34,16,19,0.32);
+    font-weight: 700;
+  }
+  .a-th {
+    display: flex; align-items: center;
+    padding: 7px 16px;
+    background: rgba(196,196,196,0.09);
+    border-bottom: 1px solid rgba(196,201,212,0.22);
+    font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--a-ink-3);
+  }
+  .a-tr {
+    display: flex; align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(196,201,212,0.22);
+    cursor: pointer; transition: background 0.12s ease;
+  }
+  .a-tr:hover { background: rgba(106,40,40,0.04); }
+  .a-tr:last-child { border-bottom: 0; }
+
   .admin-shell input[type="text"],
   .admin-shell input[type="email"],
   .admin-shell input[type="password"],
@@ -555,7 +605,7 @@ function PhoneFrame({ children, dark = true }) {
       minHeight: "100vh", width: "100%",
       background: dark
         ? "radial-gradient(ellipse 60% 50% at 30% 20%, rgba(202,160,150,0.45), #d4b8b1 75%)"
-        : "linear-gradient(180deg, #d8c5c1, #cab2ad)",
+        : "linear-gradient(148deg, #ceb0a8 0%, #c2a49c 45%, #d2b5af 100%)",
       display: "flex", alignItems: "stretch", justifyContent: "center",
       padding: "0",
       fontFamily: "var(--sans)",
@@ -563,7 +613,7 @@ function PhoneFrame({ children, dark = true }) {
       <div style={{
         width: "min(100vw, 430px)",
         minHeight: "100vh",
-        background: dark ? "var(--c-bg-1)" : "var(--a-bg)",
+        background: dark ? "var(--c-bg-1)" : "linear-gradient(180deg, #f2e7e4 0%, #ece1de 100%)",
         position: "relative",
         boxShadow: "0 0 60px rgba(0,0,0,0.45)",
         overflow: "hidden",
@@ -1480,6 +1530,7 @@ function MLogin({ navigate, onLogin }) {
 function MAdminDashboard({ navigate, commandes, setCommandes, devis, setDevis }) {
   const s = STATS_DASHBOARD;
   const [tab, setTab] = useStateMA("commandes");
+  const [period, setPeriod] = useStateMA("7j");
   const [openCmd, setOpenCmd] = useStateMA(null);
   const [openDev, setOpenDev] = useStateMA(null);
 
@@ -1492,7 +1543,6 @@ function MAdminDashboard({ navigate, commandes, setCommandes, devis, setDevis })
     if (openDev && openDev.id === id) setOpenDev({ ...openDev, ...patch });
   }
 
-  const tabKeys = ["commandes", "devis"];
   const tabCount = {
     commandes: commandes.filter(c => c.status === "confirmée" || c.status === "prête").length,
     devis: devis.filter(d => d.status === "en_attente" || d.status === "valide").length,
@@ -1500,100 +1550,112 @@ function MAdminDashboard({ navigate, commandes, setCommandes, devis, setDevis })
 
   return (
     <MobilePage>
-      <MobileTopbarLight sub="Vendredi 22 mai" title="Bonjour 👋"/>
-      <div style={{ padding: "0 18px" }}>
-
-        {/* Stats row */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-          <StatCardSm icon={<I.package size={16}/>} label="Commandes" value={s.commandesJour} tone="var(--a-accent)"/>
-          <StatCardSm icon={<I.document size={16}/>} label="Devis attente" value={s.devisAttente} tone="#c9954f"/>
-          <StatCardSm icon={<I.euro size={16}/>} label="CA · 7j" value={s.ca7j + "€"} tone="#1f8a5b"/>
-          <StatCardSm icon={<I.trending size={16}/>} label="Rupture" value={s.rupture} tone="#c45a5a"/>
+      {/* Header zone */}
+      <div style={{ padding: "20px 20px 14px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div>
+            <div style={{ fontSize: 10.5, color: "var(--a-ink-3)", fontWeight: 500, letterSpacing: "0.03em", marginBottom: 3 }}>Vendredi, 22 mai 2026</div>
+            <div style={{ fontSize: 21, fontWeight: 800, color: "var(--a-ink)", letterSpacing: "-0.025em", lineHeight: 1.1 }}>Bonjour Hélène 👋</div>
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button className="a-card" style={{ width: 36, height: 36, borderRadius: 11, border: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--a-ink-2)", cursor: "pointer" }}>
+              <I.bell size={15}/>
+            </button>
+            <div style={{ width: 36, height: 36, borderRadius: 11, background: "var(--a-accent)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 800 }}>HS</div>
+          </div>
         </div>
+        {/* Period tabs */}
+        <div style={{ display: "flex", background: "rgba(180,160,156,0.18)", borderRadius: 999, padding: "3px" }}>
+          {["7j","30j","3m","1an"].map(p => (
+            <button key={p} onClick={() => setPeriod(p)} className={"period-tab" + (period === p ? " active" : "")}>
+              {p}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        {/* Chart */}
-        <div className="neu-out" style={{ padding: "16px 18px", borderRadius: 16, marginBottom: 14 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--a-ink)" }}>Ventes · 7 jours</div>
-            <div className="neu-in-sm" style={{ padding: "4px 9px", borderRadius: 8, fontSize: 10, color: "#1f8a5b", display: "flex", alignItems: "center", gap: 4, fontWeight: 700 }}>
-              <span style={{ width: 5, height: 5, borderRadius: 999, background: "#1f8a5b" }}/>+12%
+      <div style={{ padding: "0 18px 28px" }}>
+
+        {/* Dark revenue card (Skillset × Fierce) */}
+        <div className="a-card-dark" style={{ padding: "20px 20px 16px", marginBottom: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+            <div>
+              <div style={{ fontSize: 9.5, color: "rgba(245,237,232,0.45)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: 7 }}>Chiffre d'affaires</div>
+              <div style={{ fontSize: 32, fontWeight: 800, color: "#f5ede8", letterSpacing: "-0.03em", lineHeight: 1, marginBottom: 7 }}>
+                {s.ca7j.toLocaleString("fr-FR")} €
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <span style={{ background: "rgba(94,201,154,0.18)", border: "1px solid rgba(94,201,154,0.28)", padding: "3px 8px", borderRadius: 6, fontSize: 10.5, color: "#5ec99a", fontWeight: 700 }}>↑ 12%</span>
+                <span style={{ fontSize: 10.5, color: "rgba(245,237,232,0.38)" }}>vs semaine dernière</span>
+              </div>
             </div>
           </div>
-          <MLineChart data={s.series7d}/>
+          <MGradientBarChart data={s.series7d}/>
         </div>
 
-        {/* Tabbed table */}
-        <div className="neu-out" style={{ borderRadius: 16, overflow: "hidden", marginBottom: 18 }}>
-          <div style={{ display: "flex", borderBottom: "1px solid rgba(196,201,212,0.45)" }}>
-            {tabKeys.map(tk => (
+        {/* Stats row — 3 clean cards (Skillset style) */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+          <StatCardSm label="Commandes" value={s.commandesJour} tone="var(--a-accent)" trend="↑ 1,7%" trendUp={true}/>
+          <StatCardSm label="Devis" value={s.devisAttente} tone="#c9954f" trend="stable" trendUp={null}/>
+          <StatCardSm label="Rupture" value={s.rupture} tone="#c45a5a" trend="↓ 0,9%" trendUp={false}/>
+        </div>
+
+        {/* Tabbed table card */}
+        <div className="a-card" style={{ borderRadius: 16, overflow: "hidden" }}>
+          {/* Tabs */}
+          <div style={{ display: "flex", padding: "0 16px", borderBottom: "1px solid rgba(196,201,212,0.22)" }}>
+            {["commandes","devis"].map(tk => (
               <button key={tk} onClick={() => setTab(tk)} style={{
-                flex: 1, padding: "11px 8px",
-                background: "transparent", border: 0,
-                fontSize: 11.5, fontWeight: tab === tk ? 700 : 500,
-                color: tab === tk ? "var(--a-accent)" : "var(--a-ink-3)",
-                borderBottom: tab === tk ? "2px solid var(--a-accent)" : "2px solid transparent",
-                transition: "all 0.18s ease",
+                padding: "12px 0", marginRight: 20, background: "transparent", border: 0,
+                fontSize: 12, fontWeight: tab === tk ? 700 : 500,
+                color: tab === tk ? "var(--a-ink)" : "var(--a-ink-3)",
+                borderBottom: tab === tk ? "2px solid var(--a-ink)" : "2px solid transparent",
+                transition: "all 0.18s ease", cursor: "pointer",
               }}>
                 {tk === "commandes" ? "Commandes" : "Devis"}
-                {tabCount[tk] > 0 && <span style={{ marginLeft: 6, fontSize: 10, background: "rgba(106,40,40,0.12)", color: "var(--a-accent)", padding: "1px 6px", borderRadius: 999, fontWeight: 700 }}>{tabCount[tk]}</span>}
+                {tabCount[tk] > 0 && (
+                  <span style={{ marginLeft: 6, background: tab === tk ? "var(--a-accent)" : "rgba(180,160,156,0.35)", color: tab === tk ? "#fff" : "var(--a-ink-3)", fontSize: 9, padding: "1px 6px", borderRadius: 999, fontWeight: 700 }}>{tabCount[tk]}</span>
+                )}
               </button>
             ))}
           </div>
 
-          {tab === "commandes" && (
-            <div>
-              {commandes.slice(0, 6).map((c, i) => (
-                <div key={c.id} onClick={() => setOpenCmd(c)} style={{
-                  display: "flex", justifyContent: "space-between", alignItems: "center",
-                  padding: "11px 16px",
-                  borderBottom: i < 5 ? "1px solid rgba(196,201,212,0.3)" : 0,
-                  cursor: "pointer",
-                }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 700, color: "var(--a-ink)", marginBottom: 2 }}>{c.client}</div>
-                    <div style={{ fontSize: 10.5, color: "var(--a-ink-3)" }}>{formatRetrait(c.retrait)}</div>
-                  </div>
-                  <div style={{ textAlign: "right", marginLeft: 10 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: "var(--a-ink)", marginBottom: 3 }}>{c.total} €</div>
-                    <StatusBadgeAdmin status={c.status}/>
-                  </div>
-                </div>
-              ))}
-              <div onClick={() => navigate("admin/commandes")} style={{
-                padding: "12px 16px", textAlign: "center", fontSize: 11.5,
-                color: "var(--a-accent)", fontWeight: 700, cursor: "pointer",
-                borderTop: "1px solid rgba(196,201,212,0.35)",
-              }}>Voir toutes les commandes →</div>
-            </div>
-          )}
+          {/* Column header */}
+          <div className="a-th">
+            <span style={{ flex: 1 }}>Client</span>
+            <span style={{ width: 55, textAlign: "right" }}>Montant</span>
+            <span style={{ width: 68, textAlign: "right" }}>Statut</span>
+          </div>
 
-          {tab === "devis" && (
-            <div>
-              {devis.slice(0, 5).map((d, i) => (
-                <div key={d.id} onClick={() => setOpenDev(d)} style={{
-                  display: "flex", justifyContent: "space-between", alignItems: "center",
-                  padding: "11px 16px",
-                  borderBottom: i < 4 ? "1px solid rgba(196,201,212,0.3)" : 0,
-                  cursor: "pointer",
-                }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 700, color: "var(--a-ink)", marginBottom: 2 }}>{d.client}</div>
-                    <div style={{ fontSize: 10.5, color: "var(--a-ink-3)", textTransform: "capitalize" }}>{d.event} · {d.dateEvent}</div>
-                  </div>
-                  <div style={{ textAlign: "right", marginLeft: 10 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: "var(--a-ink)", marginBottom: 3 }}>{d.prixTotal} €</div>
-                    <StatusBadgeAdmin status={d.status} type="devis"/>
-                  </div>
-                </div>
-              ))}
-              <div onClick={() => navigate("admin/devis")} style={{
-                padding: "12px 16px", textAlign: "center", fontSize: 11.5,
-                color: "var(--a-accent)", fontWeight: 700, cursor: "pointer",
-                borderTop: "1px solid rgba(196,201,212,0.35)",
-              }}>Voir tous les devis →</div>
+          {tab === "commandes" && commandes.slice(0, 6).map(c => (
+            <div key={c.id} className="a-tr" onClick={() => setOpenCmd(c)}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--a-ink)", marginBottom: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.client}</div>
+                <div style={{ fontSize: 10, color: "var(--a-ink-3)" }}>{formatRetrait(c.retrait)}</div>
+              </div>
+              <div style={{ width: 55, textAlign: "right", fontSize: 12.5, fontWeight: 700, color: "var(--a-ink)" }}>{c.total}€</div>
+              <div style={{ width: 68, display: "flex", justifyContent: "flex-end" }}><StatusBadgeAdmin status={c.status}/></div>
             </div>
-          )}
+          ))}
+
+          {tab === "devis" && devis.slice(0, 5).map(d => (
+            <div key={d.id} className="a-tr" onClick={() => setOpenDev(d)}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--a-ink)", marginBottom: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.client}</div>
+                <div style={{ fontSize: 10, color: "var(--a-ink-3)", textTransform: "capitalize" }}>{d.event} · {d.dateEvent}</div>
+              </div>
+              <div style={{ width: 55, textAlign: "right", fontSize: 12.5, fontWeight: 700, color: "var(--a-ink)" }}>{d.prixTotal}€</div>
+              <div style={{ width: 68, display: "flex", justifyContent: "flex-end" }}><StatusBadgeAdmin status={d.status} type="devis"/></div>
+            </div>
+          ))}
+
+          <div onClick={() => navigate(tab === "commandes" ? "admin/commandes" : "admin/devis")} style={{
+            padding: "12px 16px", textAlign: "center", fontSize: 11.5,
+            color: "var(--a-accent)", fontWeight: 700, cursor: "pointer",
+            borderTop: "1px solid rgba(196,201,212,0.22)",
+          }}>Voir tout →</div>
         </div>
+
       </div>
 
       {openCmd && <MCmdSheet commande={openCmd} onClose={() => setOpenCmd(null)} onUpdate={updateCmdStatus}/>}
@@ -1603,37 +1665,62 @@ function MAdminDashboard({ navigate, commandes, setCommandes, devis, setDevis })
 }
 
 
-function StatCardSm({ icon, label, value, tone }) {
+function StatCardSm({ label, value, tone, trend, trendUp }) {
   return (
-    <div className="neu-out" style={{ padding: 14, borderRadius: 14 }}>
-      <div className="neu-in-sm" style={{ width: 32, height: 32, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", color: tone, marginBottom: 10 }}>
-        {icon}
-      </div>
-      <div style={{ fontSize: 10, color: "var(--a-ink-3)", letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 700, marginBottom: 3 }}>{label}</div>
-      <div style={{ fontSize: 22, color: "var(--a-ink)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1 }}>{value}</div>
+    <div className="a-card" style={{ padding: "13px 12px 13px 16px", position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "absolute", left: 0, top: 10, bottom: 10, width: 3, borderRadius: "0 3px 3px 0", background: tone }}/>
+      <div style={{ fontSize: 8.5, color: "var(--a-ink-3)", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 700, marginBottom: 5 }}>{label}</div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: "var(--a-ink)", letterSpacing: "-0.03em", lineHeight: 1, marginBottom: trend ? 5 : 0 }}>{value}</div>
+      {trend && (
+        <div style={{ fontSize: 9.5 }}>
+          <span style={{ color: trendUp === true ? "#1f8a5b" : trendUp === false ? "#c45a5a" : "var(--a-ink-3)", fontWeight: 700 }}>{trend}</span>
+        </div>
+      )}
     </div>
   );
 }
 
-function MLineChart({ data }) {
-  const w = 380, h = 130, pad = { l: 14, r: 12, t: 10, b: 22 };
-  const max = Math.max(...data.map(d => d.value)) * 1.15 || 100;
-  const stepX = (w - pad.l - pad.r) / (data.length - 1);
-  const points = data.map((d, i) => ({ x: pad.l + i * stepX, y: h - pad.b - (d.value / max) * (h - pad.t - pad.b), v: d.value, day: d.day }));
-  const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
-  const areaPath = `${linePath} L ${points[points.length-1].x} ${h - pad.b} L ${points[0].x} ${h - pad.b} Z`;
+function MGradientBarChart({ data }) {
+  const w = 360, h = 108, padL = 6, padR = 6, padT = 6, padB = 20;
+  const max = Math.max(...data.map(d => d.value)) * 1.1 || 100;
+  const bw = (w - padL - padR) / data.length;
+  const gap = bw * 0.3;
+  const barW = bw - gap;
+  const hiVal = Math.max(...data.map(d => d.value));
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} style={{ width: "100%", height: 130 }}>
-      <defs><linearGradient id="mg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#6a2828" stopOpacity="0.18"/><stop offset="100%" stopColor="#6a2828" stopOpacity="0"/></linearGradient></defs>
-      {[0, 0.5, 1].map((p, i) => <line key={i} x1={pad.l} x2={w - pad.r} y1={pad.t + p * (h - pad.t - pad.b)} y2={pad.t + p * (h - pad.t - pad.b)} stroke="rgba(122,77,80,0.22)" strokeDasharray="2 4"/>)}
-      <path d={areaPath} fill="url(#mg)"/>
-      <path d={linePath} stroke="#6a2828" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-      {points.map((p, i) => (
-        <g key={i}>
-          <circle cx={p.x} cy={p.y} r="3.2" fill="#ece1de" stroke="#6a2828" strokeWidth="1.8"/>
-          <text x={p.x} y={h - 6} textAnchor="middle" fontSize="9.5" fill="var(--a-ink-3)" fontWeight="600">{p.day}</text>
-        </g>
+    <svg viewBox={`0 0 ${w} ${h}`} style={{ width: "100%", height: h }}>
+      <defs>
+        <linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#f5ede8" stopOpacity="0.38"/>
+          <stop offset="100%" stopColor="#f5ede8" stopOpacity="0.1"/>
+        </linearGradient>
+        <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#f5ede8" stopOpacity="0.9"/>
+          <stop offset="100%" stopColor="#f5ede8" stopOpacity="0.45"/>
+        </linearGradient>
+      </defs>
+      {[0.25, 0.6, 1].map((p, i) => (
+        <line key={i} x1={padL} x2={w - padR}
+          y1={padT + p * (h - padT - padB)} y2={padT + p * (h - padT - padB)}
+          stroke="rgba(245,237,232,0.12)" strokeDasharray="3 5"/>
       ))}
+      {data.map((d, i) => {
+        const bh = Math.max(4, (d.value / max) * (h - padT - padB));
+        const x = padL + i * bw + gap / 2;
+        const y = h - padB - bh;
+        const isHi = d.value === hiVal;
+        return (
+          <g key={i}>
+            <rect x={x} y={y} width={barW} height={bh}
+              rx={Math.min(5, barW * 0.28)}
+              fill={isHi ? "url(#bg2)" : "url(#bg1)"}/>
+            <text x={x + barW / 2} y={h - 5} textAnchor="middle"
+              fontSize="9" fontFamily="Manrope, sans-serif"
+              fill={isHi ? "rgba(245,237,232,0.85)" : "rgba(245,237,232,0.42)"}
+              fontWeight={isHi ? "700" : "400"}>{d.day}</text>
+          </g>
+        );
+      })}
     </svg>
   );
 }
@@ -1652,37 +1739,40 @@ function MAdminCommandes({ navigate, commandes, setCommandes }) {
 
   return (
     <MobilePage>
-      <MobileTopbarLight sub={`${commandes.length} commandes`} title="Commandes"/>
+      <MobileTopbarLight sub={commandes.length + " commandes"} title="Commandes"/>
       <div style={{ padding: "0 18px" }}>
         <div style={{ display: "flex", gap: 6, marginBottom: 14, overflowX: "auto", scrollbarWidth: "none" }}>
           {filters.map(f => (
-            <button key={f.id} onClick={() => setFilter(f.id)}
-              className={filter === f.id ? "neu-in-sm" : "neu-out-sm"}
-              style={{
-                background: "var(--a-bg)", border: 0, padding: "8px 12px", borderRadius: 10,
-                fontSize: 11.5, fontWeight: filter === f.id ? 700 : 500, whiteSpace: "nowrap",
-                color: filter === f.id ? "var(--a-accent)" : "var(--a-ink-2)",
-              }}>{f.l}</button>
+            <button key={f.id} onClick={() => setFilter(f.id)} style={{
+              background: filter === f.id ? "var(--a-ink)" : "rgba(255,250,248,0.7)",
+              border: filter === f.id ? 0 : "1px solid rgba(196,196,196,0.3)",
+              padding: "7px 13px", borderRadius: 999,
+              fontSize: 11, fontWeight: filter === f.id ? 700 : 500, whiteSpace: "nowrap",
+              color: filter === f.id ? "#f5ede8" : "var(--a-ink-3)",
+              cursor: "pointer", boxShadow: filter === f.id ? "0 2px 8px rgba(34,16,19,0.28)" : "none",
+              transition: "all 0.18s ease",
+            }}>{f.l}</button>
           ))}
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="a-card" style={{ borderRadius: 16, overflow: "hidden" }}>
+          <div className="a-th">
+            <span style={{ flex: 1 }}>Client</span>
+            <span style={{ width: 55, textAlign: "right" }}>Total</span>
+            <span style={{ width: 70, textAlign: "right" }}>Statut</span>
+          </div>
           {filtered.map(c => (
-            <div key={c.id} onClick={() => setOpen(c)} className="neu-out" style={{ padding: 14, borderRadius: 14, cursor: "pointer" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                <div>
-                  <div style={{ fontFamily: "ui-monospace, monospace", fontSize: 10.5, color: "var(--a-accent)", fontWeight: 700, marginBottom: 2 }}>{c.id}</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "var(--a-ink)" }}>{c.client}</div>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 14, color: "var(--a-ink)", fontWeight: 700, marginBottom: 4 }}>{c.total.toFixed(0)} €</div>
-                  <StatusBadgeAdmin status={c.status}/>
+            <div key={c.id} className="a-tr" onClick={() => setOpen(c)}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12.5, fontWeight: 700, color: "var(--a-ink)", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.client}</div>
+                <div style={{ display: "flex", gap: 8, fontSize: 10, color: "var(--a-ink-3)" }}>
+                  <span><I.calendar size={9} style={{ verticalAlign: "middle", marginRight: 3 }}/>{formatRetrait(c.retrait)}</span>
+                  <span>·</span>
+                  <span>{c.items.reduce((s, it) => s + it.qty, 0)} pièces</span>
                 </div>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11.5, color: "var(--a-ink-3)", paddingTop: 8, borderTop: "1px solid rgba(196,201,212,0.45)" }}>
-                <span><I.calendar size={11} style={{ verticalAlign: "middle", marginRight: 4 }}/>{formatRetrait(c.retrait)}</span>
-                <span>{c.items.reduce((s, it) => s + it.qty, 0)} pièces · {c.paiement === "payée" ? "Payée" : c.paiement === "remboursée" ? "Remb." : "Sur place"}</span>
-              </div>
+              <div style={{ width: 55, textAlign: "right", fontSize: 13, fontWeight: 700, color: "var(--a-ink)" }}>{c.total.toFixed(0)}€</div>
+              <div style={{ width: 70, display: "flex", justifyContent: "flex-end" }}><StatusBadgeAdmin status={c.status}/></div>
             </div>
           ))}
         </div>
@@ -1791,35 +1881,34 @@ function MAdminDevis({ navigate, devis, setDevis }) {
             const n = t.id === "tous" ? devis.length : devis.filter(d => d.status === t.id).length;
             const a = filter === t.id;
             return (
-              <button key={t.id} onClick={() => setFilter(t.id)} className={a ? "neu-in-sm" : "neu-out-sm"} style={{
-                background: "var(--a-bg)", border: 0, padding: "7px 11px", borderRadius: 10,
-                fontSize: 11, fontWeight: a ? 700 : 500, whiteSpace: "nowrap",
-                color: a ? "var(--a-accent)" : "var(--a-ink-2)",
-                display: "flex", alignItems: "center", gap: 5,
-              }}>{t.l}<span style={{ opacity: 0.55 }}>{n}</span></button>
+              <button key={t.id} onClick={() => setFilter(t.id)} style={{
+                background: a ? "var(--a-ink)" : "rgba(255,250,248,0.7)",
+                border: a ? 0 : "1px solid rgba(196,196,196,0.3)",
+                padding: "7px 11px", borderRadius: 999,
+                fontSize: 10.5, fontWeight: a ? 700 : 500, whiteSpace: "nowrap",
+                color: a ? "#f5ede8" : "var(--a-ink-3)",
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 5,
+                boxShadow: a ? "0 2px 8px rgba(34,16,19,0.28)" : "none",
+                transition: "all 0.18s ease",
+              }}>{t.l}<span style={{ opacity: a ? 0.7 : 0.5, fontSize: 9.5 }}>{n}</span></button>
             );
           })}
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="a-card" style={{ borderRadius: 16, overflow: "hidden" }}>
+          <div className="a-th">
+            <span style={{ flex: 1 }}>Client</span>
+            <span style={{ width: 58, textAlign: "right" }}>Total</span>
+            <span style={{ width: 72, textAlign: "right" }}>Statut</span>
+          </div>
           {filtered.map(d => (
-            <div key={d.id} onClick={() => setOpen(d)} className="neu-out" style={{ padding: 14, borderRadius: 14, cursor: "pointer" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                <div>
-                  <div style={{ fontFamily: "ui-monospace, monospace", fontSize: 10.5, color: "var(--a-accent)", fontWeight: 700, marginBottom: 2 }}>{d.id}</div>
-                  <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--a-ink)", marginBottom: 2 }}>{d.client}</div>
-                  <div style={{ fontSize: 11, color: "var(--a-ink-3)", textTransform: "capitalize" }}>{d.event} · {d.dateEvent}</div>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 15, color: "var(--a-ink)", fontWeight: 700, marginBottom: 4 }}>{d.prixTotal} €</div>
-                  <StatusBadgeAdmin status={d.status} type="devis"/>
-                </div>
+            <div key={d.id} className="a-tr" onClick={() => setOpen(d)}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12.5, fontWeight: 700, color: "var(--a-ink)", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.client}</div>
+                <div style={{ fontSize: 10, color: "var(--a-ink-3)", textTransform: "capitalize" }}>{d.event} · {d.dateEvent}</div>
               </div>
-              {d.acompte > 0 && (
-                <div style={{ fontSize: 10.5, color: "var(--a-ink-3)", paddingTop: 6, borderTop: "1px solid rgba(196,201,212,0.45)" }}>
-                  Acompte {d.acompte}€ · Payé {d.deja}€ · Solde {d.prixTotal - d.deja}€
-                </div>
-              )}
+              <div style={{ width: 58, textAlign: "right", fontSize: 13, fontWeight: 700, color: "var(--a-ink)" }}>{d.prixTotal}€</div>
+              <div style={{ width: 72, display: "flex", justifyContent: "flex-end" }}><StatusBadgeAdmin status={d.status} type="devis"/></div>
             </div>
           ))}
         </div>
@@ -1961,7 +2050,7 @@ function MAdminCatalogue({ navigate, products, setProducts }) {
       <div style={{ padding: "0 18px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           {products.map(p => (
-            <div key={p.id} onClick={() => setEditP(p)} className="neu-out" style={{
+            <div key={p.id} onClick={() => setEditP(p)} className="a-card" style={{
               borderRadius: 14, overflow: "hidden", cursor: "pointer",
               opacity: p.active ? 1 : 0.55,
               filter: p.active ? "none" : "grayscale(0.4)",
@@ -2142,7 +2231,7 @@ function MAdminStock({ navigate, products, setProducts }) {
             const tones = { rupture: {c:"#c45a5a",l:"Rupture"}, faible: {c:"#c9954f",l:"Faible"}, ok: {c:"#1f8a5b",l:"En stock"} };
             const t = tones[s];
             return (
-              <div key={p.id} className="neu-out" style={{ padding: 14, borderRadius: 14 }}>
+              <div key={p.id} className="a-card" style={{ padding: 14, borderRadius: 14 }}>
                 <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
                   <div style={{ width: 48, height: 48, borderRadius: 10, backgroundImage: `url(${p.photo})`, backgroundSize: "cover", backgroundPosition: "center", flexShrink: 0 }}/>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -2185,7 +2274,7 @@ function MAdminPlus({ navigate, onLogout }) {
       <div style={{ padding: "0 18px" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {items.map(it => (
-            <div key={it.id} onClick={() => navigate(it.id)} className="neu-out" style={{
+            <div key={it.id} onClick={() => navigate(it.id)} className="a-card" style={{
               padding: 18, borderRadius: 14, display: "flex", alignItems: "center", gap: 16, cursor: "pointer",
             }}>
               <div className="neu-in-sm" style={{ width: 44, height: 44, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", color: it.tone, flexShrink: 0 }}>
@@ -2225,7 +2314,7 @@ function MAdminConfig({ navigate, config, setConfig }) {
 
   function Section({ title, children }) {
     return (
-      <div className="neu-out" style={{ padding: 18, borderRadius: 14, marginBottom: 14 }}>
+      <div className="a-card" style={{ padding: 18, borderRadius: 14, marginBottom: 14 }}>
         <div style={{ fontSize: 10.5, color: "var(--a-accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: 16 }}>{title}</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>{children}</div>
       </div>
