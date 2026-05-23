@@ -40,18 +40,18 @@
     --c-glass-bd: rgba(56,22,27,0.13);
     --c-glass-bd-2: rgba(56,22,27,0.22);
 
-    /* ADMIN — neumorphism rose poudré, accent bordeaux profond */
-    --a-bg: #ece1de;
-    --a-bg-2: #f2e7e4;
-    --a-surface: #ece1de;
-    --a-hi: #fbf3f0;
-    --a-lo: #ccb6b1;
-    --a-lo-soft: rgba(204,182,177,0.55);
-    --a-ink: #4a1f24;
-    --a-ink-2: #7a4d50;
-    --a-ink-3: #ad8d8a;
-    --a-accent: #6a2828;
-    --a-accent-2: #8a2a3e;
+    /* ADMIN — forêt émeraude + florale */
+    --a-bg: #d4e5d6;
+    --a-bg-2: #deeede;
+    --a-surface: #d4e5d6;
+    --a-hi: #eef6ef;
+    --a-lo: #9ab89d;
+    --a-lo-soft: rgba(154,184,157,0.55);
+    --a-ink: #122b18;
+    --a-ink-2: #2e5c38;
+    --a-ink-3: #6b9470;
+    --a-accent: #1a6b3c;
+    --a-accent-2: #2d9a5a;
 
     --a-shadow-out: -6px -6px 12px var(--a-hi), 6px 6px 14px var(--a-lo);
     --a-shadow-out-sm: -3px -3px 7px var(--a-hi), 3px 3px 7px var(--a-lo);
@@ -136,25 +136,25 @@
 
   /* ── Admin design language: Skillset × Fierce × Smart Home ── */
   .a-card {
-    background: rgba(255,250,248,0.92);
+    background: rgba(236,250,238,0.92);
     border: 1px solid rgba(255,255,255,0.82);
     border-radius: 16px;
-    box-shadow: 0 2px 14px rgba(74,31,36,0.07), 0 1px 3px rgba(74,31,36,0.04);
+    box-shadow: 0 2px 14px rgba(18,43,24,0.07), 0 1px 3px rgba(18,43,24,0.04);
   }
   .a-card-dark {
-    background: #221013;
-    border: 1px solid rgba(255,255,255,0.06);
+    background: #0d2218;
+    border: 1px solid rgba(255,255,255,0.07);
     border-radius: 18px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.42);
-    color: #f5ede8;
+    color: #e8f5ec;
   }
   .a-glass {
-    background: rgba(255,250,248,0.58);
+    background: rgba(236,250,238,0.58);
     -webkit-backdrop-filter: blur(18px) saturate(130%);
     backdrop-filter: blur(18px) saturate(130%);
     border: 1px solid rgba(255,255,255,0.62);
     border-radius: 16px;
-    box-shadow: 0 2px 14px rgba(74,31,36,0.06);
+    box-shadow: 0 2px 14px rgba(18,43,24,0.06);
   }
   .period-tab {
     flex: 1; padding: 7px 0; border-radius: 999px; border: 0;
@@ -163,8 +163,8 @@
     transition: all 0.2s ease; white-space: nowrap; text-align: center;
   }
   .period-tab.active {
-    background: #221013; color: rgba(245,237,232,0.95);
-    box-shadow: 0 2px 10px rgba(34,16,19,0.32);
+    background: #0d2218; color: rgba(232,245,236,0.95);
+    box-shadow: 0 2px 10px rgba(13,34,24,0.32);
     font-weight: 700;
   }
   .a-th {
@@ -181,7 +181,7 @@
     border-bottom: 1px solid rgba(196,201,212,0.22);
     cursor: pointer; transition: background 0.12s ease;
   }
-  .a-tr:hover { background: rgba(106,40,40,0.04); }
+  .a-tr:hover { background: rgba(26,107,60,0.05); }
   .a-tr:last-child { border-bottom: 0; }
 
   .admin-shell input[type="text"],
@@ -204,7 +204,7 @@
     transition: box-shadow 0.18s ease;
   }
   .admin-shell input:focus, .admin-shell select:focus, .admin-shell textarea:focus {
-    box-shadow: inset 2px 2px 5px var(--a-lo), inset -2px -2px 5px var(--a-hi), 0 0 0 2px rgba(30,42,74,0.12);
+    box-shadow: inset 2px 2px 5px var(--a-lo), inset -2px -2px 5px var(--a-hi), 0 0 0 2px rgba(26,107,60,0.18);
   }
   .admin-shell label.fld-lbl { font-size: 11px; color: var(--a-ink-3); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
 
@@ -605,7 +605,7 @@ function PhoneFrame({ children, dark = true }) {
       minHeight: "100vh", width: "100%",
       background: dark
         ? "radial-gradient(ellipse 60% 50% at 30% 20%, rgba(202,160,150,0.45), #d4b8b1 75%)"
-        : "linear-gradient(148deg, #ceb0a8 0%, #c2a49c 45%, #d2b5af 100%)",
+        : "linear-gradient(148deg, #6b9e74 0%, #4e7a58 45%, #6b9e74 100%)",
       display: "flex", alignItems: "stretch", justifyContent: "center",
       padding: "0",
       fontFamily: "var(--sans)",
@@ -613,7 +613,7 @@ function PhoneFrame({ children, dark = true }) {
       <div style={{
         width: "min(100vw, 430px)",
         minHeight: "100vh",
-        background: dark ? "var(--c-bg-1)" : "linear-gradient(180deg, #f2e7e4 0%, #ece1de 100%)",
+        background: dark ? "var(--c-bg-1)" : "linear-gradient(180deg, #deeede 0%, #d4e5d6 100%)",
         position: "relative",
         boxShadow: "0 0 60px rgba(0,0,0,0.45)",
         overflow: "hidden",
@@ -691,9 +691,9 @@ function BottomNav({ items, current, onNavigate, dark = true }) {
     border: "rgba(255,255,255,0.85)",
     rim: "rgba(255,255,255,0.95)",
     rim2: "rgba(0,0,0,0.04)",
-    line: "rgba(30,42,74,0.18)",
-    dotIdle: "rgba(30,42,74,0.30)",
-    iconIdle: "rgba(74,85,115,0.55)",
+    line: "rgba(18,43,24,0.18)",
+    dotIdle: "rgba(18,43,24,0.30)",
+    iconIdle: "rgba(46,92,56,0.55)",
     accent: "var(--a-accent)",
   };
 
@@ -1596,7 +1596,7 @@ function MAdminDashboard({ navigate, commandes, setCommandes, devis, setDevis })
         {/* Stats row — 3 clean cards (Skillset style) */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
           <StatCardSm label="Commandes" value={s.commandesJour} tone="var(--a-accent)" trend="↑ 1,7%" trendUp={true}/>
-          <StatCardSm label="Devis" value={s.devisAttente} tone="#c9954f" trend="stable" trendUp={null}/>
+          <StatCardSm label="Devis" value={s.devisAttente} tone="#c4a23a" trend="stable" trendUp={null}/>
           <StatCardSm label="Rupture" value={s.rupture} tone="#c45a5a" trend="↓ 0,9%" trendUp={false}/>
         </div>
 
@@ -1691,18 +1691,18 @@ function MGradientBarChart({ data }) {
     <svg viewBox={`0 0 ${w} ${h}`} style={{ width: "100%", height: h }}>
       <defs>
         <linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f5ede8" stopOpacity="0.38"/>
-          <stop offset="100%" stopColor="#f5ede8" stopOpacity="0.1"/>
+          <stop offset="0%" stopColor="#a8e6b8" stopOpacity="0.38"/>
+          <stop offset="100%" stopColor="#a8e6b8" stopOpacity="0.1"/>
         </linearGradient>
         <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f5ede8" stopOpacity="0.9"/>
-          <stop offset="100%" stopColor="#f5ede8" stopOpacity="0.45"/>
+          <stop offset="0%" stopColor="#5ec99a" stopOpacity="0.95"/>
+          <stop offset="100%" stopColor="#2d9a5a" stopOpacity="0.55"/>
         </linearGradient>
       </defs>
       {[0.25, 0.6, 1].map((p, i) => (
         <line key={i} x1={padL} x2={w - padR}
           y1={padT + p * (h - padT - padB)} y2={padT + p * (h - padT - padB)}
-          stroke="rgba(245,237,232,0.12)" strokeDasharray="3 5"/>
+          stroke="rgba(232,245,236,0.14)" strokeDasharray="3 5"/>
       ))}
       {data.map((d, i) => {
         const bh = Math.max(4, (d.value / max) * (h - padT - padB));
@@ -1716,7 +1716,7 @@ function MGradientBarChart({ data }) {
               fill={isHi ? "url(#bg2)" : "url(#bg1)"}/>
             <text x={x + barW / 2} y={h - 5} textAnchor="middle"
               fontSize="9" fontFamily="Manrope, sans-serif"
-              fill={isHi ? "rgba(245,237,232,0.85)" : "rgba(245,237,232,0.42)"}
+              fill={isHi ? "rgba(232,245,236,0.9)" : "rgba(232,245,236,0.45)"}
               fontWeight={isHi ? "700" : "400"}>{d.day}</text>
           </g>
         );
