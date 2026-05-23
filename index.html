@@ -603,7 +603,7 @@ const { useState: useStateM, useEffect: useEffectM, useRef: useRefM, useMemo: us
 function PhoneFrame({ children, dark = true }) {
   return (
     <div style={{
-      minHeight: "100dvh", width: "100%",
+      minHeight: "100vh", width: "100%",
       background: dark
         ? "radial-gradient(ellipse 60% 50% at 30% 20%, rgba(202,160,150,0.45), #d4b8b1 75%)"
         : "linear-gradient(148deg, #6b9e74 0%, #4e7a58 45%, #6b9e74 100%)",
@@ -2459,7 +2459,7 @@ function MobileApp() {
   // Sync body background to current section
   useEffectMApp(() => {
     const isA = route.startsWith("admin/");
-    document.body.style.background = isA ? "#3a6344" : "#e8d9d0";
+    document.body.style.background = isA ? "#d4e5d6" : "#e8d9d0";
   }, [route]);
 
   const navigate = (p) => { window.location.hash = p; };
