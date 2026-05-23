@@ -2,8 +2,7 @@
 
 ## Design System
 Before any UI/UX work, read and apply the skill at:
-https://raw.githubusercontent.com/nextlevelbuilder/ui-ux-pro-max-skill/main/.claude/skills/ui-ux-pro-max/SKILL.md
-
+https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
 ---
 
 ## Contexte général
