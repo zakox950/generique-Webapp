@@ -71,6 +71,7 @@
     background: #e8d9d0;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    transition: background 0.4s ease;
   }
   #root { min-height: 100vh; }
   a { color: inherit; text-decoration: none; }
@@ -602,7 +603,7 @@ const { useState: useStateM, useEffect: useEffectM, useRef: useRefM, useMemo: us
 function PhoneFrame({ children, dark = true }) {
   return (
     <div style={{
-      minHeight: "100vh", width: "100%",
+      minHeight: "100dvh", width: "100%",
       background: dark
         ? "radial-gradient(ellipse 60% 50% at 30% 20%, rgba(202,160,150,0.45), #d4b8b1 75%)"
         : "linear-gradient(148deg, #6b9e74 0%, #4e7a58 45%, #6b9e74 100%)",
@@ -612,7 +613,7 @@ function PhoneFrame({ children, dark = true }) {
     }}>
       <div style={{
         width: "min(100vw, 430px)",
-        minHeight: "100vh",
+        minHeight: "100dvh",
         background: dark ? "var(--c-bg-1)" : "linear-gradient(180deg, #deeede 0%, #d4e5d6 100%)",
         position: "relative",
         boxShadow: "0 0 60px rgba(0,0,0,0.45)",
@@ -627,6 +628,7 @@ function PhoneFrame({ children, dark = true }) {
 /* ── Bottom Nav Pill ── */
 function BottomNav({ items, current, onNavigate, dark = true }) {
   const [collapsed, setCollapsed] = useStateM(false);
+  const [vvOffset, setVvOffset] = useStateM(0);
   const lastY = useRefM(0);
   const navRef = useRefM(null);
   const collapsedRef = useRefM(false);
@@ -675,6 +677,23 @@ function BottomNav({ items, current, onNavigate, dark = true }) {
     lastY.current = 0;
   }, [current]);
 
+  // Repositionne la nav quand la barre du navigateur apparaît/disparaît
+  useEffectM(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    function update() {
+      const gap = window.innerHeight - vv.offsetTop - vv.height;
+      setVvOffset(Math.max(0, gap));
+    }
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    update();
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+    };
+  }, []);
+
   const handleClick = () => { if (collapsed) setCollapsed(false); };
 
   const palette = dark ? {
@@ -701,7 +720,7 @@ function BottomNav({ items, current, onNavigate, dark = true }) {
     <nav ref={navRef} onClick={handleClick} className={`mobile-bottom-nav ${collapsed ? "collapsed" : ""} ${dark ? "" : "light"}`}
       style={{
         position: "absolute",
-        bottom: "calc(env(safe-area-inset-bottom, 0px) + 14px)",
+        bottom: `calc(env(safe-area-inset-bottom, 0px) + ${14 + vvOffset}px)`,
         left: "50%", transform: "translateX(-50%)",
         zIndex: 100,
         width: collapsed ? 86 : "calc(100% - 32px)",
@@ -785,7 +804,7 @@ function BottomNav({ items, current, onNavigate, dark = true }) {
 function MobilePage({ children }) {
   return (
     <div className="mobile-scroll" style={{
-      height: "100vh", overflowY: "auto", overflowX: "hidden",
+      height: "100dvh", overflowY: "auto", overflowX: "hidden",
       paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 90px)",
       WebkitOverflowScrolling: "touch",
     }}>
@@ -2436,6 +2455,12 @@ function MobileApp() {
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
+
+  // Sync body background to current section
+  useEffectMApp(() => {
+    const isA = route.startsWith("admin/");
+    document.body.style.background = isA ? "#3a6344" : "#e8d9d0";
+  }, [route]);
 
   const navigate = (p) => { window.location.hash = p; };
 
