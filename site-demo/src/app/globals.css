@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+/* Client theme */
+.client-theme {
+  --c-bg: #f7ece6;
+  --c-ink: #38161b;
+  --c-ink-2: rgba(56, 22, 27, 0.72);
+  --c-ink-3: rgba(56, 22, 27, 0.46);
+  --c-accent: #911f23;
+}
+
+/* Admin theme */
+.admin-theme {
+  --a-bg: #d4e5d6;
+  --a-ink: #122b18;
+  --a-accent: #1a6b3c;
+  --a-dark: #0d2218;
+}
+
+@keyframes bgShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.admin-bg-animated {
+  background: linear-gradient(135deg, #0d2218, #122b18, #0a1f14, #1a3d22);
+  background-size: 400% 400%;
+  animation: bgShift 8s ease infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(94,201,154,0.4), 0 0 24px rgba(94,201,154,0.15); }
+  50%       { box-shadow: 0 0 20px rgba(94,201,154,0.6), 0 0 40px rgba(94,201,154,0.25); }
+}
+
+.nav-item-active {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes floatParticle {
+  0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.3; }
+  33% { transform: translateY(-20px) translateX(10px); opacity: 0.6; }
+  66% { transform: translateY(-10px) translateX(-15px); opacity: 0.2; }
+}
+
+.particle {
+  animation: floatParticle var(--duration, 8s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
