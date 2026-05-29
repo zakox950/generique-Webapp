@@ -5,8 +5,11 @@ import { PRODUCTS } from "@/data/mock";
 
 const stockProducts = PRODUCTS.filter((p) => p.mode === "make_to_stock");
 
+const INK = "#4a1f24";
+const ACCENT = "#6a2828";
+
 function stockColor(qty: number): string {
-  if (qty > 10) return "#1a6b3c";
+  if (qty > 10) return "#6a9a6a";
   if (qty >= 4) return "#c9954f";
   return "#c45a5a";
 }
@@ -34,11 +37,11 @@ export default function StockPage() {
   };
 
   return (
-    <div style={{ padding: "24px", color: "#122b18" }}>
-      <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "32px", fontWeight: 500, margin: "0 0 6px" }}>
+    <div style={{ padding: "24px", color: INK }}>
+      <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "32px", fontWeight: 500, margin: "0 0 6px", color: INK }}>
         Gestion du stock
       </h1>
-      <p style={{ fontSize: "13px", color: "#6e7691", fontFamily: "var(--font-manrope)", margin: "0 0 24px" }}>
+      <p style={{ fontSize: "13px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)", margin: "0 0 24px" }}>
         {stockProducts.length} produits · Mise à jour en temps réel (local)
       </p>
 
@@ -52,21 +55,17 @@ export default function StockPage() {
           return (
             <div
               key={p.id}
-              style={{
-                background: "#fff",
-                borderRadius: "16px",
-                padding: "16px",
-                boxShadow: "0 2px 8px rgba(18,43,24,0.07)",
-              }}
+              className="a-card"
+              style={{ padding: "16px" }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                 <div>
-                  <div style={{ fontSize: "14px", fontWeight: 700, color: "#122b18", fontFamily: "var(--font-manrope)" }}>{p.name}</div>
-                  <div style={{ fontSize: "12px", color: "#888", fontFamily: "var(--font-manrope)" }}>{p.price.toFixed(2)} €</div>
+                  <div style={{ fontSize: "14px", fontWeight: 700, color: INK, fontFamily: "var(--font-manrope)" }}>{p.name}</div>
+                  <div style={{ fontSize: "12px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)" }}>{p.price.toFixed(2)} €</div>
                 </div>
                 <div
                   style={{
-                    fontSize: "24px",
+                    fontSize: "26px",
                     fontWeight: 700,
                     color: color,
                     fontFamily: "var(--font-cormorant)",
@@ -79,7 +78,7 @@ export default function StockPage() {
               </div>
 
               {/* Progress bar */}
-              <div style={{ height: "6px", background: "#f0f0f0", borderRadius: "3px", marginBottom: "12px", overflow: "hidden" }}>
+              <div style={{ height: "6px", background: "var(--a-lo-soft)", borderRadius: "3px", marginBottom: "12px", overflow: "hidden" }}>
                 <div
                   style={{
                     height: "100%",
@@ -95,36 +94,40 @@ export default function StockPage() {
               <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                 <button
                   onClick={() => adjust(p.id, -1)}
+                  className="neu-out-sm"
                   style={{
                     width: "32px",
                     height: "32px",
                     borderRadius: "8px",
-                    border: "1.5px solid rgba(18,43,24,0.15)",
-                    background: "transparent",
+                    border: "none",
                     cursor: "pointer",
                     fontSize: "18px",
-                    color: "#122b18",
+                    color: INK,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    background: "var(--a-bg)",
+                    flexShrink: 0,
                   }}
                 >
                   −
                 </button>
                 <button
                   onClick={() => adjust(p.id, 1)}
+                  className="neu-out-sm"
                   style={{
                     width: "32px",
                     height: "32px",
                     borderRadius: "8px",
-                    border: "1.5px solid rgba(18,43,24,0.15)",
-                    background: "transparent",
+                    border: "none",
                     cursor: "pointer",
                     fontSize: "18px",
-                    color: "#122b18",
+                    color: INK,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    background: "var(--a-bg)",
+                    flexShrink: 0,
                   }}
                 >
                   +
@@ -139,26 +142,28 @@ export default function StockPage() {
                     flex: 1,
                     padding: "7px 10px",
                     borderRadius: "8px",
-                    border: "1.5px solid rgba(18,43,24,0.15)",
-                    background: "#f6fbf8",
+                    border: "0",
+                    background: "var(--a-bg)",
+                    boxShadow: "inset 2px 2px 5px var(--a-lo), inset -2px -2px 5px var(--a-hi)",
                     fontSize: "13px",
                     fontFamily: "var(--font-manrope)",
-                    color: "#122b18",
+                    color: INK,
                     outline: "none",
                   }}
                 />
                 <button
                   onClick={() => setFromInput(p.id)}
                   style={{
-                    background: "#1a6b3c",
-                    color: "#fff",
+                    background: ACCENT,
+                    color: "#f5ede8",
                     borderRadius: "8px",
-                    padding: "7px 12px",
+                    padding: "7px 14px",
                     fontSize: "12px",
                     fontWeight: 600,
                     border: "none",
                     cursor: "pointer",
                     fontFamily: "var(--font-manrope)",
+                    flexShrink: 0,
                   }}
                 >
                   OK

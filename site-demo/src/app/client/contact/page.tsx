@@ -25,7 +25,7 @@ export default function ContactPage() {
           borderRadius: "20px",
           overflow: "hidden",
           marginBottom: "20px",
-          background: "linear-gradient(135deg, #d4e5d6, #b8d4bc)",
+          background: "linear-gradient(135deg, #f0e2db, #ead9d0)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

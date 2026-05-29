@@ -210,7 +210,7 @@ function ProductModal({
             disabled={!product.active}
             style={{
               width: "100%",
-              background: added ? "#1a6b3c" : product.active ? "#911f23" : "#aaa",
+              background: added ? "#38161b" : product.active ? "#911f23" : "#aaa",
               color: "#fff",
               borderRadius: "999px",
               padding: "14px",

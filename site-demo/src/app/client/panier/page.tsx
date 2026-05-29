@@ -182,7 +182,7 @@ export default function PanierPage() {
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
           <span style={{ fontSize: "13px", color: "rgba(56,22,27,0.6)", fontFamily: "var(--font-manrope)" }}>Retrait boutique</span>
-          <span style={{ fontSize: "13px", color: "#1a6b3c", fontFamily: "var(--font-manrope)" }}>Gratuit</span>
+          <span style={{ fontSize: "13px", color: "var(--c-ink-2)", fontFamily: "var(--font-manrope)" }}>Gratuit</span>
         </div>
         <div
           style={{

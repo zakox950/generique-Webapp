@@ -5,59 +5,44 @@ import { PRODUCTS } from "@/data/mock";
 
 type Product = (typeof PRODUCTS)[number];
 
+const INK = "#4a1f24";
+const ACCENT = "#6a2828";
+
 function EditModal({ product, onClose }: { product: Product; onClose: () => void }) {
   const [name, setName] = useState(product.name);
   const [price, setPrice] = useState(String(product.price));
   const [desc, setDesc] = useState(product.short);
   const [active, setActive] = useState(product.active);
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "10px 12px",
-    borderRadius: "10px",
-    border: "1.5px solid rgba(18,43,24,0.2)",
-    background: "#fff",
-    fontSize: "14px",
-    fontFamily: "var(--font-manrope)",
-    color: "#122b18",
-    boxSizing: "border-box",
-    outline: "none",
-  };
-
   return (
     <div
-      style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}
+      style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(34,16,19,0.5)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}
       onClick={onClose}
     >
       <div
-        style={{ width: "100%", maxWidth: "480px", background: "#f0f7f2", borderRadius: "20px", padding: "24px", boxShadow: "0 24px 80px rgba(0,0,0,0.2)" }}
+        className="a-card admin-shell"
+        style={{ width: "100%", maxWidth: "480px", borderRadius: "20px", padding: "24px", boxShadow: "0 24px 80px rgba(34,16,19,0.28)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "26px", fontWeight: 500, margin: "0 0 20px", color: "#122b18" }}>
+        <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "26px", fontWeight: 500, margin: "0 0 20px", color: INK }}>
           Modifier — {product.name}
         </h2>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <div>
-            <label style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", color: "#666", fontFamily: "var(--font-manrope)", display: "block", marginBottom: "5px" }}>
-              Nom
-            </label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} />
+            <label className="fld-lbl" style={{ display: "block", marginBottom: "6px" }}>Nom</label>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div>
-            <label style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", color: "#666", fontFamily: "var(--font-manrope)", display: "block", marginBottom: "5px" }}>
-              Prix (€)
-            </label>
-            <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} step="0.5" style={inputStyle} />
+            <label className="fld-lbl" style={{ display: "block", marginBottom: "6px" }}>Prix (€)</label>
+            <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} step="0.5" />
           </div>
           <div>
-            <label style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", color: "#666", fontFamily: "var(--font-manrope)", display: "block", marginBottom: "5px" }}>
-              Description
-            </label>
-            <textarea rows={3} value={desc} onChange={(e) => setDesc(e.target.value)} style={{ ...inputStyle, resize: "vertical" }} />
+            <label className="fld-lbl" style={{ display: "block", marginBottom: "6px" }}>Description</label>
+            <textarea rows={3} value={desc} onChange={(e) => setDesc(e.target.value)} style={{ resize: "vertical" }} />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <label style={{ fontSize: "13px", fontWeight: 600, fontFamily: "var(--font-manrope)", color: "#122b18" }}>
+            <label style={{ fontSize: "13px", fontWeight: 600, fontFamily: "var(--font-manrope)", color: INK }}>
               Produit actif
             </label>
             <button
@@ -67,7 +52,7 @@ function EditModal({ product, onClose }: { product: Product; onClose: () => void
                 height: "24px",
                 borderRadius: "999px",
                 border: "none",
-                background: active ? "#1a6b3c" : "#ccc",
+                background: active ? ACCENT : "var(--a-lo)",
                 cursor: "pointer",
                 position: "relative",
                 transition: "background 0.2s",
@@ -90,20 +75,20 @@ function EditModal({ product, onClose }: { product: Product; onClose: () => void
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+        <div style={{ display: "flex", gap: "10px", marginTop: "22px" }}>
           <button
             onClick={onClose}
             style={{
               flex: 1,
               background: "transparent",
-              border: "1.5px solid rgba(18,43,24,0.2)",
+              border: "1px solid rgba(74,31,36,0.22)",
               borderRadius: "999px",
               padding: "11px",
               fontSize: "14px",
               fontFamily: "var(--font-manrope)",
               fontWeight: 600,
               cursor: "pointer",
-              color: "#122b18",
+              color: INK,
             }}
           >
             Annuler
@@ -112,7 +97,7 @@ function EditModal({ product, onClose }: { product: Product; onClose: () => void
             onClick={onClose}
             style={{
               flex: 2,
-              background: "#1a6b3c",
+              background: ACCENT,
               border: "none",
               borderRadius: "999px",
               padding: "11px",
@@ -120,7 +105,7 @@ function EditModal({ product, onClose }: { product: Product; onClose: () => void
               fontFamily: "var(--font-manrope)",
               fontWeight: 600,
               cursor: "pointer",
-              color: "#fff",
+              color: "#f5ede8",
             }}
           >
             Sauvegarder
@@ -138,15 +123,15 @@ export default function CataloguePage() {
   );
 
   return (
-    <div style={{ padding: "24px", color: "#122b18" }}>
+    <div style={{ padding: "24px", color: INK }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "32px", fontWeight: 500, margin: 0 }}>
+        <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "32px", fontWeight: 500, margin: 0, color: INK }}>
           Catalogue
         </h1>
         <button
           style={{
-            background: "#1a6b3c",
-            color: "#fff",
+            background: ACCENT,
+            color: "#f5ede8",
             borderRadius: "999px",
             padding: "9px 18px",
             fontSize: "13px",
@@ -165,13 +150,8 @@ export default function CataloguePage() {
         {PRODUCTS.map((p) => (
           <div
             key={p.id}
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              overflow: "hidden",
-              boxShadow: "0 2px 8px rgba(18,43,24,0.07)",
-              opacity: actifs[p.id] ? 1 : 0.55,
-            }}
+            className="a-card"
+            style={{ overflow: "hidden", opacity: actifs[p.id] ? 1 : 0.55, padding: 0 }}
           >
             <div style={{ position: "relative" }}>
               <img
@@ -185,8 +165,8 @@ export default function CataloguePage() {
                     position: "absolute",
                     top: "8px",
                     left: "8px",
-                    background: "#f0d5c0",
-                    color: "#8a4a1f",
+                    background: "rgba(145,31,35,0.85)",
+                    color: "#fff",
                     fontSize: "9px",
                     fontWeight: 700,
                     borderRadius: "999px",
@@ -202,10 +182,10 @@ export default function CataloguePage() {
             </div>
 
             <div style={{ padding: "10px 12px 12px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "6px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
                 <div>
-                  <div style={{ fontSize: "13px", fontWeight: 700, color: "#122b18", fontFamily: "var(--font-manrope)" }}>{p.name}</div>
-                  <div style={{ fontSize: "13px", color: "#1a6b3c", fontWeight: 700, fontFamily: "var(--font-manrope)" }}>{p.price.toFixed(2)} €</div>
+                  <div style={{ fontSize: "13px", fontWeight: 700, color: INK, fontFamily: "var(--font-manrope)" }}>{p.name}</div>
+                  <div style={{ fontSize: "13px", color: ACCENT, fontWeight: 700, fontFamily: "var(--font-manrope)" }}>{p.price.toFixed(2)} €</div>
                 </div>
                 <button
                   onClick={() => setActifs((prev) => ({ ...prev, [p.id]: !prev[p.id] }))}
@@ -214,7 +194,7 @@ export default function CataloguePage() {
                     height: "20px",
                     borderRadius: "999px",
                     border: "none",
-                    background: actifs[p.id] ? "#1a6b3c" : "#ccc",
+                    background: actifs[p.id] ? ACCENT : "var(--a-lo)",
                     cursor: "pointer",
                     position: "relative",
                     flexShrink: 0,
@@ -239,7 +219,7 @@ export default function CataloguePage() {
                 onClick={() => setSelected(p)}
                 style={{
                   width: "100%",
-                  background: "rgba(18,43,24,0.07)",
+                  background: "rgba(106,40,40,0.08)",
                   border: "none",
                   borderRadius: "8px",
                   padding: "6px",
@@ -247,7 +227,7 @@ export default function CataloguePage() {
                   fontFamily: "var(--font-manrope)",
                   fontWeight: 600,
                   cursor: "pointer",
-                  color: "#1a6b3c",
+                  color: ACCENT,
                 }}
               >
                 Modifier

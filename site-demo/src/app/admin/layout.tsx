@@ -35,18 +35,25 @@ function Sidebar({ pathname }: { pathname: string }) {
             fontFamily: "var(--font-cormorant)",
             fontSize: "26px",
             fontWeight: 500,
-            color: "#e8f5ec",
+            color: "#f5ede8",
             lineHeight: 1.1,
           }}
         >
           Atelier
         </div>
-        <div style={{ fontSize: "11px", color: "rgba(232,245,236,0.45)", fontFamily: "var(--font-manrope)", letterSpacing: "1px", textTransform: "uppercase", marginTop: "2px" }}>
+        <div style={{
+          fontSize: "11px",
+          color: "rgba(245,237,232,0.40)",
+          fontFamily: "var(--font-manrope)",
+          letterSpacing: "1px",
+          textTransform: "uppercase",
+          marginTop: "2px",
+        }}>
           Administration
         </div>
       </div>
 
-      {/* Nav items */}
+      {/* Nav */}
       <nav style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px", padding: "0 12px" }}>
         {NAV_ITEMS.map(({ href, label, icon }) => {
           const active = pathname === href || (pathname.startsWith(href) && href !== "/admin");
@@ -61,8 +68,8 @@ function Sidebar({ pathname }: { pathname: string }) {
                 padding: "10px 14px",
                 borderRadius: "12px",
                 textDecoration: "none",
-                background: active ? "rgba(94,201,154,0.18)" : "transparent",
-                color: active ? "#5ec99a" : "rgba(232,245,236,0.55)",
+                background: active ? "rgba(192,96,96,0.18)" : "transparent",
+                color: active ? "#e8c0c0" : "rgba(245,237,232,0.50)",
                 fontSize: "14px",
                 fontFamily: "var(--font-manrope)",
                 fontWeight: active ? 600 : 400,
@@ -78,14 +85,14 @@ function Sidebar({ pathname }: { pathname: string }) {
       </nav>
 
       {/* Bottom */}
-      <div style={{ padding: "16px 24px 0", borderTop: "1px solid rgba(232,245,236,0.08)" }}>
+      <div style={{ padding: "16px 24px 0", borderTop: "1px solid rgba(245,237,232,0.08)" }}>
         <Link
           href="/admin/login"
           style={{
             display: "flex",
             alignItems: "center",
             gap: "8px",
-            color: "rgba(232,245,236,0.4)",
+            color: "rgba(245,237,232,0.35)",
             fontSize: "12px",
             textDecoration: "none",
             fontFamily: "var(--font-manrope)",
@@ -113,15 +120,15 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
     >
       <div
         style={{
-          background: "rgba(13,34,24,0.92)",
+          background: "rgba(34,16,19,0.92)",
           backdropFilter: "blur(16px)",
           borderRadius: "999px",
           padding: "8px 4px",
           display: "flex",
           justifyContent: "space-around",
           alignItems: "center",
-          boxShadow: "0 8px 32px rgba(13,34,24,0.5)",
-          border: "1px solid rgba(94,201,154,0.15)",
+          boxShadow: "0 8px 32px rgba(34,16,19,0.5)",
+          border: "1px solid rgba(192,96,96,0.18)",
         }}
       >
         {NAV_ITEMS.map(({ href, label, icon }) => {
@@ -135,11 +142,11 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
                 flexDirection: "column",
                 alignItems: "center",
                 gap: "2px",
-                color: active ? "#5ec99a" : "rgba(232,245,236,0.45)",
+                color: active ? "#e8c0c0" : "rgba(245,237,232,0.40)",
                 textDecoration: "none",
                 padding: "4px 8px",
                 borderRadius: "999px",
-                background: active ? "rgba(94,201,154,0.15)" : "transparent",
+                background: active ? "rgba(192,96,96,0.15)" : "transparent",
               }}
             >
               <span style={{ fontSize: "16px" }}>{icon}</span>
@@ -160,7 +167,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="admin-theme" style={{ minHeight: "100vh", background: "#d4e5d6" }}>
+    <div className="admin-shell" style={{ minHeight: "100vh" }}>
       {/* Desktop sidebar */}
       <div className="hidden lg:block">
         <Sidebar pathname={pathname} />
@@ -168,9 +175,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main content */}
       <main
-        style={{
-          fontFamily: "var(--font-manrope)",
-        }}
+        style={{ fontFamily: "var(--font-manrope)" }}
         className="lg:ml-[240px] pb-24 lg:pb-8 min-h-screen"
       >
         {children}

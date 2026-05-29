@@ -27,11 +27,16 @@ const itemAnim = {
 type CommandeType = (typeof COMMANDES)[number];
 type DevisType = (typeof DEVIS)[number];
 
+const INK = "#4a1f24";
+const ACCENT = "#6a2828";
+const BG = "#ece1de";
+const SHEET_BG = "#f2e7e4";
+
 function CommandeSheet({ cmd, onClose }: { cmd: CommandeType; onClose: () => void }) {
   const st = STATUTS_CMD[cmd.status] || { label: cmd.status, color: "#888" };
   return (
     <div
-      style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+      style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(34,16,19,0.5)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
       onClick={onClose}
     >
       <motion.div
@@ -39,16 +44,19 @@ function CommandeSheet({ cmd, onClose }: { cmd: CommandeType; onClose: () => voi
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 280 }}
-        style={{ width: "100%", maxWidth: "600px", background: "#f0f7f2", borderRadius: "24px 24px 0 0", padding: "24px 24px 40px", maxHeight: "80vh", overflowY: "auto" }}
+        className="a-card"
+        style={{ width: "100%", maxWidth: "600px", borderRadius: "24px 24px 0 0", padding: "24px 24px 40px", maxHeight: "80vh", overflowY: "auto" }}
         onClick={(e) => e.stopPropagation()}
       >
+        <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "rgba(74,31,36,0.2)", margin: "0 auto 20px" }} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
           <div>
-            <div style={{ fontSize: "12px", color: "#666", fontFamily: "var(--font-manrope)", marginBottom: "2px" }}>{cmd.id}</div>
-            <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "26px", fontWeight: 500, margin: 0, color: "#122b18" }}>{cmd.client}</h2>
-            <div style={{ fontSize: "12px", color: "#666", fontFamily: "var(--font-manrope)", marginTop: "2px" }}>{cmd.email}</div>
+            <div style={{ fontSize: "11px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)", marginBottom: "2px" }}>{cmd.id}</div>
+            <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "28px", fontWeight: 500, margin: "0 0 2px", color: INK }}>{cmd.client}</h2>
+            <div style={{ fontSize: "13px", color: "var(--a-ink-2)", fontFamily: "var(--font-manrope)" }}>{cmd.email}</div>
           </div>
-          <span style={{ background: st.color + "22", color: st.color, borderRadius: "999px", padding: "4px 12px", fontSize: "12px", fontWeight: 700, fontFamily: "var(--font-manrope)" }}>
+          <span className="badge" style={{ background: st.color + "20", color: st.color }}>
+            <span className="badge-dot" style={{ background: st.color }} />
             {st.label}
           </span>
         </div>
@@ -59,25 +67,25 @@ function CommandeSheet({ cmd, onClose }: { cmd: CommandeType; onClose: () => voi
             { label: "Retrait", value: cmd.retrait },
             { label: "Total", value: `${cmd.total.toFixed(2)} €` },
           ].map((r) => (
-            <div key={r.label} style={{ background: "#fff", borderRadius: "12px", padding: "12px" }}>
-              <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", color: "#666", fontFamily: "var(--font-manrope)", marginBottom: "4px" }}>{r.label}</div>
-              <div style={{ fontSize: "14px", fontWeight: 600, color: "#122b18", fontFamily: "var(--font-manrope)" }}>{r.value}</div>
+            <div key={r.label} className="neu-out-sm" style={{ padding: "12px" }}>
+              <label className="fld-lbl" style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)", display: "block", marginBottom: "4px" }}>{r.label}</label>
+              <div style={{ fontSize: "14px", fontWeight: 600, color: INK, fontFamily: "var(--font-manrope)" }}>{r.value}</div>
             </div>
           ))}
         </div>
 
-        <h3 style={{ fontFamily: "var(--font-manrope)", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px", color: "#666", margin: "0 0 8px" }}>Articles</h3>
+        <h3 style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)", margin: "0 0 8px", fontWeight: 700 }}>Articles</h3>
         {cmd.items.map((it, i) => (
-          <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
-            <span style={{ fontSize: "13px", fontFamily: "var(--font-manrope)", color: "#122b18" }}>{it.name} × {it.qty}</span>
-            <span style={{ fontSize: "13px", fontFamily: "var(--font-manrope)", color: "#1a6b3c", fontWeight: 600 }}>{(it.price * it.qty).toFixed(2)} €</span>
+          <div key={i} className="a-tr">
+            <span style={{ flex: 1, fontSize: "13px", fontFamily: "var(--font-manrope)", color: INK }}>{it.name} × {it.qty}</span>
+            <span style={{ fontSize: "13px", fontFamily: "var(--font-manrope)", color: ACCENT, fontWeight: 600 }}>{(it.price * it.qty).toFixed(2)} €</span>
           </div>
         ))}
 
         {cmd.note && (
-          <div style={{ marginTop: "16px", background: "#fffde8", borderRadius: "12px", padding: "12px", border: "1px solid #f0e0a0" }}>
-            <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", color: "#888", fontFamily: "var(--font-manrope)", marginBottom: "4px" }}>Note client</div>
-            <p style={{ fontSize: "13px", color: "#555", fontFamily: "var(--font-manrope)", margin: 0, lineHeight: 1.6 }}>{cmd.note}</p>
+          <div style={{ marginTop: "16px", background: "rgba(255,250,248,0.7)", borderRadius: "12px", padding: "12px", border: "1px solid rgba(74,31,36,0.12)" }}>
+            <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)", marginBottom: "4px" }}>Note client</div>
+            <p style={{ fontSize: "13px", color: "var(--a-ink-2)", fontFamily: "var(--font-manrope)", margin: 0, lineHeight: 1.6, fontStyle: "italic" }}>&ldquo;{cmd.note}&rdquo;</p>
           </div>
         )}
       </motion.div>
@@ -90,7 +98,7 @@ function DevisSheet({ dev, onClose }: { dev: DevisType; onClose: () => void }) {
   const solde = dev.prixTotal - dev.deja;
   return (
     <div
-      style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+      style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(34,16,19,0.5)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
       onClick={onClose}
     >
       <motion.div
@@ -98,16 +106,19 @@ function DevisSheet({ dev, onClose }: { dev: DevisType; onClose: () => void }) {
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 280 }}
-        style={{ width: "100%", maxWidth: "600px", background: "#f0f7f2", borderRadius: "24px 24px 0 0", padding: "24px 24px 40px", maxHeight: "80vh", overflowY: "auto" }}
+        className="a-card"
+        style={{ width: "100%", maxWidth: "600px", borderRadius: "24px 24px 0 0", padding: "24px 24px 40px", maxHeight: "80vh", overflowY: "auto" }}
         onClick={(e) => e.stopPropagation()}
       >
+        <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "rgba(74,31,36,0.2)", margin: "0 auto 20px" }} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
           <div>
-            <div style={{ fontSize: "12px", color: "#666", fontFamily: "var(--font-manrope)", marginBottom: "2px" }}>{dev.id} · {dev.event}</div>
-            <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "26px", fontWeight: 500, margin: 0, color: "#122b18" }}>{dev.client}</h2>
-            <div style={{ fontSize: "12px", color: "#666", fontFamily: "var(--font-manrope)", marginTop: "2px" }}>{dev.email} · {dev.tel}</div>
+            <div style={{ fontSize: "11px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)", marginBottom: "2px", textTransform: "capitalize" }}>{dev.id} · {dev.event}</div>
+            <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "28px", fontWeight: 500, margin: "0 0 2px", color: INK }}>{dev.client}</h2>
+            <div style={{ fontSize: "12px", color: "var(--a-ink-2)", fontFamily: "var(--font-manrope)" }}>{dev.email} · {dev.tel}</div>
           </div>
-          <span style={{ background: st.color + "22", color: st.color, borderRadius: "999px", padding: "4px 12px", fontSize: "12px", fontWeight: 700, fontFamily: "var(--font-manrope)" }}>
+          <span className="badge" style={{ background: st.color + "20", color: st.color }}>
+            <span className="badge-dot" style={{ background: st.color }} />
             {st.label}
           </span>
         </div>
@@ -118,23 +129,23 @@ function DevisSheet({ dev, onClose }: { dev: DevisType; onClose: () => void }) {
             { label: "Acompte", value: `${dev.acompte} €` },
             { label: "Solde", value: `${solde} €` },
           ].map((r) => (
-            <div key={r.label} style={{ background: "#fff", borderRadius: "12px", padding: "12px" }}>
-              <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", color: "#666", fontFamily: "var(--font-manrope)", marginBottom: "4px" }}>{r.label}</div>
-              <div style={{ fontSize: "14px", fontWeight: 600, color: "#122b18", fontFamily: "var(--font-manrope)" }}>{r.value}</div>
+            <div key={r.label} className="neu-out-sm" style={{ padding: "12px" }}>
+              <label style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)", display: "block", marginBottom: "4px" }}>{r.label}</label>
+              <div style={{ fontSize: "14px", fontWeight: 600, color: INK, fontFamily: "var(--font-manrope)" }}>{r.value}</div>
             </div>
           ))}
         </div>
 
         {dev.noteClient && (
-          <div style={{ marginBottom: "12px", background: "#fffde8", borderRadius: "12px", padding: "12px", border: "1px solid #f0e0a0" }}>
-            <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", color: "#888", fontFamily: "var(--font-manrope)", marginBottom: "4px" }}>Note client</div>
-            <p style={{ fontSize: "13px", color: "#555", fontFamily: "var(--font-manrope)", margin: 0, lineHeight: 1.6 }}>{dev.noteClient}</p>
+          <div style={{ marginBottom: "10px", background: "rgba(255,250,248,0.7)", borderRadius: "12px", padding: "12px", border: "1px solid rgba(74,31,36,0.12)" }}>
+            <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)", marginBottom: "4px" }}>Note client</div>
+            <p style={{ fontSize: "13px", color: "var(--a-ink-2)", fontFamily: "var(--font-manrope)", margin: 0, lineHeight: 1.6, fontStyle: "italic" }}>&ldquo;{dev.noteClient}&rdquo;</p>
           </div>
         )}
         {dev.noteAdmin && (
-          <div style={{ background: "#e8f5ec", borderRadius: "12px", padding: "12px", border: "1px solid rgba(26,107,60,0.2)" }}>
-            <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", color: "#1a6b3c", fontFamily: "var(--font-manrope)", marginBottom: "4px" }}>Note interne</div>
-            <p style={{ fontSize: "13px", color: "#122b18", fontFamily: "var(--font-manrope)", margin: 0, lineHeight: 1.6 }}>{dev.noteAdmin}</p>
+          <div style={{ background: "rgba(106,40,40,0.08)", borderRadius: "12px", padding: "12px", border: "1px solid rgba(106,40,40,0.18)" }}>
+            <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", color: ACCENT, fontFamily: "var(--font-manrope)", marginBottom: "4px" }}>Note interne</div>
+            <p style={{ fontSize: "13px", color: INK, fontFamily: "var(--font-manrope)", margin: 0, lineHeight: 1.6 }}>{dev.noteAdmin}</p>
           </div>
         )}
       </motion.div>
@@ -156,28 +167,29 @@ export default function DashboardPage() {
   });
 
   return (
-    <div style={{ padding: "24px", color: "#122b18", maxWidth: "900px" }}>
+    <div style={{ padding: "24px", color: INK, maxWidth: "900px" }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" }}>
         <div>
-          <p style={{ fontSize: "12px", color: "#6e7691", fontFamily: "var(--font-manrope)", margin: "0 0 2px", textTransform: "capitalize" }}>{today}</p>
-          <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "30px", fontWeight: 500, margin: 0 }}>
+          <p style={{ fontSize: "12px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)", margin: "0 0 2px", textTransform: "capitalize" }}>{today}</p>
+          <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "30px", fontWeight: 500, margin: 0, color: INK }}>
             Bonjour Hélène 👋
           </h1>
         </div>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <button
+            className="neu-out-sm"
             style={{
               width: "36px",
               height: "36px",
               borderRadius: "50%",
-              border: "1.5px solid rgba(18,43,24,0.2)",
-              background: "#fff",
+              border: "none",
               cursor: "pointer",
               fontSize: "16px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              background: BG,
             }}
           >
             🔔
@@ -187,11 +199,11 @@ export default function DashboardPage() {
               width: "36px",
               height: "36px",
               borderRadius: "50%",
-              background: "linear-gradient(135deg, #1a6b3c, #2d9b5c)",
+              background: "linear-gradient(135deg, #6a2828, #8a2a3e)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#fff",
+              color: "#f5ede8",
               fontSize: "12px",
               fontWeight: 700,
               fontFamily: "var(--font-manrope)",
@@ -202,61 +214,51 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Period pills */}
-      <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
+      {/* Period tabs */}
+      <div
+        className="neu-in-sm"
+        style={{
+          display: "flex",
+          gap: "4px",
+          padding: "5px",
+          marginBottom: "20px",
+          width: "fit-content",
+        }}
+      >
         {PERIODS.map((p) => (
           <button
             key={p}
             onClick={() => setPeriod(p)}
-            style={{
-              borderRadius: "999px",
-              padding: "6px 14px",
-              fontSize: "12px",
-              fontFamily: "var(--font-manrope)",
-              fontWeight: 600,
-              border: "none",
-              cursor: "pointer",
-              background: period === p ? "#1a6b3c" : "rgba(18,43,24,0.1)",
-              color: period === p ? "#fff" : "#1a6b3c",
-              transition: "all 0.15s",
-            }}
+            className={`period-tab${period === p ? " active" : ""}`}
+            style={{ minWidth: "50px" }}
           >
             {p}
           </button>
         ))}
       </div>
 
-      {/* Hero KPI card */}
+      {/* Hero KPI card (dark bordeaux) */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
-        style={{
-          background: "#0d2218",
-          borderRadius: "20px",
-          padding: "20px 20px 8px",
-          marginBottom: "16px",
-          overflow: "hidden",
-        }}
+        className="a-card-dark"
+        style={{ padding: "20px 20px 8px", marginBottom: "16px", overflow: "hidden" }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "4px" }}>
           <div>
-            <div style={{ fontSize: "10px", letterSpacing: "2px", textTransform: "uppercase", color: "rgba(232,245,236,0.5)", fontFamily: "var(--font-manrope)", marginBottom: "6px" }}>
+            <div style={{ fontSize: "10px", letterSpacing: "2px", textTransform: "uppercase", color: "rgba(245,237,232,0.5)", fontFamily: "var(--font-manrope)", marginBottom: "6px" }}>
               Chiffre d&apos;affaires
             </div>
-            <div style={{ fontFamily: "var(--font-cormorant)", fontSize: "42px", fontWeight: 500, color: "#e8f5ec", lineHeight: 1 }}>
+            <div style={{ fontFamily: "var(--font-cormorant)", fontSize: "42px", fontWeight: 500, color: "#f5ede8", lineHeight: 1 }}>
               1 284 €
             </div>
           </div>
           <span
+            className="badge"
             style={{
               background: "rgba(94,201,154,0.2)",
               color: "#5ec99a",
-              borderRadius: "999px",
-              padding: "4px 10px",
-              fontSize: "12px",
-              fontWeight: 700,
-              fontFamily: "var(--font-manrope)",
               marginTop: "4px",
             }}
           >
@@ -267,36 +269,36 @@ export default function DashboardPage() {
         <ResponsiveContainer width="100%" height={110}>
           <AreaChart data={SERIES_7D} margin={{ top: 5, right: 5, bottom: 0, left: -30 }}>
             <defs>
-              <linearGradient id="greenGrad" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="gradCA" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#5ec99a" stopOpacity={0.7} />
                 <stop offset="95%" stopColor="#5ec99a" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 5" stroke="rgba(232,245,236,0.08)" vertical={false} />
+            <CartesianGrid strokeDasharray="3 5" stroke="rgba(245,237,232,0.07)" vertical={false} />
             <XAxis
               dataKey="day"
-              tick={{ fill: "rgba(232,245,236,0.45)", fontSize: 9 }}
+              tick={{ fill: "rgba(245,237,232,0.45)", fontSize: 9, fontFamily: "var(--font-manrope)" }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis hide />
             <Tooltip
               contentStyle={{
-                background: "#0d2218",
-                border: "1px solid rgba(94,201,154,0.2)",
+                background: "#221013",
+                border: "1px solid rgba(192,96,96,0.2)",
                 borderRadius: 8,
-                color: "#e8f5ec",
+                color: "#f5ede8",
                 fontSize: 12,
                 fontFamily: "var(--font-manrope)",
               }}
-              cursor={{ stroke: "rgba(94,201,154,0.2)" }}
+              cursor={{ stroke: "rgba(192,96,96,0.2)" }}
             />
             <Area
               type="monotone"
               dataKey="value"
               stroke="#5ec99a"
               strokeWidth={2}
-              fill="url(#greenGrad)"
+              fill="url(#gradCA)"
               dot={false}
               activeDot={{ r: 4, fill: "#5ec99a" }}
             />
@@ -312,26 +314,25 @@ export default function DashboardPage() {
         style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", marginBottom: "20px" }}
       >
         {[
-          { label: "Commandes", value: "8", trend: "↑ 1,7%", trendColor: "#1a6b3c", accent: "#1a6b3c" },
+          { label: "Commandes", value: "8", trend: "↑ 1,7%", trendColor: "#6a9a6a", accent: ACCENT },
           { label: "Devis", value: "5", trend: "stable", trendColor: "#c9954f", accent: "#c9954f" },
           { label: "Ruptures", value: "1", trend: "↓ 0,9%", trendColor: "#c45a5a", accent: "#c45a5a" },
         ].map((stat) => (
           <motion.div
             key={stat.label}
             variants={itemAnim}
-            whileHover={{ boxShadow: "0 0 24px rgba(94,201,154,0.3)" }}
+            whileHover={{ boxShadow: "0 0 24px rgba(106,40,40,0.18)" }}
+            className="a-card"
             style={{
-              background: "#fff",
-              borderRadius: "16px",
               padding: "14px",
               borderLeft: `3px solid ${stat.accent}`,
               cursor: "default",
             }}
           >
-            <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.8px", color: "#6e7691", fontFamily: "var(--font-manrope)", marginBottom: "6px" }}>
+            <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.8px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)", marginBottom: "6px" }}>
               {stat.label}
             </div>
-            <div style={{ fontFamily: "var(--font-cormorant)", fontSize: "28px", fontWeight: 500, color: "#122b18" }}>
+            <div style={{ fontFamily: "var(--font-cormorant)", fontSize: "28px", fontWeight: 500, color: INK }}>
               {stat.value}
             </div>
             <div style={{ fontSize: "11px", color: stat.trendColor, fontFamily: "var(--font-manrope)", fontWeight: 600, marginTop: "2px" }}>
@@ -342,9 +343,9 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Tabbed table */}
-      <div style={{ background: "#fff", borderRadius: "20px", overflow: "hidden" }}>
+      <div className="a-card" style={{ overflow: "hidden", padding: 0 }}>
         {/* Tabs */}
-        <div style={{ display: "flex", borderBottom: "1px solid rgba(18,43,24,0.1)", position: "relative" }}>
+        <div style={{ display: "flex", borderBottom: "1px solid rgba(196,201,212,0.22)", position: "relative", padding: "0 4px" }}>
           {(["commandes", "devis"] as const).map((tab) => (
             <button
               key={tab}
@@ -354,7 +355,7 @@ export default function DashboardPage() {
                 fontSize: "13px",
                 fontFamily: "var(--font-manrope)",
                 fontWeight: activeTab === tab ? 700 : 400,
-                color: activeTab === tab ? "#1a6b3c" : "#888",
+                color: activeTab === tab ? ACCENT : "var(--a-ink-3)",
                 border: "none",
                 background: "transparent",
                 cursor: "pointer",
@@ -372,7 +373,7 @@ export default function DashboardPage() {
                     left: 0,
                     right: 0,
                     height: "2px",
-                    background: "#1a6b3c",
+                    background: ACCENT,
                     borderRadius: "2px 2px 0 0",
                   }}
                 />
@@ -382,19 +383,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Table header */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr auto auto",
-            gap: "12px",
-            padding: "10px 16px",
-            background: "#f6fbf8",
-          }}
-        >
+        <div className="a-th" style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: "12px" }}>
           {["Client", "Montant", "Statut"].map((h) => (
-            <div key={h} style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", color: "#888", fontFamily: "var(--font-manrope)", fontWeight: 700 }}>
-              {h}
-            </div>
+            <span key={h}>{h}</span>
           ))}
         </div>
 
@@ -408,38 +399,18 @@ export default function DashboardPage() {
                   <div
                     key={cmd.id}
                     onClick={() => setSelectedCmd(cmd)}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr auto auto",
-                      gap: "12px",
-                      padding: "12px 16px",
-                      borderBottom: "1px solid rgba(18,43,24,0.05)",
-                      cursor: "pointer",
-                      alignItems: "center",
-                      transition: "background 0.15s",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "#f6fbf8")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    className="a-tr"
+                    style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: "12px" }}
                   >
                     <div>
-                      <div style={{ fontSize: "13px", fontWeight: 600, color: "#122b18", fontFamily: "var(--font-manrope)" }}>{cmd.client}</div>
-                      <div style={{ fontSize: "11px", color: "#888", fontFamily: "var(--font-manrope)" }}>{cmd.retrait}</div>
+                      <div style={{ fontSize: "13px", fontWeight: 600, color: INK, fontFamily: "var(--font-manrope)" }}>{cmd.client}</div>
+                      <div style={{ fontSize: "11px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)" }}>{cmd.retrait}</div>
                     </div>
-                    <div style={{ fontSize: "13px", fontWeight: 700, color: "#1a6b3c", fontFamily: "var(--font-manrope)", textAlign: "right" }}>
+                    <div style={{ fontSize: "13px", fontWeight: 700, color: ACCENT, fontFamily: "var(--font-manrope)", textAlign: "right", alignSelf: "center" }}>
                       {cmd.total.toFixed(2)} €
                     </div>
-                    <span
-                      style={{
-                        background: st.color + "18",
-                        color: st.color,
-                        borderRadius: "999px",
-                        padding: "3px 10px",
-                        fontSize: "11px",
-                        fontWeight: 700,
-                        fontFamily: "var(--font-manrope)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <span className="badge" style={{ background: st.color + "18", color: st.color, alignSelf: "center" }}>
+                      <span className="badge-dot" style={{ background: st.color }} />
                       {st.label}
                     </span>
                   </div>
@@ -454,38 +425,18 @@ export default function DashboardPage() {
                   <div
                     key={dev.id}
                     onClick={() => setSelectedDev(dev)}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr auto auto",
-                      gap: "12px",
-                      padding: "12px 16px",
-                      borderBottom: "1px solid rgba(18,43,24,0.05)",
-                      cursor: "pointer",
-                      alignItems: "center",
-                      transition: "background 0.15s",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "#f6fbf8")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    className="a-tr"
+                    style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: "12px" }}
                   >
                     <div>
-                      <div style={{ fontSize: "13px", fontWeight: 600, color: "#122b18", fontFamily: "var(--font-manrope)" }}>{dev.client}</div>
-                      <div style={{ fontSize: "11px", color: "#888", fontFamily: "var(--font-manrope)", textTransform: "capitalize" }}>{dev.event} · {dev.dateEvent}</div>
+                      <div style={{ fontSize: "13px", fontWeight: 600, color: INK, fontFamily: "var(--font-manrope)" }}>{dev.client}</div>
+                      <div style={{ fontSize: "11px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)", textTransform: "capitalize" }}>{dev.event} · {dev.dateEvent}</div>
                     </div>
-                    <div style={{ fontSize: "13px", fontWeight: 700, color: "#1a6b3c", fontFamily: "var(--font-manrope)", textAlign: "right" }}>
+                    <div style={{ fontSize: "13px", fontWeight: 700, color: ACCENT, fontFamily: "var(--font-manrope)", textAlign: "right", alignSelf: "center" }}>
                       {dev.prixTotal} €
                     </div>
-                    <span
-                      style={{
-                        background: st.color + "18",
-                        color: st.color,
-                        borderRadius: "999px",
-                        padding: "3px 10px",
-                        fontSize: "11px",
-                        fontWeight: 700,
-                        fontFamily: "var(--font-manrope)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <span className="badge" style={{ background: st.color + "18", color: st.color, alignSelf: "center" }}>
+                      <span className="badge-dot" style={{ background: st.color }} />
                       {st.label}
                     </span>
                   </div>

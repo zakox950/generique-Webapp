@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 
+const INK = "#4a1f24";
+const ACCENT = "#6a2828";
+
 const TILES = [
   { href: "/admin/stock", icon: "📦", label: "Stock", desc: "Gérer les niveaux de stock" },
   { href: "/admin/config", icon: "⚙️", label: "Configuration", desc: "Paramètres de la boutique" },
@@ -11,11 +14,11 @@ const TILES = [
 
 export default function PlusPage() {
   return (
-    <div style={{ padding: "24px", color: "#122b18" }}>
-      <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "32px", fontWeight: 500, margin: "0 0 8px" }}>
+    <div style={{ padding: "24px", color: INK }}>
+      <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "32px", fontWeight: 500, margin: "0 0 8px", color: INK }}>
         Plus
       </h1>
-      <p style={{ fontSize: "13px", color: "#6e7691", fontFamily: "var(--font-manrope)", margin: "0 0 24px" }}>
+      <p style={{ fontSize: "13px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)", margin: "0 0 24px" }}>
         Accès rapide aux outils
       </p>
 
@@ -24,26 +27,23 @@ export default function PlusPage() {
           <Link
             key={tile.href}
             href={tile.href}
-            style={{
-              textDecoration: "none",
-              display: "block",
-            }}
+            style={{ textDecoration: "none", display: "block" }}
           >
             <div
+              className="a-card"
               style={{
-                background: tile.danger ? "#fff5f5" : "#fff",
-                borderRadius: "16px",
                 padding: "20px 16px",
-                boxShadow: "0 2px 8px rgba(18,43,24,0.07)",
-                border: tile.danger ? "1.5px solid rgba(196,90,90,0.2)" : "none",
+                border: tile.danger ? "1.5px solid rgba(196,90,90,0.2)" : undefined,
+                background: tile.danger ? "rgba(196,90,90,0.06)" : undefined,
                 transition: "box-shadow 0.15s, transform 0.15s",
+                cursor: "pointer",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 16px rgba(26,107,60,0.15)";
+                (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 16px rgba(106,40,40,0.14)";
                 (e.currentTarget as HTMLDivElement).style.transform = "translateY(-1px)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 8px rgba(18,43,24,0.07)";
+                (e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 14px rgba(74,31,36,0.07), 0 1px 3px rgba(74,31,36,0.04)";
                 (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
               }}
             >
@@ -52,14 +52,14 @@ export default function PlusPage() {
                 style={{
                   fontSize: "14px",
                   fontWeight: 700,
-                  color: tile.danger ? "#c45a5a" : "#122b18",
+                  color: tile.danger ? "#c45a5a" : INK,
                   fontFamily: "var(--font-manrope)",
                   marginBottom: "4px",
                 }}
               >
                 {tile.label}
               </div>
-              <div style={{ fontSize: "12px", color: "#888", fontFamily: "var(--font-manrope)", lineHeight: 1.4 }}>
+              <div style={{ fontSize: "12px", color: "var(--a-ink-3)", fontFamily: "var(--font-manrope)", lineHeight: 1.4 }}>
                 {tile.desc}
               </div>
             </div>
