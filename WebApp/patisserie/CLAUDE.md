@@ -597,7 +597,301 @@ Depuis `src/__tests__/routes.test.ts`, les routes se trouvent dans `app/api/` à
 - [x] Tests routes API
 
 ### À faire
-- [ ] Middleware next-auth — protection des routes /admin
+- [ ] Frontend client (accueil, catalogue, panier)
+- [ ] Frontend admin (dashboard, commandes, devis, catalogue, config, stock)
+- [ ] Déploiement Coolify + Dockerfile
+
+---
+
+# [2025-05-19] Jest — Résultat final (83 tests)
+
+Après ajout des tests validators et des tests de routes :
+
+```
+Test Suites: 6 passed, 6 total
+Tests:       83 passed, 83 total
+Time:        ~0.5s
+```
+
+Répartition :
+- 43 tests services (catalogue, stock, config, limites, commande, devis)
+- 40 tests validators + routes (commande.validator, devis.validator, catalogue.validator, admin.validator, routes publiques, routes admin)
+
+---
+
+# [2025-05-20] Authentification next-auth
+
+## Architecture — Deux fichiers séparés
+
+Le problème central de next-auth v5 avec Prisma : le middleware Next.js tourne dans le **Edge Runtime** (un environnement JavaScript allégé, proche de Cloudflare Workers). Le Edge Runtime n'a pas accès aux modules Node.js natifs (`node:path`, `node:fs`, etc.). Prisma 7 avec `@prisma/adapter-pg` charge ces modules natifs — il est incompatible avec l'Edge Runtime.
+
+**Solution : séparer la configuration en deux fichiers.**
+
+### `src/lib/auth.config.ts` — Edge Runtime safe
+
+Contient uniquement la configuration de base de next-auth, sans aucun import Prisma. Utilisé par le middleware.
+
+```typescript
+import type { NextAuthConfig } from "next-auth";
+
+export const authConfig: NextAuthConfig = {
+  providers: [],
+  pages: { signIn: "/admin/login" },
+  callbacks: {
+    authorized({ auth, request: { nextUrl } }) {
+      return !!auth?.user;
+    },
+  },
+};
+```
+
+### `src/lib/auth.ts` — Node.js uniquement
+
+Contient la configuration complète avec Prisma, bcryptjs, et le provider Credentials. Importé uniquement depuis les Server Actions et les routes API — jamais depuis le middleware.
+
+```typescript
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
+import prisma from "./prisma";
+import { authConfig } from "./auth.config";
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
+  providers: [
+    Credentials({
+      credentials: { email: {}, password: {} },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+        const admin = await prisma.admin.findUnique({
+          where: { email: credentials.email as string },
+        });
+        if (!admin) return null;
+        const ok = await bcrypt.compare(
+          credentials.password as string,
+          admin.passwordHash
+        );
+        if (!ok) return null;
+        return { id: String(admin.id), email: admin.email, role: admin.role ?? "admin" };
+      },
+    }),
+  ],
+  session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) {
+        token.id = user.id as string;
+        token.role = (user as { role?: string }).role ?? "admin";
+      }
+      return token;
+    },
+    session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+        (session.user as { id: string; role: string }).role = token.role as string;
+      }
+      return session;
+    },
+  },
+});
+```
+
+---
+
+## `middleware.ts` — Protection des routes
+
+Fichier à la racine de `src/` (ou à la racine du projet). Utilise `auth.config.ts` uniquement — Edge Runtime compatible.
+
+```typescript
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
+import { NextResponse } from "next/server";
+
+const { auth } = NextAuth(authConfig);
+
+const EXEMPT_PATHS = ["/admin/login", "/admin/setup", "/admin/already-exists"];
+
+export default auth(function middleware(req) {
+  const { nextUrl } = req;
+  const session = req.auth;
+  const isLoggedIn = !!session?.user;
+  const path = nextUrl.pathname;
+  const isExempt = EXEMPT_PATHS.some(
+    (p) => path === p || path.startsWith(p + "/")
+  );
+
+  if (isExempt) {
+    if (isLoggedIn && path.startsWith("/admin/login"))
+      return NextResponse.redirect(new URL("/admin", req.url));
+    return NextResponse.next();
+  }
+
+  if (path.startsWith("/api/admin") && !isLoggedIn)
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+
+  if (path.startsWith("/admin") && !isLoggedIn)
+    return NextResponse.redirect(new URL("/admin/login", req.url));
+
+  return NextResponse.next();
+});
+
+export const config = {
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
+};
+```
+
+---
+
+## Pages d'authentification
+
+### `/admin/setup` — Création du premier compte admin
+
+Page accessible uniquement si aucun admin n'existe en base. Si un admin existe déjà, redirige vers `/admin/already-exists`. Hash le mot de passe avec bcryptjs avant stockage.
+
+### `/admin/login` — Connexion
+
+Formulaire email + mot de passe. Utilise une Server Action qui importe `signIn` depuis `@/lib/auth` (jamais depuis `next-auth` directement). Gère l'erreur `AuthError` de next-auth pour afficher les messages d'échec.
+
+### `/admin/already-exists` — Page informative
+
+Affichée quand on essaie d'accéder à `/admin/setup` alors qu'un admin existe déjà. Propose un lien vers la page de connexion.
+
+---
+
+## `next.config.ts` — serverExternalPackages
+
+Prisma et pg doivent être exclus du bundling Next.js — ils doivent rester en `require()` Node.js natif au lieu d'être inlinés dans le bundle.
+
+```typescript
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg"],
+};
+
+export default nextConfig;
+```
+
+Sans cette config, le build échoue avec des erreurs de modules Node.js introuvables.
+
+---
+
+## Variables d'environnement
+
+```
+DATABASE_URL="postgresql://patisserie:[MOT_DE_PASSE]@localhost:5120/patisserie"
+AUTH_SECRET="valeur-aleatoire-32-caracteres-minimum"
+NEXTAUTH_URL="http://localhost:5650"
+RESEND_API_KEY=""
+```
+
+**Important** :
+- La variable s'appelle `AUTH_SECRET` en next-auth v5 (pas `NEXTAUTH_SECRET` qui était la v4)
+- Pas d'espaces autour du `=` dans le fichier `.env`
+- `AUTH_SECRET` doit faire au moins 32 caractères — la session JWT est signée avec cette clé
+
+---
+
+## Problèmes rencontrés et solutions
+
+### Edge Runtime crash — `Failed to load external module node:path`
+
+**Symptôme** : Le middleware crashait au démarrage avec une erreur sur `node:path`.
+
+**Cause** : `middleware.ts` importait `{ auth }` depuis `@/lib/auth`. Ce fichier importe Prisma, qui charge `node:path` — incompatible avec Edge Runtime.
+
+**Fix** : Créer `auth.config.ts` sans Prisma, importer uniquement `authConfig` dans le middleware.
+
+### `NEXTAUTH_SECRET` vs `AUTH_SECRET`
+
+**Symptôme** : La session ne persistait pas, déconnexion immédiate après login.
+
+**Cause** : Le `.env` contenait `NEXTAUTH_SECRET` (syntaxe next-auth v4). En v5, la variable s'appelle `AUTH_SECRET`.
+
+**Fix** : Renommer la variable dans `.env.local` sur le serveur.
+
+### Espaces autour du `=` dans `.env`
+
+**Symptôme** : `DATABASE_URL` mal parsée, connexion PostgreSQL refusée.
+
+**Cause** : Le fichier `.env` avait `DATABASE_URL = "..."` avec des espaces. dotenv interprète le nom de variable comme `DATABASE_URL ` (avec espace).
+
+**Fix** : Supprimer les espaces : `DATABASE_URL="..."`.
+
+---
+
+# [2025-05-20] site-demo et serveur
+
+## site-demo — `/site-demo/`
+
+Nouveau projet Next.js standalone à la racine du repo. Démo commerciale complète frontend-only, port 3001.
+
+**Stack** : Next.js 15, TypeScript, Tailwind CSS, Framer Motion, Recharts, Zustand
+
+**Structure** :
+- `src/data/mock.ts` — données factices (produits, commandes, devis, séries temporelles)
+- `src/store/cart.ts` — Zustand avec `persist` middleware pour le panier
+- `src/app/client/` — accueil, catalogue, panier, devis, contact (PhoneFrame sur desktop)
+- `src/app/admin/` — login animé, dashboard (Recharts AreaChart courbes douces), commandes, devis, catalogue, stock, config
+
+**Animations admin** :
+- Background animé via CSS keyframe `bgShift` (gradient animé)
+- `glowPulse` sur l'item actif du sidebar
+- Framer Motion : stagger sur les cards, slide-up sheets, hover glow
+
+**Graphiques** : Recharts `AreaChart` avec `type="monotone"` pour des courbes douces
+
+**Pas de backend** — toutes les données viennent de `mock.ts`
+
+## Serveur Hetzner
+
+- OS : Ubuntu 22.04
+- Node.js : v22.22.2 (installé via NodeSource)
+- npm : inclus avec Node.js v22
+- Gestionnaire de processus : pm2
+- Ports : patisserie sur 5650, site-demo sur 3001
+
+**Démarrage pm2** :
+```bash
+cd /var/www/generique-Webapp/WebApp/patisserie && pm2 start npm --name patisserie -- start
+cd /var/www/generique-Webapp/site-demo && pm2 start npm --name site-demo -- start
+pm2 save
+pm2 startup
+```
+
+**Problème `npm run dev` silencieux sur Mac** : La commande `npm run dev` dans `WebApp/patisserie/` ne produisait aucune sortie sur Mac (terminal silencieux). Aucune cause identifiée. Contourné en développant directement sur le serveur Hetzner.
+
+---
+
+## Roadmap mise à jour
+
+### Terminé
+- [x] Schéma SQL validé et documenté
+- [x] Docker + PostgreSQL configuré
+- [x] Projet Next.js initialisé
+- [x] Prisma 7 configuré avec driver adapter
+- [x] prisma db pull + prisma generate
+- [x] src/lib/prisma.ts
+- [x] src/lib/config.ts
+- [x] src/lib/services/catalogue.service.ts
+- [x] src/lib/services/commande.service.ts
+- [x] src/lib/services/devis.service.ts
+- [x] src/lib/services/limites.service.ts
+- [x] src/lib/services/stock.service.ts
+- [x] src/lib/services/mail.service.ts
+- [x] Jest configuré + 43 tests services passent
+- [x] src/validators/commande.validator.ts
+- [x] src/validators/devis.validator.ts
+- [x] src/validators/catalogue.validator.ts
+- [x] src/validators/admin.validator.ts
+- [x] Routes API publiques (catalogue, commande, devis)
+- [x] Routes API admin (commandes, devis, catalogue, config, stock)
+- [x] Tests validators (40 tests) + tests routes → 83 tests total
+- [x] Authentification next-auth v5 (auth.config.ts, auth.ts, middleware, login, setup)
+- [x] site-demo complet (frontend-only, port 3001, animations, Recharts, Zustand)
+- [x] Node.js v22.22.2 sur serveur Hetzner + pm2
+
+### À faire
 - [ ] Frontend client (accueil, catalogue, panier)
 - [ ] Frontend admin (dashboard, commandes, devis, catalogue, config, stock)
 - [ ] Déploiement Coolify + Dockerfile
