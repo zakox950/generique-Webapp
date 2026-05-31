@@ -194,6 +194,20 @@ export async function creerCommande(data: CreerCommandeData) {
 }
 
 // =========================================
+// MISE À JOUR — côté admin
+// =========================================
+
+export async function marquerCommandePrete(id: number) {
+  return await prisma.commandeDirect.update({
+    where: { id },
+    data: { prete: true },
+    include: {
+      items: { include: { catalogue: true } },
+    },
+  });
+}
+
+// =========================================
 // SUPPRESSION — côté admin
 // =========================================
 
