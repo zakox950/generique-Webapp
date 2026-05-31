@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Spyfi Admin — Statistiques</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body data-page="Statistiques">
+<img class="bg-photo" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80" alt="">
+<div class="bg-overlay"></div>
+
+<div class="app-layout">
+  <div id="sidebar-mount"></div>
+  <div class="main">
+    <div id="topbar-mount"></div>
+    <main class="content" data-screen-label="Statistiques">
+      <div>
+        <h1 class="page-title">Statistiques</h1>
+        <p class="page-sub">Tendances de la boutique. Survolez les points des courbes pour le détail.</p>
+      </div>
+
+      <!-- KPI résumé -->
+      <section class="kpi-grid">
+        <div class="glass-base kpi"><div class="kpi-head"><span class="kpi-label">Revenus du mois</span></div><div class="kpi-value">8 920 €</div><div class="kpi-trend up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l7-7 7 7M12 5v15"/></svg>+9% <span class="muted">vs mois dernier</span></div></div>
+        <div class="glass-base kpi"><div class="kpi-head"><span class="kpi-label">Commandes du mois</span></div><div class="kpi-value">312</div><div class="kpi-trend up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l7-7 7 7M12 5v15"/></svg>+24 <span class="muted">vs mois dernier</span></div></div>
+        <div class="glass-base kpi"><div class="kpi-head"><span class="kpi-label">Panier moyen</span></div><div class="kpi-value">28,60 €</div><div class="kpi-trend"><span class="muted">stable</span></div></div>
+        <div class="glass-base kpi"><div class="kpi-head"><span class="kpi-label">Taux de retrait honoré</span></div><div class="kpi-value">97 %</div><div class="kpi-trend up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l7-7 7 7M12 5v15"/></svg>+1pt</div></div>
+      </section>
+
+      <!-- Revenus -->
+      <section class="glass-base panel mt">
+        <div class="panel-head">
+          <div class="panel-title">Revenus<div class="sub" id="revSub">12 derniers mois</div></div>
+          <div class="segment" id="revSeg"><button data-range="week">Semaine</button><button data-range="month">Mois</button><button class="active" data-range="year">Année</button></div>
+        </div>
+        <div class="chart-wrap" id="revWrap"><svg class="chart-svg" id="revSvg" preserveAspectRatio="none"></svg><div class="chart-tip"></div></div>
+      </section>
+
+      <div class="dash-grid">
+        <!-- Heures de retrait -->
+        <section class="glass-base panel">
+          <div class="panel-head"><div class="panel-title">Heures de retrait<div class="sub">Demandes par créneau horaire</div></div></div>
+          <div class="chart-wrap" id="hWrap"><svg class="chart-svg" id="hSvg" preserveAspectRatio="none"></svg><div class="chart-tip"></div></div>
+        </section>
+
+        <!-- Top produits -->
+        <section class="glass-base panel">
+          <div class="panel-head"><div class="panel-title">Produits les plus vendus<div class="sub">30 derniers jours</div></div></div>
+          <div class="rank-list" id="rankList"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="bottomnav-mount"></div>
+
+<script src="admin.js"></script>
+<script>
+/* Revenus */
+const revSeg=document.getElementById('revSeg');
+function drawRev(range){makeChart('revSvg','revWrap',STATS.revenus[range],{unit:'€',fmt:v=>eur(v)});document.getElementById('revSub').textContent=STATS.revenus[range].sub;}
+revSeg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;revSeg.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');drawRev(b.dataset.range);});
+drawRev('year');
+
+/* Heures de retrait */
+makeChart('hSvg','hWrap',STATS.heuresRetrait,{unit:'',vh:280,fmt:v=>v+' retraits'});
+
+/* Top produits */
+const max=Math.max(...STATS.topProduits.map(p=>p.n));
+document.getElementById('rankList').innerHTML=STATS.topProduits.map((p,i)=>`
+  <div class="rank-item">
+    <span class="rank-num">${i+1}</span>
+    <span class="rank-name">${esc(p.nom)}</span>
+    <span class="rank-bar"><i style="width:${Math.round(p.n/max*100)}%"></i></span>
+    <span class="rank-val">${p.n}</span>
+  </div>`).join('');
+
+window.addEventListener('resize',()=>document.querySelectorAll('.chart-tip').forEach(t=>t.style.opacity='0'));
+</script>
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#2D3536"/><g transform="translate(22 26)" fill="none" stroke="#98AA9D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M0 48V0M0 48h56"/><path d="M8 36l12-14 10 8 16-22"/></g></svg>
+</template>
+</body>
+</html>

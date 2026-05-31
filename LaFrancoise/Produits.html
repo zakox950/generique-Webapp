@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Spyfi Admin — Produits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body data-page="Produits">
+<img class="bg-photo" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80" alt="">
+<div class="bg-overlay"></div>
+
+<div class="app-layout">
+  <div id="sidebar-mount"></div>
+  <div class="main">
+    <div id="topbar-mount"></div>
+    <main class="content" data-screen-label="Produits">
+      <div class="page-head-row">
+        <div>
+          <h1 class="page-title">Produits</h1>
+          <p class="page-sub">Catalogue complet — actifs et désactivés. Cliquez une fiche pour la modifier.</p>
+        </div>
+        <button class="btn-primary" id="addBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Ajouter un produit</button>
+      </div>
+
+      <div class="segment" id="filterSeg" style="margin-top:var(--space-6);">
+        <button class="active" data-f="all">Tous</button>
+        <button data-f="active">Actifs</button>
+        <button data-f="inactive">Désactivés</button>
+        <button data-f="stock">Sur stock</button>
+        <button data-f="rupture">En rupture</button>
+      </div>
+
+      <div class="prod-grid" id="prodGrid"></div>
+    </main>
+  </div>
+</div>
+
+<div id="bottomnav-mount"></div>
+
+<script src="admin.js"></script>
+<script>
+let filter='all';
+function priceLabel(p){
+  if(p.prixOptions){const cat=Object.keys(p.prixOptions)[0];const opts=p.prixOptions[cat];const min=Math.min(...Object.values(opts).map(v=>p.prix+v));return 'dès '+eur(min);}
+  return eur(p.prix);
+}
+function stockBadge(p){
+  if(p.modeVente==='make_to_order') return '<span class="badge badge-info no-dot">À la commande</span>';
+  if(p.stockDisponible===0) return '<span class="badge badge-error no-dot">Rupture</span>';
+  if(p.stockDisponible<=12) return `<span class="badge badge-warn no-dot">Stock ${p.stockDisponible}</span>`;
+  return `<span class="badge badge-ok no-dot">Stock ${p.stockDisponible}</span>`;
+}
+function matches(p){
+  if(filter==='active')return p.isActif;
+  if(filter==='inactive')return !p.isActif;
+  if(filter==='stock')return p.modeVente==='make_to_stock';
+  if(filter==='rupture')return p.modeVente==='make_to_stock'&&p.stockDisponible===0;
+  return true;
+}
+function render(){
+  const list=CATALOGUE.filter(matches);
+  const grid=document.getElementById('prodGrid');
+  if(!list.length){grid.innerHTML='<div class="empty-row glass-base" style="grid-column:1/-1;padding:48px;">Aucun produit dans ce filtre.</div>';return;}
+  grid.innerHTML=list.map(p=>`
+    <article class="glass-base prod-card ${p.isActif?'':'inactive'}" data-id="${p.id}">
+      <div class="prod-thumb">
+        <img src="${p.photo}" alt="${esc(p.nom)}" loading="lazy" onerror="this.style.display='none'">
+        <div class="badges">${stockBadge(p)}${!p.isActif?'<span class="badge badge-muted no-dot">Désactivé</span>':''}${p.dateDebutActif?'<span class="badge badge-muted no-dot">Saisonnier</span>':''}</div>
+      </div>
+      <div class="prod-cbody">
+        <div class="prod-cname">${esc(p.nom)}</div>
+        <div class="prod-cmeta">${MODE_VENTE[p.modeVente]}${(p.dayLimit||p.weekLimit)?` · limite ${p.dayLimit?p.dayLimit+'/j':''}${p.dayLimit&&p.weekLimit?' · ':''}${p.weekLimit?p.weekLimit+'/sem':''}`:''}</div>
+        <div class="prod-cfoot"><span class="prod-cprice">${priceLabel(p)}</span><span class="prod-cmeta">#${p.id}</span></div>
+      </div>
+    </article>`).join('');
+}
+document.getElementById('filterSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  document.querySelectorAll('#filterSeg button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');filter=b.dataset.f;render();
+});
+
+/* ---- Modale édition ---- */
+function optionsHtml(p){
+  if(!p.prixOptions)return '<div class="prod-cmeta">Aucune variante</div>';
+  const cat=Object.keys(p.prixOptions)[0];const opts=p.prixOptions[cat];
+  return `<div class="prod-cmeta" style="margin-bottom:6px;">${esc(cat)}</div>`+Object.entries(opts).map(([k,v])=>`<div class="item-line"><span>${esc(k)}</span><span class="amount">${v>0?'+'+eur(v):'inclus'}</span></div>`).join('');
+}
+document.getElementById('prodGrid').addEventListener('click',e=>{
+  const card=e.target.closest('[data-id]');if(!card)return;
+  const p=CATALOGUE.find(x=>x.id==card.dataset.id);
+  const isStock=p.modeVente==='make_to_stock';
+  openModal(`
+    <div class="modal-head"><div><div class="modal-title">${esc(p.nom)}</div><div class="modal-sub">Produit #${p.id} · ${MODE_VENTE[p.modeVente]}</div></div><button class="modal-x" onclick="closeModal()">${ICON_X}</button></div>
+    <div class="modal-divider"></div>
+    <div class="field"><label>Nom</label><input class="input" value="${esc(p.nom)}"></div>
+    <div class="field-row" style="margin-top:var(--space-3);">
+      <div class="field"><label>Prix de base</label><div class="input-prefix"><input class="input" value="${p.prix.toFixed(2).replace('.',',')}"><span class="sfx">€</span></div></div>
+      <div class="field"><label>Mode de vente</label><select class="input"><option ${p.modeVente==='make_to_order'?'selected':''}>À la commande</option><option ${isStock?'selected':''}>Sur stock</option></select></div>
+    </div>
+    ${isStock?`<div class="field" style="margin-top:var(--space-3);"><label>Stock disponible</label><input class="input" value="${p.stockDisponible}"><span class="hint">Réapprovisionner ou corriger la valeur absolue.</span></div>`:''}
+    <div class="field" style="margin-top:var(--space-3);"><label>Description</label><textarea class="input">${esc(p.description||'')}</textarea></div>
+    <div class="field" style="margin-top:var(--space-3);"><label>Ingrédients</label><textarea class="input">${esc(p.ingredient||'')}</textarea></div>
+    <div class="modal-section-label">Variantes & prix options</div>
+    ${optionsHtml(p)}
+    <div class="modal-section-label">Limites de production</div>
+    <div class="field-row">
+      <div class="field"><label>Limite / jour</label><input class="input" value="${p.dayLimit??''}" placeholder="illimité"></div>
+      <div class="field"><label>Limite / semaine</label><input class="input" value="${p.weekLimit??''}" placeholder="illimité"></div>
+    </div>
+    ${p.dateDebutActif?`<div class="modal-section-label">Disponibilité saisonnière</div><div class="detail-row"><span class="k">Du</span><span class="v">${p.dateDebutActif.split('-').reverse().join('/')}</span></div><div class="detail-row"><span class="k">Au</span><span class="v">${p.dateFinActif.split('-').reverse().join('/')}</span></div>`:''}
+    <div class="config-row" style="margin-top:var(--space-4);border-top:1px solid var(--color-border);">
+      <div class="meta"><div class="k">Produit actif</div><div class="d">Visible par les clients sur le site public.</div></div>
+      <div class="ctl narrow"><label class="switch"><input type="checkbox" ${p.isActif?'checked':''} onchange="toggleProduit(${p.id}, this.checked)"><span class="track"></span><span class="knob"></span></label></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary grow" onclick="closeModal();showToast('Produit #${p.id} enregistré')">Enregistrer</button>
+      <button class="btn-danger" onclick="closeModal();showToast('Produit #${p.id} supprimé')">Supprimer</button>
+    </div>`);
+});
+
+/* ---- Modale ajout ---- */
+document.getElementById('addBtn').addEventListener('click',()=>{
+  openModal(`
+    <div class="modal-head"><div><div class="modal-title">Nouveau produit</div><div class="modal-sub">Ajouté au catalogue, désactivé par défaut.</div></div><button class="modal-x" onclick="closeModal()">${ICON_X}</button></div>
+    <div class="modal-divider"></div>
+    <div class="field"><label>Nom</label><input class="input" placeholder="Ex. Tarte au citron meringuée"></div>
+    <div class="field-row" style="margin-top:var(--space-3);">
+      <div class="field"><label>Prix de base</label><div class="input-prefix"><input class="input" placeholder="0,00"><span class="sfx">€</span></div></div>
+      <div class="field"><label>Mode de vente</label><select class="input"><option>À la commande</option><option>Sur stock</option></select></div>
+    </div>
+    <div class="field" style="margin-top:var(--space-3);"><label>Description</label><textarea class="input" placeholder="Courte description appétissante…"></textarea></div>
+    <div class="field-row" style="margin-top:var(--space-3);">
+      <div class="field"><label>Limite / jour</label><input class="input" placeholder="illimité"></div>
+      <div class="field"><label>Limite / semaine</label><input class="input" placeholder="illimité"></div>
+    </div>
+    <div class="modal-actions"><button class="btn-primary btn-block" onclick="closeModal();showToast('Produit créé — pensez à l’activer')">Créer le produit</button></div>`,true);
+});
+
+function toggleProduit(id, checked){
+  const p=CATALOGUE.find(x=>x.id==id);
+  if(p)p.isActif=checked;
+  showToast((p?p.nom:'Produit')+' '+(checked?'activé':'désactivé'));
+}
+
+render();
+</script>
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#2D3536"/><g transform="translate(50 52)" fill="none" stroke="#98AA9D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M-18 -6l4-14h28l4 14"/><path d="M-16 -6V18h32V-6"/><path d="M-6 18v-12h12v12"/></g></svg>
+</template>
+</body>
+</html>
