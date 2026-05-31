@@ -41,7 +41,7 @@ function ConfirmationContent() {
       )}
 
       <div className="confirmation-actions">
-        <Link href="/" className="btn-primary">Retour à l'accueil</Link>
+        <Link href="/" className="btn-primary">Retour à l&rsquo;accueil</Link>
         <Link href="/catalogue" className="btn-outline">Continuer mes achats</Link>
       </div>
 
@@ -58,7 +58,7 @@ function ConfirmationContent() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
               <path d="M3 9l1-5h16l1 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/>
             </svg>
-            <span>Retrait uniquement en boutique aux horaires d'ouverture.</span>
+            <span>Retrait uniquement en boutique aux horaires d&rsquo;ouverture.</span>
           </div>
         </div>
       </div>

@@ -162,31 +162,34 @@ export default function ConfigurationPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  const save = useCallback(async (key: string, value: string) => {
-    setSaving(key);
-    try {
-      const res = await fetch("/api/admin/config", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nameVariable: key, valeur: value }),
-      });
-      if (res.ok) {
-        setConfig((prev) => ({ ...prev, [key]: value }));
-        showToast("Enregistré");
-      } else {
-        showToast("Erreur lors de l'enregistrement");
-      }
-    } catch {
-      showToast("Erreur réseau");
-    } finally {
-      setSaving(null);
-    }
-  }, []);
-
-  function showToast(msg: string) {
+  const showToast = useCallback((msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(""), 2500);
-  }
+  }, []);
+
+  const save = useCallback(
+    async (key: string, value: string) => {
+      setSaving(key);
+      try {
+        const res = await fetch("/api/admin/config", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nameVariable: key, valeur: value }),
+        });
+        if (res.ok) {
+          setConfig((prev) => ({ ...prev, [key]: value }));
+          showToast("Enregistré");
+        } else {
+          showToast("Erreur lors de l'enregistrement");
+        }
+      } catch {
+        showToast("Erreur réseau");
+      } finally {
+        setSaving(null);
+      }
+    },
+    [showToast],
+  );
 
   if (loading) {
     return (

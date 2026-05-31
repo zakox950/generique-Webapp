@@ -44,6 +44,8 @@ export default function CommandesPage() {
   const [filterPrete, setFilterPrete] = useState<"all" | "false" | "true">("all");
 
   useEffect(() => {
+    // fetchCommandes est hoistée (déclaration de fonction) — appel au montage.
+    // eslint-disable-next-line react-hooks/immutability
     fetchCommandes();
   }, []);
 

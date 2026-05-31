@@ -31,6 +31,8 @@ export function useCart() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Hydratation depuis localStorage au montage (système externe à React)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setItems(readCart());
     setMounted(true);
   }, []);

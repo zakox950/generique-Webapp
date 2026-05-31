@@ -47,6 +47,10 @@ jest.mock("../lib/prisma", () => ({
       findMany: jest.fn(),
       update: jest.fn(),
     },
+    admin: {
+      findUnique: jest.fn(),
+      update: jest.fn(),
+    },
 
     $transaction: jest.fn(),
   },

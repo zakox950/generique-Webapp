@@ -80,6 +80,8 @@ export default function CommandePage() {
 
   useEffect(() => {
     if (!mounted) return;
+    // Aligne le mode de paiement par défaut sur la Config chargée (source externe)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (modePaiement === "sur_place") setPaiement("sur_place");
     else if (modePaiement === "en_ligne") setPaiement("en_ligne");
   }, [modePaiement, mounted]);
@@ -273,7 +275,7 @@ export default function CommandePage() {
             {isDevis && (
               <div className="form-row">
                 <div className="form-field">
-                  <label className="form-label">Type d'événement</label>
+                  <label className="form-label">Type d&rsquo;événement</label>
                   <input
                     className="form-input"
                     type="text"

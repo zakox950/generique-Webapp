@@ -895,3 +895,157 @@ pm2 startup
 - [ ] Frontend client (accueil, catalogue, panier)
 - [ ] Frontend admin (dashboard, commandes, devis, catalogue, config, stock)
 - [ ] Déploiement Coolify + Dockerfile
+
+---
+
+# [2026-05-31] Frontend complet — client + admin
+
+Construction de l'intégralité du frontend (client + admin) en se basant
+fidèlement sur les maquettes du dossier `LaFrancoise/` (DA client crème/bordeaux)
+et la DA `Spyfi Admin` (glassmorphism, accent Moss). Aucun emoji sur le site —
+uniquement des icônes SVG inline et des images Unsplash libres de droits.
+
+## Architecture CSS — un seul `app/globals.css`
+
+Deux design systems cohabitent dans un seul fichier, séparés par scope pour
+éviter les collisions de variables (les deux utilisent `--color-accent`) :
+
+- **Client** : variables sous `:root` (`--color-accent: #7C2D3E`, palette crème).
+- **Admin** : variables et classes scopées sous `.admin-root` (`--color-accent:
+  #697C70`, surfaces glass sombres). Le layout admin enveloppe tout son contenu
+  dans `<div className="admin-root">`. Mode clair via `.admin-root[data-theme="light"]`.
+
+Polices chargées dans `app/layout.tsx` via `next/font/google` :
+Cormorant Garamond (serif client), DM Sans (sans client), Geist (admin) —
+exposées en variables CSS (`--font-cormorant`, `--font-dm-sans`, `--font-geist`).
+
+Les classes utilisées par les composants React sont définies dans deux blocs
+« ADDENDUM » en fin de fichier (client puis admin) pour garantir le rendu.
+
+## Frontend client (`app/`)
+
+Pas de route groups (`(client)`) car `app/page.tsx` existe déjà — on utilise un
+composant `ClientLayout` (header, blobs animés, bottom-nav liquid glass, toast)
+que chaque page enveloppe. Panier en `localStorage` via le hook `useCart`
+(SSR-safe : lecture dans `useEffect`, flag `mounted`).
+
+- `/` — accueil : hero, bandeau confiance, incontournables, histoire, avis, footer.
+- `/catalogue` — recherche + chips catégories + grille produits (`GET /api/catalogue`).
+- `/panier` — liste, contrôle quantité, récap, total.
+- `/commande` — formulaire **conditionné par la Config** + paiement simulé.
+- `/confirmation` — page de confirmation statique (commande ou devis).
+
+### Comportement conditionné par la Config (`GET /api/config`)
+
+Nouvelle route **publique** `app/api/config/route.ts` qui n'expose qu'une
+**liste blanche** de variables non sensibles (jamais `notif_admin_email` ni les
+réglages d'acompte). Le formulaire `/commande` s'adapte :
+- `mode_commande = "devis_only"` ou panier ≥ `seuil_devis` → bascule en formulaire
+  devis (téléphone requis, type d'événement).
+- `mode_paiement = "en_ligne"` → étape paiement simulé ; `"sur_place"` → soumission
+  directe ; `"au_choix_client"` → choix radio.
+- `delai_retrait_jours` → borne `min` du sélecteur de date.
+- `boutique_*` → carte boutique (adresse, téléphone, horaires).
+
+Champs obligatoires côté client réduits au strict minimum : **nom + email**.
+Le reste est conditionné par la Config.
+
+### Paiement simulé
+
+Carte bancaire factice pré-remplie (4242…), traitement simulé (~1,8 s), puis
+soumission réelle via `POST /api/commande`. **Le prix n'est jamais envoyé par le
+client** : le serveur le recalcule depuis la base (`creerCommande`). Aucune donnée
+bancaire réelle. À la validation, `creerCommande`/`creerDevis` déclenchent les
+emails Resend, puis redirection vers `/confirmation`.
+
+## Frontend admin (`app/admin/`)
+
+Layout `admin/layout.tsx` : `SessionProvider`, fond photo Unsplash fixe + overlay,
+`AdminNav` (sidebar desktop 220px, topbar avec fil d'Ariane + toggle thème + burger,
+bottom-nav mobile, menu overlay mobile). Toggle dark/light persisté en `localStorage`
+(`data-theme` sur `.admin-root`). Graphiques : composant `LineChart` SVG maison
+(line charts uniquement, conforme à la DA — pas de pie/bar).
+
+- `/admin` → redirige vers `/admin/dashboard`.
+- `/admin/dashboard` — 4 KPI, courbe revenus, derniers devis, dernières commandes.
+- `/admin/produits` — grille + modale création/édition + activer/désactiver.
+- `/admin/commandes` — tableau + filtre + modale détail (marquer prête / supprimer).
+- `/admin/devis` — tableau + filtre statut + modale workflow (valider/refuser/
+  acompte/prêt).
+- `/admin/statistiques` — KPI, courbe semaine/mois, top produits classés.
+- `/admin/configuration` — **chaque variable Config** avec le bon contrôle (toggle,
+  number, select, texte), regroupée par section. Les champs vides par défaut
+  (`boutique_*`, `zone_livraison`, `notif_admin_email`) sont visibles et éditables.
+- `/admin/parametres` — compte admin (email + mot de passe).
+- `/admin/login`, `/admin/setup`, `/admin/already-exists` — restylés en DA Spyfi.
+
+Toutes les pages admin appellent les routes `/api/admin/*` existantes, en
+respectant leur contrat (ex : `{ action: "toggle_actif" }`, `{ action:
+"marquer_prete" }`, workflow devis `valider`/`refuser`/`acompte_paye`/`marquer_pret`).
+
+## Nouveaux service + route
+
+- `src/lib/services/admin.service.ts` — `getAdminById`, `updateAdminEmail`
+  (vérifie l'unicité), `updateAdminPassword` (vérifie l'ancien mot de passe, hash
+  bcrypt coût 12).
+- `app/api/admin/parametres/route.ts` — `GET` (compte courant) / `PATCH` (email ou
+  mot de passe). Récupère l'admin via `auth()` (session) ; protégé aussi par le
+  middleware `/api/admin/*`.
+
+## Étape 4 — Resend
+
+`mail.service.ts` instanciait `new Resend(process.env.RESEND_API_KEY)` au niveau
+module → **levait « Missing API key » au chargement** quand la clé est vide, ce qui
+**cassait `next build`** (collecte des routes). Corrigé : instanciation paresseuse
+via `sendMail()` qui ne construit le client qu'à la demande et **n'envoie rien
+(warning) si la clé est absente** — mode démo non bloquant. Variables documentées
+dans `.env.example` : `RESEND_API_KEY`, `DOMAINE_EMAIL`, `REPLY_TO_EMAIL`. Le flux
+commande/devis appelle déjà les fonctions d'envoi — un déploiement réel n'a qu'à
+fournir une clé + un domaine vérifié.
+
+## Étape 6 — Revue de sécurité
+
+- **Prix non manipulables** : le client n'envoie jamais de montant ; recalcul serveur.
+- **Route config publique** : liste blanche stricte (test dédié vérifiant l'absence
+  des clés sensibles).
+- **Paramètres admin** : double protection (middleware + `auth()`), changement de mot
+  de passe avec vérification de l'ancien + hash bcrypt 12, unicité de l'email.
+- **Injection HTML dans les emails (corrigé)** : `nom`, `noteClient`, `typeEvenement`,
+  `numeroTel`, `noteAdmin`, `mail` étaient interpolés bruts dans le HTML des emails
+  (risque d'injection dans la boîte de l'admin). Ajout d'un helper `esc()` appliqué à
+  tous les champs fournis par l'utilisateur.
+- **XSS frontend** : interpolation JSX (échappée par React), aucun
+  `dangerouslySetInnerHTML`.
+
+## Bugs corrigés (avérés)
+
+- `app/api/admin/devis/route.ts` importait `@/app/generated/prisma/client`
+  → résolu en `src/app/generated` (inexistant). Corrigé en chemin relatif
+  `../../../generated/prisma/client`, cohérent avec les autres fichiers.
+- **Unités de prix** : le frontend divisait/multipliait par 100 (centimes) alors que
+  la base stocke `prix` en **euros** (Decimal, `multipleOf(0.01)`). Tous les
+  formatages corrigés (`Number(valeur)` directement).
+- **Noms de champs** : alignés sur le schéma — `prixTotal` (pas `total`),
+  `prixUnite` (pas `prixUnitaire`), `statutEnum` (pas `statut`),
+  `dateCommande` (pas `createdAt`), `items[].catalogue.nom`.
+
+## Étape 5 — Tests
+
+- `admin.service.test.ts` (7 tests) — getAdminById sans hash, update email
+  (libre/même admin/email pris), update password (ok/mauvais MDP/compte absent).
+  `bcryptjs` mocké. Ajout du modèle `admin` au mock Prisma partagé (`setup.ts`).
+- `config-public.route.test.ts` (2 tests) — la route publique n'interroge que des
+  clés non sensibles + en-tête de cache.
+- Tous les tests existants continuent de passer.
+
+**Résultat : 8 suites, 129 tests OK.** `next build` vert (30 routes), `tsc` propre.
+
+## Checklist
+
+- [x] Étape 1 — Lecture complète du projet (schéma, services, validators, routes)
+- [x] Étape 2 — Frontend client (config-aware, paiement simulé, email)
+- [x] Étape 3 — Frontend admin (DA Spyfi, next-auth, toutes les pages)
+- [x] Étape 4 — Resend (instanciation paresseuse + env documentées)
+- [x] Étape 5 — Tests des nouveautés (129 tests au total)
+- [x] Étape 6 — Revue de sécurité (injection email corrigée, prix serveur, config publique)
+- [x] Étape 7 — Documentation CLAUDE.md

@@ -85,7 +85,7 @@ export default function DashboardPage() {
       <section className="kpi-grid">
         <div className="glass-base kpi">
           <div className="kpi-head">
-            <span className="kpi-label">Commandes aujourd'hui</span>
+            <span className="kpi-label">Commandes aujourd&rsquo;hui</span>
             <span className="kpi-ic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
                 <path d="M5 4h14l-1 16H6L5 4Z"/><path d="M9 4a3 3 0 0 1 6 0"/>

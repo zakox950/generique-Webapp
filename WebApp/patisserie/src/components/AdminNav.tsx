@@ -10,7 +10,9 @@ function useTheme(): [string, () => void] {
   const [theme, setTheme] = useState("dark");
 
   useEffect(() => {
+    // Lecture du thème persisté au montage (localStorage = système externe)
     const saved = (typeof window !== "undefined" && localStorage.getItem(THEME_KEY)) || "dark";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(saved);
     const root = document.querySelector(".admin-root") as HTMLElement | null;
     if (root) root.dataset.theme = saved;

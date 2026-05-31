@@ -75,7 +75,7 @@ export default function SetupPage() {
           <span className="auth-brand-name">Françoise</span>
         </div>
         <h1 className="auth-title">Créer le compte</h1>
-        <p className="auth-sub">Configuration initiale de l'administration</p>
+        <p className="auth-sub">Configuration initiale de l&rsquo;administration</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           {error && (
