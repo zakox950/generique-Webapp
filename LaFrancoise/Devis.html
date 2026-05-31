@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Spyfi Admin — Devis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body data-page="Devis">
+<img class="bg-photo" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80" alt="">
+<div class="bg-overlay"></div>
+
+<div class="app-layout">
+  <div id="sidebar-mount"></div>
+  <div class="main">
+    <div id="topbar-mount"></div>
+    <main class="content" data-screen-label="Devis">
+      <div>
+        <h1 class="page-title">Devis</h1>
+        <p class="page-sub">Demandes sur mesure et grosses commandes. Cliquez une ligne pour gérer le devis.</p>
+      </div>
+
+      <div class="page-head-row" style="margin-top:var(--space-6);">
+        <div class="segment" id="filterSeg">
+          <button class="active" data-f="all">Tous</button>
+          <button data-f="en_attente">En attente</button>
+          <button data-f="valide">Validés</button>
+          <button data-f="acompte_paye">Acompte payé</button>
+          <button data-f="pret">Prêts</button>
+          <button data-f="expire">Expirés</button>
+        </div>
+        <span class="page-sub" id="count"></span>
+      </div>
+
+      <section class="glass-base panel mt">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Client</th><th>Événement</th><th>Retrait</th><th>Statut</th><th class="num">Estimé</th><th class="num">Solde</th></tr></thead>
+            <tbody id="body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="bottomnav-mount"></div>
+
+<script src="admin.js"></script>
+<script>
+let filter='all';
+const fr=d=>d.split('-').reverse().join('/');
+const solde=d=>d.prixTotal-d.dejaPaye;
+function matches(d){return filter==='all'||d.statut===filter;}
+function render(){
+  const list=DEVIS.filter(matches);
+  document.getElementById('count').textContent=list.length+' devis';
+  const body=document.getElementById('body');
+  if(!list.length){body.innerHTML='<tr><td colspan="7" class="empty-row">Aucun devis dans ce filtre.</td></tr>';return;}
+  body.innerHTML=list.map(d=>{const s=DEVIS_STATUT[d.statut];
+    return `<tr data-id="${d.id}"><td class="muted">D-${d.id}</td><td class="client">${esc(d.nom)}</td><td class="prod">${esc(d.typeEvenement)}</td><td>${fr(d.dateRetrait)}</td><td><span class="badge ${s.cls} no-dot">${s.label}</span></td><td class="num amount">${eur(d.prixTotal)}</td><td class="num amount">${solde(d)>0?eur(solde(d)):'—'}</td></tr>`;
+  }).join('');
+}
+document.getElementById('filterSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#filterSeg button').forEach(x=>x.classList.remove('active'));b.classList.add('active');filter=b.dataset.f;render();});
+
+/* Actions disponibles selon l'état (machine à états backend) */
+function actionsFor(d){
+  const a=[];
+  if(d.statut==='en_attente'){
+    a.push(`<button class="btn-primary grow" onclick="act(${d.id},'valider')">Valider le devis</button>`);
+    a.push(`<button class="btn-danger" onclick="act(${d.id},'refuser')">Refuser</button>`);
+  } else if(d.statut==='valide'){
+    a.push(`<button class="btn-primary grow" onclick="act(${d.id},'acompte')">Enregistrer l'acompte</button>`);
+    a.push(`<button class="btn-danger" onclick="act(${d.id},'refuser')">Annuler</button>`);
+  } else if(d.statut==='acompte_paye'){
+    a.push(`<button class="btn-primary grow" onclick="act(${d.id},'pret')">Marquer prêt</button>`);
+  } else if(d.statut==='pret'){
+    a.push(`<button class="btn-ghost grow" onclick="closeModal();showToast('Email « commande prête » renvoyé')">Renvoyer l'avis de retrait</button>`);
+  } else if(d.statut==='expire'){
+    a.push(`<button class="btn-ghost grow" onclick="act(${d.id},'relancer')">Relancer le client</button>`);
+  }
+  return a.join('');
+}
+function openDevis(id){
+  const d=DEVIS.find(x=>x.id==id);const s=DEVIS_STATUT[d.statut];
+  const editable=(d.statut==='en_attente'||d.statut==='valide');
+  openModal(`
+    <div class="modal-head"><div><div class="modal-title">Devis <span class="id">D-${d.id}</span></div><div class="modal-sub">Reçu le ${fr(d.dateCommande)} · ${esc(d.typeEvenement)}</div></div><button class="modal-x" onclick="closeModal()">${ICON_X}</button></div>
+    <div class="modal-divider"></div>
+    <div class="detail-row"><span class="k">Client</span><span class="v">${esc(d.nom)}</span></div>
+    <div class="detail-row"><span class="k">Email</span><span class="v">${esc(d.mail)}</span></div>
+    <div class="detail-row"><span class="k">Téléphone</span><span class="v">${d.tel}</span></div>
+    <div class="detail-row"><span class="k">Date souhaitée</span><span class="v">${fr(d.dateSouhaitee)}</span></div>
+    <div class="detail-row"><span class="k">Date de retrait</span><span class="v">${fr(d.dateRetrait)} ${editable?`<button class="btn-ghost btn-sm" style="margin-left:6px;" onclick="act(${d.id},'date')">Modifier</button>`:''}</span></div>
+    <div class="detail-row"><span class="k">Statut</span><span class="v"><span class="badge ${s.cls} no-dot">${s.label}</span></span></div>
+    <div class="detail-row"><span class="k">Expire le</span><span class="v">${fr(d.expireAt)}</span></div>
+    ${d.noteClient?`<div class="modal-section-label">Note du client</div><p style="font-size:var(--text-sm);color:var(--color-muted);">${esc(d.noteClient)}</p>`:''}
+    ${d.noteAdmin?`<div class="modal-section-label">Note interne</div><p style="font-size:var(--text-sm);color:var(--color-muted);">${esc(d.noteAdmin)}</p>`:''}
+    <div class="modal-section-label">Articles</div>
+    ${d.items.map(i=>`<div class="item-line"><span>${esc(i.nom)} <span class="q">×${i.q}</span></span><span class="amount">${eur(i.pu*i.q)}</span></div>`).join('')}
+    <div class="modal-section-label">Montants</div>
+    <div class="detail-row"><span class="k">Prix total ${editable?'':'estimé'}</span><span class="v amount">${eur(d.prixTotal)} ${editable?`<button class="btn-ghost btn-sm" style="margin-left:6px;" onclick="act(${d.id},'prix')">Modifier</button>`:''}</span></div>
+    <div class="detail-row"><span class="k">Acompte attendu (${CONFIG.acompte_valeur}%)</span><span class="v amount">${eur(d.acompte)}</span></div>
+    <div class="detail-row"><span class="k">Déjà payé</span><span class="v amount">${eur(d.dejaPaye)}</span></div>
+    <div class="detail-row" style="border-top:1px solid var(--color-border);margin-top:6px;padding-top:12px;"><span class="k">Solde restant</span><span class="v amount">${eur(solde(d))}</span></div>
+    <div class="modal-actions">${actionsFor(d)}</div>`);
+}
+document.getElementById('body').addEventListener('click',e=>{const tr=e.target.closest('tr[data-id]');if(!tr)return;openDevis(tr.dataset.id);});
+
+/* Dispatch des actions (mappe PatchDevisSchema) */
+function act(id,action){
+  const d=DEVIS.find(x=>x.id==id);
+  if(action==='valider'){d.statut='valide';d.noteAdmin='Devis validé et envoyé au client.';closeModal();render();showToast('Devis D-'+id+' validé — email envoyé');}
+  else if(action==='refuser'){d.statut='annule';closeModal();render();showToast('Devis D-'+id+' refusé');}
+  else if(action==='pret'){d.statut='pret';closeModal();render();showToast('Devis D-'+id+' marqué prêt — client notifié');}
+  else if(action==='relancer'){closeModal();showToast('Relance envoyée à '+d.nom);}
+  else if(action==='acompte'){
+    openModal(`
+      <div class="modal-head"><div class="modal-title">Acompte — D-${d.id}</div><button class="modal-x" onclick="openDevis(${id})">${ICON_X}</button></div>
+      <div class="modal-divider"></div>
+      <div class="field"><label>Montant reçu</label><div class="input-prefix"><input class="input" id="acVal" value="${d.acompte.toFixed(2).replace('.',',')}"><span class="sfx">€</span></div><span class="hint">Acompte attendu : ${eur(d.acompte)} · solde mis à jour automatiquement.</span></div>
+      <div class="modal-actions"><button class="btn-ghost grow" onclick="openDevis(${id})">Retour</button><button class="btn-primary grow" onclick="confirmAcompte(${id})">Enregistrer l'acompte</button></div>`);
+  }
+  else if(action==='prix'){
+    openModal(`
+      <div class="modal-head"><div class="modal-title">Modifier le prix — D-${d.id}</div><button class="modal-x" onclick="openDevis(${id})">${ICON_X}</button></div>
+      <div class="modal-divider"></div>
+      <div class="field"><label>Nouveau prix total</label><div class="input-prefix"><input class="input" id="prixVal" value="${d.prixTotal.toFixed(2).replace('.',',')}"><span class="sfx">€</span></div><span class="hint">L'acompte (${CONFIG.acompte_valeur}%) sera recalculé automatiquement.</span></div>
+      <div class="modal-actions"><button class="btn-ghost grow" onclick="openDevis(${id})">Retour</button><button class="btn-primary grow" onclick="confirmPrix(${id})">Enregistrer</button></div>`);
+  }
+  else if(action==='date'){
+    openModal(`
+      <div class="modal-head"><div class="modal-title">Date de retrait — D-${d.id}</div><button class="modal-x" onclick="openDevis(${id})">${ICON_X}</button></div>
+      <div class="modal-divider"></div>
+      <div class="field"><label>Nouvelle date de retrait</label><input class="input" id="dateVal" type="date" value="${d.dateRetrait}"></div>
+      <div class="modal-actions"><button class="btn-ghost grow" onclick="openDevis(${id})">Retour</button><button class="btn-primary grow" onclick="confirmDate(${id})">Enregistrer</button></div>`);
+  }
+}
+function confirmAcompte(id){const d=DEVIS.find(x=>x.id==id);const v=parseFloat(document.getElementById('acVal').value.replace(',','.'))||0;d.dejaPaye=v;d.statut='acompte_paye';d.noteAdmin='Acompte de '+eur(v)+' reçu.';closeModal();render();showToast('Acompte enregistré pour D-'+id);}
+function confirmPrix(id){const d=DEVIS.find(x=>x.id==id);const v=parseFloat(document.getElementById('prixVal').value.replace(',','.'))||d.prixTotal;d.prixTotal=v;d.acompte=Math.round(v*(+CONFIG.acompte_valeur)/100*100)/100;closeModal();render();showToast('Prix mis à jour — acompte recalculé');}
+function confirmDate(id){const d=DEVIS.find(x=>x.id==id);d.dateRetrait=document.getElementById('dateVal').value||d.dateRetrait;closeModal();render();showToast('Date de retrait modifiée');}
+
+render();
+</script>
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#2D3536"/><g transform="translate(50 50)" fill="none" stroke="#98AA9D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M-14 -20h20l12 12v28h-32Z"/><path d="M6 -20v12h12"/><path d="M-7 0h14M-7 8h14"/></g></svg>
+</template>
+</body>
+</html>

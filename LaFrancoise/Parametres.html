@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Spyfi Admin — Paramètres</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+<style>
+  .settings{display:grid;grid-template-columns:1fr 1fr;gap:var(--grid-gap);margin-top:var(--space-6);align-items:start;}
+  @media (max-width:980px){.settings{grid-template-columns:1fr;}}
+  .acct{display:flex;align-items:center;gap:var(--space-4);}
+  .acct .big{width:56px;height:56px;border-radius:var(--radius-pill);background:var(--color-accent);color:#F2EFE2;display:grid;place-items:center;font-size:1.3rem;font-weight:var(--font-semibold);flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.2);}
+  .acct .n{font-size:var(--text-lg);font-weight:var(--font-medium);}
+  .acct .r{font-size:var(--text-xs);color:var(--color-muted);}
+</style>
+</head>
+<body data-page="Paramètres">
+<img class="bg-photo" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80" alt="">
+<div class="bg-overlay"></div>
+
+<div class="app-layout">
+  <div id="sidebar-mount"></div>
+  <div class="main">
+    <div id="topbar-mount"></div>
+    <main class="content" data-screen-label="Paramètres">
+      <div>
+        <h1 class="page-title">Paramètres du compte</h1>
+        <p class="page-sub">Votre accès administrateur à Spyfi Admin.</p>
+      </div>
+
+      <div class="settings">
+        <!-- Compte -->
+        <section class="glass-base panel">
+          <div class="panel-head"><div class="panel-title">Mon compte</div></div>
+          <div class="acct">
+            <div class="big">FP</div>
+            <div><div class="n">Françoise Pâtissier</div><div class="r">Rôle : Administratrice</div></div>
+          </div>
+          <div class="field" style="margin-top:var(--space-4);"><label>Nom affiché</label><input class="input" value="Françoise Pâtissier"></div>
+          <div class="field" style="margin-top:var(--space-3);"><label>Email de connexion</label><input class="input" type="email" value="francoise@francoise.be"></div>
+          <div class="modal-actions" style="margin-top:var(--space-4);"><button class="btn-primary btn-block" onclick="showToast('Compte mis à jour')">Enregistrer</button></div>
+        </section>
+
+        <!-- Mot de passe -->
+        <section class="glass-base panel">
+          <div class="panel-head"><div class="panel-title">Mot de passe</div></div>
+          <div class="field"><label>Mot de passe actuel</label><input class="input" type="password" value="••••••••••"></div>
+          <div class="field" style="margin-top:var(--space-3);"><label>Nouveau mot de passe</label><input class="input" type="password" placeholder="Minimum 10 caractères"></div>
+          <div class="field" style="margin-top:var(--space-3);"><label>Confirmer</label><input class="input" type="password" placeholder="Répéter le nouveau mot de passe"></div>
+          <div class="modal-actions" style="margin-top:var(--space-4);"><button class="btn-primary btn-block" onclick="showToast('Mot de passe modifié')">Changer le mot de passe</button></div>
+        </section>
+
+        <!-- Préférences -->
+        <section class="glass-base panel">
+          <div class="panel-head"><div class="panel-title">Préférences</div></div>
+          <div class="config-row">
+            <div class="meta"><div class="k">Thème sombre</div><div class="d">Interface sombre par défaut.</div></div>
+            <div class="ctl narrow"><label class="switch"><input type="checkbox" id="themePref" onchange="applyTheme(this.checked?'dark':'light')"><span class="track"></span><span class="knob"></span></label></div>
+          </div>
+          <div class="config-row">
+            <div class="meta"><div class="k">Résumé quotidien par email</div><div class="d">Reçu chaque matin à 6 h.</div></div>
+            <div class="ctl narrow"><label class="switch"><input type="checkbox" checked onchange="showToast('Préférence enregistrée')"><span class="track"></span><span class="knob"></span></label></div>
+          </div>
+          <div class="config-row">
+            <div class="meta"><div class="k">Alertes stock faible</div><div class="d">Notifié sous 5 unités restantes.</div></div>
+            <div class="ctl narrow"><label class="switch"><input type="checkbox" checked onchange="showToast('Préférence enregistrée')"><span class="track"></span><span class="knob"></span></label></div>
+          </div>
+        </section>
+
+        <!-- Session / projet -->
+        <section class="glass-base panel">
+          <div class="panel-head"><div class="panel-title">Projet &amp; session</div></div>
+          <div class="detail-row"><span class="k">Projet</span><span class="v">Pâtisserie Françoise</span></div>
+          <div class="detail-row"><span class="k">Propulsé par</span><span class="v">Spyfi Admin v1.0</span></div>
+          <div class="detail-row"><span class="k">Dernière connexion</span><span class="v">30/05/2026 · 07:42</span></div>
+          <div class="detail-row"><span class="k">Support</span><span class="v">contact@spyfi.be</span></div>
+          <div class="modal-actions" style="margin-top:var(--space-4);"><button class="btn-danger btn-block" onclick="confirmLogout(event)">Se déconnecter</button></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="bottomnav-mount"></div>
+
+<script src="admin.js"></script>
+<script>
+  // refléter l'état du thème dans le toggle de préférence
+  document.addEventListener('DOMContentLoaded',()=>{
+    const t=document.getElementById('themePref');
+    if(t)t.checked=document.documentElement.getAttribute('data-theme')==='dark';
+  });
+</script>
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#2D3536"/><g transform="translate(50 46)" fill="none" stroke="#98AA9D" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="0" cy="-6" r="12"/><path d="M-20 30a20 20 0 0 1 40 0"/></g></svg>
+</template>
+</body>
+</html>
