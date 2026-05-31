@@ -20,30 +20,72 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12, width: 320 }}>
-        <h1 style={{ marginBottom: 8 }}>Connexion admin</h1>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-          style={{ padding: 8 }}
-        />
-        <input
-          type="password"
-          placeholder="Mot de passe"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-          style={{ padding: 8 }}
-        />
-        <button type="submit" disabled={loading} style={{ padding: 10 }}>
-          {loading ? "Connexion..." : "Se connecter"}
-        </button>
-      </form>
+    <div className="admin-root admin-auth-page">
+      <img
+        className="bg-photo"
+        src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80"
+        alt=""
+        aria-hidden="true"
+      />
+      <div className="bg-overlay" />
+
+      <div className="auth-card glass-base">
+        <div className="auth-brand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36">
+            <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/>
+            <path d="M8 12h8M12 8v8"/>
+          </svg>
+          <span className="auth-brand-name">Françoise</span>
+        </div>
+        <h1 className="auth-title">Connexion</h1>
+        <p className="auth-sub">Espace administrateur</p>
+
+        <form onSubmit={handleSubmit} className="auth-form">
+          {error && (
+            <div className="auth-error">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              {error}
+            </div>
+          )}
+
+          <div className="form-field">
+            <label className="form-label-admin">Email</label>
+            <input
+              className="form-input-admin"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="admin@patisserie.fr"
+              autoComplete="email"
+            />
+          </div>
+
+          <div className="form-field" style={{ marginTop: 16 }}>
+            <label className="form-label-admin">Mot de passe</label>
+            <input
+              className="form-input-admin"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+              autoComplete="current-password"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="btn-primary full-width"
+            style={{ marginTop: 24 }}
+            disabled={loading}
+          >
+            {loading ? "Connexion…" : "Se connecter"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

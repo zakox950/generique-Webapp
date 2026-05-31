@@ -12,7 +12,25 @@ import type {
   CatalogueDevisItem,
 } from "../../../app/generated/prisma/client";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Instanciation paresseuse du client Resend.
+// Construire `new Resend("")` lève une erreur ("Missing API key") au chargement
+// du module, ce qui cassait le build quand RESEND_API_KEY est vide.
+// On instancie donc à la demande, et on n'envoie rien si la clé est absente.
+let _resend: Resend | null = null;
+
+type SendPayload = Parameters<Resend["emails"]["send"]>[0];
+
+async function sendMail(payload: SendPayload) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    console.warn(
+      "[mail] RESEND_API_KEY manquante — email non envoyé (mode démo).",
+    );
+    return;
+  }
+  if (!_resend) _resend = new Resend(key);
+  return _resend.emails.send(payload);
+}
 
 // =========================================
 // TYPES
@@ -75,7 +93,7 @@ export async function sendConfirmationCommande(commande: CommandeAvecItems) {
     )
     .join("");
 
-  await resend.emails.send({
+  await sendMail({
     from,
     replyTo: process.env.REPLY_TO_EMAIL,
     to: commande.mail,
@@ -125,7 +143,7 @@ export async function sendNouvelleCommandeAdmin(commande: CommandeAvecItems) {
     )
     .join("");
 
-  await resend.emails.send({
+  await sendMail({
     from,
     to: adminEmail,
     subject: `Nouvelle commande #${commande.id} — ${commande.nom}`,
@@ -156,7 +174,7 @@ export async function sendNouvelleCommandeAdmin(commande: CommandeAvecItems) {
 export async function sendNouveauDevisClient(devis: DevisAvecItems) {
   const from = await getFromEmail();
 
-  await resend.emails.send({
+  await sendMail({
     from,
     replyTo: process.env.REPLY_TO_EMAIL,
     to: devis.mail,
@@ -198,7 +216,7 @@ export async function sendNouveauDevisAdmin(devis: DevisAvecItems) {
     )
     .join("");
 
-  await resend.emails.send({
+  await sendMail({
     from,
     to: adminEmail,
     subject: `Nouveau devis #${devis.id} — ${devis.nom}`,
@@ -227,7 +245,7 @@ export async function sendNouveauDevisAdmin(devis: DevisAvecItems) {
 export async function sendDevisValide(devis: DevisAvecItems) {
   const from = await getFromEmail();
 
-  await resend.emails.send({
+  await sendMail({
     from,
     replyTo: process.env.REPLY_TO_EMAIL,
     to: devis.mail,
@@ -257,7 +275,7 @@ export async function sendDevisValide(devis: DevisAvecItems) {
 export async function sendDevisRefuse(devis: DevisAvecItems) {
   const from = await getFromEmail();
 
-  await resend.emails.send({
+  await sendMail({
     from,
     replyTo: process.env.REPLY_TO_EMAIL,
     to: devis.mail,
@@ -279,7 +297,7 @@ export async function sendDevisPret(devis: DevisAvecItems) {
   const from = await getFromEmail();
   const adresse = await getBoutiqueAdresse();
 
-  await resend.emails.send({
+  await sendMail({
     from,
     replyTo: process.env.REPLY_TO_EMAIL,
     to: devis.mail,
