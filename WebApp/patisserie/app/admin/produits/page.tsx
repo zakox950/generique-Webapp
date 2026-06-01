@@ -17,7 +17,7 @@ function eur(val: number) {
   return Number(val).toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
 }
 
-const FALLBACK = "photo-1612203985729-70726954388c";
+const UNSPLASH_FALLBACK = "photo-1612203985729-70726954388c";
 
 export default function ProduitsPage() {
   const [produits, setProduits] = useState<Produit[]>([]);
@@ -35,8 +35,8 @@ export default function ProduitsPage() {
   const [ingredient, setIngredient] = useState("");
 
   // Photo state
-  const [newPhotoUrl, setNewPhotoUrl] = useState("");
   const [addingPhoto, setAddingPhoto] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState("");
 
   useEffect(() => { fetchProduits(); }, []);
 
@@ -59,7 +59,6 @@ export default function ProduitsPage() {
     setSelected(null);
     setCreating(true);
     setNom(""); setPrix(""); setDescription(""); setIngredient("");
-    setNewPhotoUrl("");
     setModalOpen(true);
   }
 
@@ -70,7 +69,6 @@ export default function ProduitsPage() {
     setPrix(String(Number(p.prix)));
     setDescription(p.description || "");
     setIngredient(p.ingredient || "");
-    setNewPhotoUrl("");
     setModalOpen(true);
   }
 
@@ -110,28 +108,41 @@ export default function ProduitsPage() {
     if (res.ok) { showToast(p.isActif ? "Produit désactivé" : "Produit activé"); fetchProduits(); }
   }
 
-  async function handleAddPhoto(prodId: number) {
-    if (!newPhotoUrl.trim()) return;
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, prodId: number) {
+    const file = e.target.files?.[0];
+    if (!file) return;
     setAddingPhoto(true);
+    setUploadProgress("Envoi en cours…");
     try {
+      const form = new FormData();
+      form.append("file", file);
+      const uploadRes = await fetch("/api/admin/upload", { method: "POST", body: form });
+      if (!uploadRes.ok) {
+        const data = await uploadRes.json().catch(() => ({}));
+        showToast(data.error || "Erreur upload");
+        return;
+      }
+      const { url } = await uploadRes.json();
+      setUploadProgress("Enregistrement…");
       const res = await fetch(`/api/admin/catalogue/${prodId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "ajouter_photo", photoUrl: newPhotoUrl.trim() }),
+        body: JSON.stringify({ action: "ajouter_photo", photoUrl: url }),
       });
       if (res.ok) {
         showToast("Photo ajoutée");
-        setNewPhotoUrl("");
         const list = await fetchProduits();
         const updated = list.find((p) => p.id === prodId);
         if (updated) setSelected(updated);
       } else {
-        showToast("URL invalide");
+        showToast("Erreur lors de l'ajout");
       }
     } catch {
       showToast("Erreur réseau");
     } finally {
       setAddingPhoto(false);
+      setUploadProgress("");
+      e.target.value = "";
     }
   }
 
@@ -177,7 +188,7 @@ export default function ProduitsPage() {
             <div key={p.id} className={`glass-base prod-card-admin${!p.isActif ? " inactive" : ""}`}>
               <div className="prod-img-admin">
                 <img
-                  src={p.photos[0]?.photoUrl || `https://images.unsplash.com/${FALLBACK}?w=300&q=80`}
+                  src={p.photos[0]?.photoUrl || `https://images.unsplash.com/${UNSPLASH_FALLBACK}?w=300&q=80`}
                   alt={p.nom}
                 />
                 {!p.isActif && <div className="prod-overlay">Inactif</div>}
@@ -246,14 +257,14 @@ export default function ProduitsPage() {
                         <img
                           src={photo.photoUrl}
                           alt=""
-                          style={{ width: 72, height: 72, objectFit: "cover", borderRadius: 8, border: "1px solid var(--color-glass-border, rgba(255,255,255,0.1))", display: "block" }}
+                          style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: "1px solid var(--color-glass-border, rgba(255,255,255,0.1))", display: "block" }}
                         />
                         <button
                           onClick={() => handleDeletePhoto(selected.id, photo.id)}
                           title="Supprimer cette photo"
                           style={{
                             position: "absolute", top: -6, right: -6,
-                            width: 20, height: 20, borderRadius: "50%",
+                            width: 22, height: 22, borderRadius: "50%",
                             background: "rgba(220,38,38,0.9)", color: "#fff",
                             border: "none", cursor: "pointer",
                             display: "flex", alignItems: "center", justifyContent: "center",
@@ -268,25 +279,38 @@ export default function ProduitsPage() {
                     ))}
                   </div>
                 ) : (
-                  <p style={{ fontSize: "var(--text-sm)", color: "var(--color-muted)", marginTop: 6 }}>Aucune photo — ajoutez une URL ci-dessous.</p>
+                  <p style={{ fontSize: "var(--text-sm)", color: "var(--color-muted)", marginTop: 6 }}>Aucune photo — importez une image ci-dessous.</p>
                 )}
-                <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                  <input
-                    className="form-input-admin"
-                    type="url"
-                    placeholder="https://images.unsplash.com/photo-…"
-                    value={newPhotoUrl}
-                    onChange={(e) => setNewPhotoUrl(e.target.value)}
-                    style={{ flex: 1 }}
-                  />
-                  <button
-                    className="btn-primary"
-                    onClick={() => handleAddPhoto(selected.id)}
-                    disabled={!newPhotoUrl.trim() || addingPhoto}
-                    style={{ whiteSpace: "nowrap" }}
+                <div style={{ marginTop: 12 }}>
+                  <label
+                    style={{
+                      display: "flex", alignItems: "center", gap: 10,
+                      background: "var(--input-bg)", border: "1.5px dashed var(--color-glass-border-strong)",
+                      borderRadius: "var(--radius-md)", padding: "10px 14px",
+                      cursor: addingPhoto ? "not-allowed" : "pointer", opacity: addingPhoto ? 0.6 : 1,
+                      color: "var(--color-text)", fontSize: "var(--text-sm)", transition: "border-color .15s ease",
+                    }}
                   >
-                    {addingPhoto ? "…" : "Ajouter"}
-                  </button>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18" style={{ flex: "none", color: "var(--color-accent-light)" }}>
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="17 8 12 3 7 8"/>
+                      <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <span style={{ flex: 1 }}>
+                      {addingPhoto ? uploadProgress || "Upload en cours…" : "Importer une photo"}
+                    </span>
+                    {addingPhoto && <div className="spinner-admin" style={{ width: 16, height: 16 }} />}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      style={{ display: "none" }}
+                      disabled={addingPhoto}
+                      onChange={(e) => handleFileUpload(e, selected.id)}
+                    />
+                  </label>
+                  <p style={{ fontSize: "var(--text-xs)", color: "var(--color-muted)", marginTop: 6 }}>
+                    JPEG, PNG, WebP — taille illimitée (haute résolution acceptée)
+                  </p>
                 </div>
               </div>
             )}

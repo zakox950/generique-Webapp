@@ -131,8 +131,11 @@ export type UpdateCatalogueInput = z.infer<typeof UpdateCatalogueSchema>;
 export const AddPhotoSchema = z.object({
   photoUrl: z
     .string()
-    .url("L'URL de la photo est invalide")
-    .min(1, "L'URL est obligatoire"),
+    .min(1, "L'URL est obligatoire")
+    .refine(
+      (val) => val.startsWith("/uploads/") || z.string().url().safeParse(val).success,
+      "L'URL de la photo est invalide",
+    ),
 });
 
 export type AddPhotoInput = z.infer<typeof AddPhotoSchema>;
