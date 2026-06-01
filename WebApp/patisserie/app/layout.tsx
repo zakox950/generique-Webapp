@@ -26,6 +26,7 @@ const geist = Geist({
 export const metadata: Metadata = {
   title: "Pâtisserie Françoise",
   description: "Pâtisserie artisanale — commande en ligne, retrait en boutique",
+  themeColor: "#FAF7F2",
 };
 
 export default function RootLayout({

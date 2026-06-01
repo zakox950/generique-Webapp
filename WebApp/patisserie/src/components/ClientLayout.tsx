@@ -85,7 +85,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     { href: "/", label: "Accueil", icon: <IconHome /> },
     { href: "/catalogue", label: "Catalogue", icon: <IconGrid /> },
     { href: "/panier", label: "Panier", icon: <IconCart /> },
-    { href: "/commande", label: "Contact", icon: <IconPhone /> },
+    { href: "/contact", label: "Contact", icon: <IconPhone /> },
   ];
 
   return (
