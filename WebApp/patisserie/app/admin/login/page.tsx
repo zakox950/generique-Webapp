@@ -16,6 +16,10 @@ export default function LoginPage() {
     if (result?.error) {
       setError(result.error);
       setLoading(false);
+    } else {
+      // Navigation dure : force le navigateur à relire le cookie de session
+      // posé par la Server Action avant d'accéder au dashboard.
+      window.location.href = "/admin";
     }
   }
 
