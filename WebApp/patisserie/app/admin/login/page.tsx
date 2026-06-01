@@ -85,6 +85,13 @@ export default function LoginPage() {
             {loading ? "Connexion…" : "Se connecter"}
           </button>
         </form>
+
+        <p style={{ marginTop: 20, textAlign: "center", fontSize: "0.8rem", color: "rgba(255,255,255,0.5)" }}>
+          Première connexion ?{" "}
+          <a href="/admin/setup" style={{ color: "rgba(255,255,255,0.8)", textDecoration: "underline" }}>
+            Créer un compte administrateur
+          </a>
+        </p>
       </div>
     </div>
   );

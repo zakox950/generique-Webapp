@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/hooks/useCart";
 
+
 function IconHome() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
@@ -50,6 +51,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const { count } = useCart();
   const [toast, setToast] = useState<ToastState>({ message: "", visible: false });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const handler = (msg: string) => {
@@ -59,6 +61,24 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     };
     toastQueue.push(handler);
     return () => { toastQueue = toastQueue.filter((fn) => fn !== handler); };
+  }, []);
+
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastY;
+      if (y > 120 && delta > 8) {
+        nav.classList.add("hidden");
+      } else if (delta < -8 || y <= 120) {
+        nav.classList.remove("hidden");
+      }
+      lastY = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const navLinks = [
@@ -77,7 +97,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
       {/* Header */}
       <header className="app-header">
-        <Link href="/" className="brand">Françoise</Link>
+        <Link href="/" className="brand">Pâtisserie <span style={{ fontStyle: "italic" }}>Françoise</span></Link>
         <Link href="/panier" className="cart-btn" aria-label="Panier">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
             <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/>
@@ -92,7 +112,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       </main>
 
       {/* Navigation bas liquide */}
-      <nav className="bottom-nav">
+      <nav className="bottom-nav" ref={navRef}>
         {navLinks.map((link) => {
           const isCart = link.href === "/panier";
           const active =
@@ -114,7 +134,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       </nav>
 
       {/* Toast */}
-      <div className={`toast${toast.visible ? " visible" : ""}`}>
+      <div className={`toast${toast.visible ? " show" : ""}`}>
         {toast.message}
       </div>
     </div>

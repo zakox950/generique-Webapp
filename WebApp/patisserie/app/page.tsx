@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import ClientLayout, { showToast } from "@/components/ClientLayout";
 import { useCart } from "@/hooks/useCart";
@@ -74,16 +74,12 @@ function StarIcon() {
 
 export default function AccueilPage() {
   const { addItem } = useCart();
-  const [produits, setProduits] = useState<Produit[]>([]);
   const [bestsellers, setBestsellers] = useState<Produit[]>([]);
-  const revealRefs = useRef<(HTMLElement | null)[]>([]);
 
   useEffect(() => {
     fetch("/api/catalogue")
       .then((r) => r.json())
       .then((data: Produit[]) => {
-        setProduits(data);
-        // Prendre les 4 premiers produits comme bestsellers
         setBestsellers(data.slice(0, 4));
       })
       .catch(() => {});
@@ -91,10 +87,10 @@ export default function AccueilPage() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("visible"); }),
-      { threshold: 0.1 },
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); observer.unobserve(e.target); } }),
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
     );
-    revealRefs.current.forEach((el) => el && observer.observe(el));
+    document.querySelectorAll<HTMLElement>(".reveal").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [bestsellers]);
 
@@ -120,8 +116,8 @@ export default function AccueilPage() {
       {/* Hero */}
       <section className="hero">
         <img
-          src="https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=800&q=80"
-          alt="Tartelette aux fraises"
+          src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=1200&q=80"
+          alt="Fraisier artisanal"
           className="hero-img"
         />
         <div className="hero-body">
@@ -133,7 +129,7 @@ export default function AccueilPage() {
       </section>
 
       {/* Trust */}
-      <section className="trust-section">
+      <section className="trust-section reveal">
         {TRUST_ITEMS.map((item, i) => (
           <div key={i} className="trust-item">
             <div className="trust-icon">{item.icon}</div>
@@ -152,11 +148,7 @@ export default function AccueilPage() {
           </div>
           <div className="prod-grid">
             {bestsellers.map((p, i) => (
-              <article
-                key={p.id}
-                className="prod-card reveal"
-                ref={(el) => { revealRefs.current[i] = el; }}
-              >
+              <article key={p.id} className="prod-card reveal">
                 <div className="prod-img-wrap">
                   <img src={imgUrl(p, i)} alt={p.nom} className="prod-img" loading="lazy" />
                 </div>
@@ -179,11 +171,11 @@ export default function AccueilPage() {
       )}
 
       {/* Story */}
-      <section className="story-section">
+      <section className="story-section reveal">
         <div className="story-img-wrap">
           <img
-            src="https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=600&q=80"
-            alt="Notre boutique"
+            src="https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=600&q=80"
+            alt="Notre fournil"
             className="story-img"
           />
         </div>
@@ -200,7 +192,7 @@ export default function AccueilPage() {
       </section>
 
       {/* Avis */}
-      <section className="section">
+      <section className="section reveal">
         <div className="section-head">
           <h2 className="section-title">Ce que disent nos clients</h2>
         </div>

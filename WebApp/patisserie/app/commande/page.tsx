@@ -188,11 +188,72 @@ export default function CommandePage() {
     return (
       <ClientLayout>
         <section className="page-hero">
-          <h1 className="page-title">Commander</h1>
+          <h1 className="page-title">Click &amp; Collect</h1>
+          <p className="page-sub">Commandez, on prépare.</p>
         </section>
-        <div className="empty-cart">
-          <p>Votre panier est vide.</p>
-          <a href="/catalogue" className="btn-primary" style={{ marginTop: 20 }}>Voir le catalogue</a>
+        <div className="section" style={{ maxWidth: 680, margin: "0 auto" }}>
+          <div className="trust-section" style={{ marginBottom: 40 }}>
+            <div className="trust-item">
+              <div className="trust-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="28" height="28">
+                  <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                  <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+              </div>
+              <div className="trust-title">1. Choisissez</div>
+              <div className="trust-sub">Parcourez notre catalogue et ajoutez vos créations au panier</div>
+            </div>
+            <div className="trust-item">
+              <div className="trust-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="28" height="28">
+                  <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+                </svg>
+              </div>
+              <div className="trust-title">2. Réglez</div>
+              <div className="trust-sub">Confirmez votre commande et choisissez votre date de retrait</div>
+            </div>
+            <div className="trust-item">
+              <div className="trust-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="28" height="28">
+                  <path d="M3 9l1-5h16l1 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/>
+                </svg>
+              </div>
+              <div className="trust-title">3. Récupérez</div>
+              <div className="trust-sub">Votre commande fraîche du matin vous attend en boutique</div>
+            </div>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <a href="/catalogue" className="btn-primary">Découvrir nos créations</a>
+          </div>
+          {config.boutique_adresse && (
+            <div className="surface-card" style={{ marginTop: 40 }}>
+              <div className="summary-title">La boutique</div>
+              <div className="boutique-info">
+                <div className="boutique-row">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <span>{config.boutique_adresse}</span>
+                </div>
+                {config.boutique_tel && (
+                  <div className="boutique-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+                      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 012 1.18 2 2 0 014 1h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+                    </svg>
+                    <span>{config.boutique_tel}</span>
+                  </div>
+                )}
+                {config.boutique_horaires && (
+                  <div className="boutique-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+                      <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                    </svg>
+                    <span>{config.boutique_horaires}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </ClientLayout>
     );
