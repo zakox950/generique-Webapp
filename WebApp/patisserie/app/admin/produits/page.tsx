@@ -85,9 +85,18 @@ export default function ProduitsPage() {
       const method = creating ? "POST" : "PATCH";
       const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (res.ok) {
-        showToast(creating ? "Produit créé" : "Produit modifié");
-        setModalOpen(false);
-        fetchProduits();
+        if (creating) {
+          showToast("Produit créé — ajoutez maintenant vos photos");
+          const newProduit = await res.json();
+          const list = await fetchProduits();
+          const created = list.find((p) => p.id === newProduit.id) ?? null;
+          setSelected(created);
+          setCreating(false);
+        } else {
+          showToast("Produit modifié");
+          setModalOpen(false);
+          fetchProduits();
+        }
       } else {
         const data = await res.json();
         showToast(data.error || "Erreur");
