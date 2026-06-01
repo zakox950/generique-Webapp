@@ -354,8 +354,13 @@ select.input { appearance: none; -webkit-appearance: none; cursor: pointer; }
    pour éviter les conflits avec le design client.
    ============================================================ */
 
+/* Barres blanches safe-area iOS : le body garde sa couleur crème pour les pages client
+   mais doit être sombre sur les pages admin — :has() cible le body quand admin-root est présent */
+html:has(.admin-root),
+body:has(.admin-root) { background: #0E1714; }
+
 .admin-root {
-  --color-bg-overlay: rgba(0,0,0,0.35);
+  --color-bg-overlay: rgba(0,0,0,0.12);
   --color-glass-base: rgba(45,53,54,0.55);
   --color-glass-raised: rgba(45,53,54,0.70);
   --color-glass-modal: rgba(30,36,37,0.80);
@@ -423,6 +428,30 @@ select.input { appearance: none; -webkit-appearance: none; cursor: pointer; }
   background: linear-gradient(135deg, #0E1714 0%, #141E1A 20%, #1C2822 40%, #243028 55%, #1A2820 75%, #111A17 100%);
   background-size: 300% 300%;
   animation: adminBgShift 18s ease infinite;
+}
+
+/* Sphères blush flottantes — accentuent le glassmorphisme */
+.admin-root .admin-blob {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  animation: drift linear infinite;
+}
+.admin-root .blob-a {
+  width: 480px; height: 480px;
+  background: radial-gradient(circle at center, rgba(196,96,128,0.55) 0%, rgba(168,64,96,0.3) 40%, transparent 70%);
+  filter: blur(80px); opacity: 0.9;
+  top: -120px; right: -80px; animation-duration: 32s;
+}
+.admin-root .blob-b {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle at center, rgba(45,112,96,0.55) 0%, rgba(26,80,68,0.3) 40%, transparent 70%);
+  filter: blur(90px); opacity: 0.85;
+  bottom: 8%; left: -90px; animation-duration: 45s; animation-delay: -18s;
+}
+.admin-root .blob-c {
+  width: 340px; height: 340px;
+  background: radial-gradient(circle at center, rgba(184,144,74,0.45) 0%, rgba(154,112,48,0.25) 40%, transparent 70%);
+  filter: blur(100px); opacity: 0.8;
+  top: 38%; right: 12%; animation-duration: 38s; animation-delay: -10s;
 }
 
 .admin-root .bg-overlay { position: fixed; inset: 0; z-index: 1; background: var(--color-bg-overlay); transition: background .4s ease; pointer-events: none; }
