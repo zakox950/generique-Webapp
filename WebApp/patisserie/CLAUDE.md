@@ -597,7 +597,455 @@ Depuis `src/__tests__/routes.test.ts`, les routes se trouvent dans `app/api/` à
 - [x] Tests routes API
 
 ### À faire
-- [ ] Middleware next-auth — protection des routes /admin
 - [ ] Frontend client (accueil, catalogue, panier)
 - [ ] Frontend admin (dashboard, commandes, devis, catalogue, config, stock)
 - [ ] Déploiement Coolify + Dockerfile
+
+---
+
+# [2025-05-19] Jest — Résultat final (83 tests)
+
+Après ajout des tests validators et des tests de routes :
+
+```
+Test Suites: 6 passed, 6 total
+Tests:       83 passed, 83 total
+Time:        ~0.5s
+```
+
+Répartition :
+- 43 tests services (catalogue, stock, config, limites, commande, devis)
+- 40 tests validators + routes (commande.validator, devis.validator, catalogue.validator, admin.validator, routes publiques, routes admin)
+
+---
+
+# [2025-05-20] Authentification next-auth
+
+## Architecture — Deux fichiers séparés
+
+Le problème central de next-auth v5 avec Prisma : le middleware Next.js tourne dans le **Edge Runtime** (un environnement JavaScript allégé, proche de Cloudflare Workers). Le Edge Runtime n'a pas accès aux modules Node.js natifs (`node:path`, `node:fs`, etc.). Prisma 7 avec `@prisma/adapter-pg` charge ces modules natifs — il est incompatible avec l'Edge Runtime.
+
+**Solution : séparer la configuration en deux fichiers.**
+
+### `src/lib/auth.config.ts` — Edge Runtime safe
+
+Contient uniquement la configuration de base de next-auth, sans aucun import Prisma. Utilisé par le middleware.
+
+```typescript
+import type { NextAuthConfig } from "next-auth";
+
+export const authConfig: NextAuthConfig = {
+  providers: [],
+  pages: { signIn: "/admin/login" },
+  callbacks: {
+    authorized({ auth, request: { nextUrl } }) {
+      return !!auth?.user;
+    },
+  },
+};
+```
+
+### `src/lib/auth.ts` — Node.js uniquement
+
+Contient la configuration complète avec Prisma, bcryptjs, et le provider Credentials. Importé uniquement depuis les Server Actions et les routes API — jamais depuis le middleware.
+
+```typescript
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
+import prisma from "./prisma";
+import { authConfig } from "./auth.config";
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
+  providers: [
+    Credentials({
+      credentials: { email: {}, password: {} },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+        const admin = await prisma.admin.findUnique({
+          where: { email: credentials.email as string },
+        });
+        if (!admin) return null;
+        const ok = await bcrypt.compare(
+          credentials.password as string,
+          admin.passwordHash
+        );
+        if (!ok) return null;
+        return { id: String(admin.id), email: admin.email, role: admin.role ?? "admin" };
+      },
+    }),
+  ],
+  session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) {
+        token.id = user.id as string;
+        token.role = (user as { role?: string }).role ?? "admin";
+      }
+      return token;
+    },
+    session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+        (session.user as { id: string; role: string }).role = token.role as string;
+      }
+      return session;
+    },
+  },
+});
+```
+
+---
+
+## `middleware.ts` — Protection des routes
+
+Fichier à la racine de `src/` (ou à la racine du projet). Utilise `auth.config.ts` uniquement — Edge Runtime compatible.
+
+```typescript
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
+import { NextResponse } from "next/server";
+
+const { auth } = NextAuth(authConfig);
+
+const EXEMPT_PATHS = ["/admin/login", "/admin/setup", "/admin/already-exists"];
+
+export default auth(function middleware(req) {
+  const { nextUrl } = req;
+  const session = req.auth;
+  const isLoggedIn = !!session?.user;
+  const path = nextUrl.pathname;
+  const isExempt = EXEMPT_PATHS.some(
+    (p) => path === p || path.startsWith(p + "/")
+  );
+
+  if (isExempt) {
+    if (isLoggedIn && path.startsWith("/admin/login"))
+      return NextResponse.redirect(new URL("/admin", req.url));
+    return NextResponse.next();
+  }
+
+  if (path.startsWith("/api/admin") && !isLoggedIn)
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+
+  if (path.startsWith("/admin") && !isLoggedIn)
+    return NextResponse.redirect(new URL("/admin/login", req.url));
+
+  return NextResponse.next();
+});
+
+export const config = {
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
+};
+```
+
+---
+
+## Pages d'authentification
+
+### `/admin/setup` — Création du premier compte admin
+
+Page accessible uniquement si aucun admin n'existe en base. Si un admin existe déjà, redirige vers `/admin/already-exists`. Hash le mot de passe avec bcryptjs avant stockage.
+
+### `/admin/login` — Connexion
+
+Formulaire email + mot de passe. Utilise une Server Action qui importe `signIn` depuis `@/lib/auth` (jamais depuis `next-auth` directement). Gère l'erreur `AuthError` de next-auth pour afficher les messages d'échec.
+
+### `/admin/already-exists` — Page informative
+
+Affichée quand on essaie d'accéder à `/admin/setup` alors qu'un admin existe déjà. Propose un lien vers la page de connexion.
+
+---
+
+## `next.config.ts` — serverExternalPackages
+
+Prisma et pg doivent être exclus du bundling Next.js — ils doivent rester en `require()` Node.js natif au lieu d'être inlinés dans le bundle.
+
+```typescript
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg"],
+};
+
+export default nextConfig;
+```
+
+Sans cette config, le build échoue avec des erreurs de modules Node.js introuvables.
+
+---
+
+## Variables d'environnement
+
+```
+DATABASE_URL="postgresql://patisserie:[MOT_DE_PASSE]@localhost:5120/patisserie"
+AUTH_SECRET="valeur-aleatoire-32-caracteres-minimum"
+NEXTAUTH_URL="http://localhost:5650"
+RESEND_API_KEY=""
+```
+
+**Important** :
+- La variable s'appelle `AUTH_SECRET` en next-auth v5 (pas `NEXTAUTH_SECRET` qui était la v4)
+- Pas d'espaces autour du `=` dans le fichier `.env`
+- `AUTH_SECRET` doit faire au moins 32 caractères — la session JWT est signée avec cette clé
+
+---
+
+## Problèmes rencontrés et solutions
+
+### Edge Runtime crash — `Failed to load external module node:path`
+
+**Symptôme** : Le middleware crashait au démarrage avec une erreur sur `node:path`.
+
+**Cause** : `middleware.ts` importait `{ auth }` depuis `@/lib/auth`. Ce fichier importe Prisma, qui charge `node:path` — incompatible avec Edge Runtime.
+
+**Fix** : Créer `auth.config.ts` sans Prisma, importer uniquement `authConfig` dans le middleware.
+
+### `NEXTAUTH_SECRET` vs `AUTH_SECRET`
+
+**Symptôme** : La session ne persistait pas, déconnexion immédiate après login.
+
+**Cause** : Le `.env` contenait `NEXTAUTH_SECRET` (syntaxe next-auth v4). En v5, la variable s'appelle `AUTH_SECRET`.
+
+**Fix** : Renommer la variable dans `.env.local` sur le serveur.
+
+### Espaces autour du `=` dans `.env`
+
+**Symptôme** : `DATABASE_URL` mal parsée, connexion PostgreSQL refusée.
+
+**Cause** : Le fichier `.env` avait `DATABASE_URL = "..."` avec des espaces. dotenv interprète le nom de variable comme `DATABASE_URL ` (avec espace).
+
+**Fix** : Supprimer les espaces : `DATABASE_URL="..."`.
+
+---
+
+# [2025-05-20] site-demo et serveur
+
+## site-demo — `/site-demo/`
+
+Nouveau projet Next.js standalone à la racine du repo. Démo commerciale complète frontend-only, port 3001.
+
+**Stack** : Next.js 15, TypeScript, Tailwind CSS, Framer Motion, Recharts, Zustand
+
+**Structure** :
+- `src/data/mock.ts` — données factices (produits, commandes, devis, séries temporelles)
+- `src/store/cart.ts` — Zustand avec `persist` middleware pour le panier
+- `src/app/client/` — accueil, catalogue, panier, devis, contact (PhoneFrame sur desktop)
+- `src/app/admin/` — login animé, dashboard (Recharts AreaChart courbes douces), commandes, devis, catalogue, stock, config
+
+**Animations admin** :
+- Background animé via CSS keyframe `bgShift` (gradient animé)
+- `glowPulse` sur l'item actif du sidebar
+- Framer Motion : stagger sur les cards, slide-up sheets, hover glow
+
+**Graphiques** : Recharts `AreaChart` avec `type="monotone"` pour des courbes douces
+
+**Pas de backend** — toutes les données viennent de `mock.ts`
+
+## Serveur Hetzner
+
+- OS : Ubuntu 22.04
+- Node.js : v22.22.2 (installé via NodeSource)
+- npm : inclus avec Node.js v22
+- Gestionnaire de processus : pm2
+- Ports : patisserie sur 5650, site-demo sur 3001
+
+**Démarrage pm2** :
+```bash
+cd /var/www/generique-Webapp/WebApp/patisserie && pm2 start npm --name patisserie -- start
+cd /var/www/generique-Webapp/site-demo && pm2 start npm --name site-demo -- start
+pm2 save
+pm2 startup
+```
+
+**Problème `npm run dev` silencieux sur Mac** : La commande `npm run dev` dans `WebApp/patisserie/` ne produisait aucune sortie sur Mac (terminal silencieux). Aucune cause identifiée. Contourné en développant directement sur le serveur Hetzner.
+
+---
+
+## Roadmap mise à jour
+
+### Terminé
+- [x] Schéma SQL validé et documenté
+- [x] Docker + PostgreSQL configuré
+- [x] Projet Next.js initialisé
+- [x] Prisma 7 configuré avec driver adapter
+- [x] prisma db pull + prisma generate
+- [x] src/lib/prisma.ts
+- [x] src/lib/config.ts
+- [x] src/lib/services/catalogue.service.ts
+- [x] src/lib/services/commande.service.ts
+- [x] src/lib/services/devis.service.ts
+- [x] src/lib/services/limites.service.ts
+- [x] src/lib/services/stock.service.ts
+- [x] src/lib/services/mail.service.ts
+- [x] Jest configuré + 43 tests services passent
+- [x] src/validators/commande.validator.ts
+- [x] src/validators/devis.validator.ts
+- [x] src/validators/catalogue.validator.ts
+- [x] src/validators/admin.validator.ts
+- [x] Routes API publiques (catalogue, commande, devis)
+- [x] Routes API admin (commandes, devis, catalogue, config, stock)
+- [x] Tests validators (40 tests) + tests routes → 83 tests total
+- [x] Authentification next-auth v5 (auth.config.ts, auth.ts, middleware, login, setup)
+- [x] site-demo complet (frontend-only, port 3001, animations, Recharts, Zustand)
+- [x] Node.js v22.22.2 sur serveur Hetzner + pm2
+
+### À faire
+- [ ] Frontend client (accueil, catalogue, panier)
+- [ ] Frontend admin (dashboard, commandes, devis, catalogue, config, stock)
+- [ ] Déploiement Coolify + Dockerfile
+
+---
+
+# [2026-05-31] Frontend complet — client + admin
+
+Construction de l'intégralité du frontend (client + admin) en se basant
+fidèlement sur les maquettes du dossier `LaFrancoise/` (DA client crème/bordeaux)
+et la DA `Spyfi Admin` (glassmorphism, accent Moss). Aucun emoji sur le site —
+uniquement des icônes SVG inline et des images Unsplash libres de droits.
+
+## Architecture CSS — un seul `app/globals.css`
+
+Deux design systems cohabitent dans un seul fichier, séparés par scope pour
+éviter les collisions de variables (les deux utilisent `--color-accent`) :
+
+- **Client** : variables sous `:root` (`--color-accent: #7C2D3E`, palette crème).
+- **Admin** : variables et classes scopées sous `.admin-root` (`--color-accent:
+  #697C70`, surfaces glass sombres). Le layout admin enveloppe tout son contenu
+  dans `<div className="admin-root">`. Mode clair via `.admin-root[data-theme="light"]`.
+
+Polices chargées dans `app/layout.tsx` via `next/font/google` :
+Cormorant Garamond (serif client), DM Sans (sans client), Geist (admin) —
+exposées en variables CSS (`--font-cormorant`, `--font-dm-sans`, `--font-geist`).
+
+Les classes utilisées par les composants React sont définies dans deux blocs
+« ADDENDUM » en fin de fichier (client puis admin) pour garantir le rendu.
+
+## Frontend client (`app/`)
+
+Pas de route groups (`(client)`) car `app/page.tsx` existe déjà — on utilise un
+composant `ClientLayout` (header, blobs animés, bottom-nav liquid glass, toast)
+que chaque page enveloppe. Panier en `localStorage` via le hook `useCart`
+(SSR-safe : lecture dans `useEffect`, flag `mounted`).
+
+- `/` — accueil : hero, bandeau confiance, incontournables, histoire, avis, footer.
+- `/catalogue` — recherche + chips catégories + grille produits (`GET /api/catalogue`).
+- `/panier` — liste, contrôle quantité, récap, total.
+- `/commande` — formulaire **conditionné par la Config** + paiement simulé.
+- `/confirmation` — page de confirmation statique (commande ou devis).
+
+### Comportement conditionné par la Config (`GET /api/config`)
+
+Nouvelle route **publique** `app/api/config/route.ts` qui n'expose qu'une
+**liste blanche** de variables non sensibles (jamais `notif_admin_email` ni les
+réglages d'acompte). Le formulaire `/commande` s'adapte :
+- `mode_commande = "devis_only"` ou panier ≥ `seuil_devis` → bascule en formulaire
+  devis (téléphone requis, type d'événement).
+- `mode_paiement = "en_ligne"` → étape paiement simulé ; `"sur_place"` → soumission
+  directe ; `"au_choix_client"` → choix radio.
+- `delai_retrait_jours` → borne `min` du sélecteur de date.
+- `boutique_*` → carte boutique (adresse, téléphone, horaires).
+
+Champs obligatoires côté client réduits au strict minimum : **nom + email**.
+Le reste est conditionné par la Config.
+
+### Paiement simulé
+
+Carte bancaire factice pré-remplie (4242…), traitement simulé (~1,8 s), puis
+soumission réelle via `POST /api/commande`. **Le prix n'est jamais envoyé par le
+client** : le serveur le recalcule depuis la base (`creerCommande`). Aucune donnée
+bancaire réelle. À la validation, `creerCommande`/`creerDevis` déclenchent les
+emails Resend, puis redirection vers `/confirmation`.
+
+## Frontend admin (`app/admin/`)
+
+Layout `admin/layout.tsx` : `SessionProvider`, fond photo Unsplash fixe + overlay,
+`AdminNav` (sidebar desktop 220px, topbar avec fil d'Ariane + toggle thème + burger,
+bottom-nav mobile, menu overlay mobile). Toggle dark/light persisté en `localStorage`
+(`data-theme` sur `.admin-root`). Graphiques : composant `LineChart` SVG maison
+(line charts uniquement, conforme à la DA — pas de pie/bar).
+
+- `/admin` → redirige vers `/admin/dashboard`.
+- `/admin/dashboard` — 4 KPI, courbe revenus, derniers devis, dernières commandes.
+- `/admin/produits` — grille + modale création/édition + activer/désactiver.
+- `/admin/commandes` — tableau + filtre + modale détail (marquer prête / supprimer).
+- `/admin/devis` — tableau + filtre statut + modale workflow (valider/refuser/
+  acompte/prêt).
+- `/admin/statistiques` — KPI, courbe semaine/mois, top produits classés.
+- `/admin/configuration` — **chaque variable Config** avec le bon contrôle (toggle,
+  number, select, texte), regroupée par section. Les champs vides par défaut
+  (`boutique_*`, `zone_livraison`, `notif_admin_email`) sont visibles et éditables.
+- `/admin/parametres` — compte admin (email + mot de passe).
+- `/admin/login`, `/admin/setup`, `/admin/already-exists` — restylés en DA Spyfi.
+
+Toutes les pages admin appellent les routes `/api/admin/*` existantes, en
+respectant leur contrat (ex : `{ action: "toggle_actif" }`, `{ action:
+"marquer_prete" }`, workflow devis `valider`/`refuser`/`acompte_paye`/`marquer_pret`).
+
+## Nouveaux service + route
+
+- `src/lib/services/admin.service.ts` — `getAdminById`, `updateAdminEmail`
+  (vérifie l'unicité), `updateAdminPassword` (vérifie l'ancien mot de passe, hash
+  bcrypt coût 12).
+- `app/api/admin/parametres/route.ts` — `GET` (compte courant) / `PATCH` (email ou
+  mot de passe). Récupère l'admin via `auth()` (session) ; protégé aussi par le
+  middleware `/api/admin/*`.
+
+## Étape 4 — Resend
+
+`mail.service.ts` instanciait `new Resend(process.env.RESEND_API_KEY)` au niveau
+module → **levait « Missing API key » au chargement** quand la clé est vide, ce qui
+**cassait `next build`** (collecte des routes). Corrigé : instanciation paresseuse
+via `sendMail()` qui ne construit le client qu'à la demande et **n'envoie rien
+(warning) si la clé est absente** — mode démo non bloquant. Variables documentées
+dans `.env.example` : `RESEND_API_KEY`, `DOMAINE_EMAIL`, `REPLY_TO_EMAIL`. Le flux
+commande/devis appelle déjà les fonctions d'envoi — un déploiement réel n'a qu'à
+fournir une clé + un domaine vérifié.
+
+## Étape 6 — Revue de sécurité
+
+- **Prix non manipulables** : le client n'envoie jamais de montant ; recalcul serveur.
+- **Route config publique** : liste blanche stricte (test dédié vérifiant l'absence
+  des clés sensibles).
+- **Paramètres admin** : double protection (middleware + `auth()`), changement de mot
+  de passe avec vérification de l'ancien + hash bcrypt 12, unicité de l'email.
+- **Injection HTML dans les emails (corrigé)** : `nom`, `noteClient`, `typeEvenement`,
+  `numeroTel`, `noteAdmin`, `mail` étaient interpolés bruts dans le HTML des emails
+  (risque d'injection dans la boîte de l'admin). Ajout d'un helper `esc()` appliqué à
+  tous les champs fournis par l'utilisateur.
+- **XSS frontend** : interpolation JSX (échappée par React), aucun
+  `dangerouslySetInnerHTML`.
+
+## Bugs corrigés (avérés)
+
+- `app/api/admin/devis/route.ts` importait `@/app/generated/prisma/client`
+  → résolu en `src/app/generated` (inexistant). Corrigé en chemin relatif
+  `../../../generated/prisma/client`, cohérent avec les autres fichiers.
+- **Unités de prix** : le frontend divisait/multipliait par 100 (centimes) alors que
+  la base stocke `prix` en **euros** (Decimal, `multipleOf(0.01)`). Tous les
+  formatages corrigés (`Number(valeur)` directement).
+- **Noms de champs** : alignés sur le schéma — `prixTotal` (pas `total`),
+  `prixUnite` (pas `prixUnitaire`), `statutEnum` (pas `statut`),
+  `dateCommande` (pas `createdAt`), `items[].catalogue.nom`.
+
+## Étape 5 — Tests
+
+- `admin.service.test.ts` (7 tests) — getAdminById sans hash, update email
+  (libre/même admin/email pris), update password (ok/mauvais MDP/compte absent).
+  `bcryptjs` mocké. Ajout du modèle `admin` au mock Prisma partagé (`setup.ts`).
+- `config-public.route.test.ts` (2 tests) — la route publique n'interroge que des
+  clés non sensibles + en-tête de cache.
+- Tous les tests existants continuent de passer.
+
+**Résultat : 8 suites, 129 tests OK.** `next build` vert (30 routes), `tsc` propre.
+
+## Checklist
+
+- [x] Étape 1 — Lecture complète du projet (schéma, services, validators, routes)
+- [x] Étape 2 — Frontend client (config-aware, paiement simulé, email)
+- [x] Étape 3 — Frontend admin (DA Spyfi, next-auth, toutes les pages)
+- [x] Étape 4 — Resend (instanciation paresseuse + env documentées)
+- [x] Étape 5 — Tests des nouveautés (129 tests au total)
+- [x] Étape 6 — Revue de sécurité (injection email corrigée, prix serveur, config publique)
+- [x] Étape 7 — Documentation CLAUDE.md

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDevis, getDevisByStatut } from "@/lib/services/devis.service";
-import { StatutTypeDevis } from "@/app/generated/prisma/client";
+import { StatutTypeDevis } from "../../../generated/prisma/client";
 
 // GET /api/admin/devis
 // Retourne tous les devis ou filtrés par statut

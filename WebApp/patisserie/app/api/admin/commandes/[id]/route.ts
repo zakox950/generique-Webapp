@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import {
   getCommandeById,
+  marquerCommandePrete,
   supprimerCommande,
 } from "@/lib/services/commande.service";
 import { PatchCommandeSchema } from "@/validators/admin.validator";
@@ -52,19 +53,8 @@ export async function PATCH(req: Request, { params }: Params) {
     const body = await req.json();
     const data = PatchCommandeSchema.parse(body);
 
-    // Seule action disponible pour les commandes directes
     if (data.action === "marquer_prete") {
-      const commande = await getCommandeById(idNum);
-
-      if (!commande) {
-        return NextResponse.json(
-          { error: "Commande introuvable" },
-          { status: 404 },
-        );
-      }
-
-      // TODO: envoyer email "commande prête" au client
-      // Pour l'instant on retourne juste la commande
+      const commande = await marquerCommandePrete(idNum);
       return NextResponse.json(commande);
     }
 

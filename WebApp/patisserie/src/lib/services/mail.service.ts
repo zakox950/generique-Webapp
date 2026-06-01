@@ -12,7 +12,25 @@ import type {
   CatalogueDevisItem,
 } from "../../../app/generated/prisma/client";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Instanciation paresseuse du client Resend.
+// Construire `new Resend("")` lève une erreur ("Missing API key") au chargement
+// du module, ce qui cassait le build quand RESEND_API_KEY est vide.
+// On instancie donc à la demande, et on n'envoie rien si la clé est absente.
+let _resend: Resend | null = null;
+
+type SendPayload = Parameters<Resend["emails"]["send"]>[0];
+
+async function sendMail(payload: SendPayload) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    console.warn(
+      "[mail] RESEND_API_KEY manquante — email non envoyé (mode démo).",
+    );
+    return;
+  }
+  if (!_resend) _resend = new Resend(key);
+  return _resend.emails.send(payload);
+}
 
 // =========================================
 // TYPES
@@ -33,6 +51,17 @@ type DevisAvecItems = Devis & {
 async function getFromEmail(): Promise<string> {
   const nom = await getBoutiqueNom();
   return `${nom || "La Pâtisserie"} <commandes@${process.env.DOMAINE_EMAIL}>`;
+}
+
+// Échappe les valeurs fournies par l'utilisateur avant injection dans le HTML
+// des emails — évite l'injection de balises/contenu dans la boîte de l'admin.
+function esc(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function formatDate(date: Date): string {
@@ -66,7 +95,7 @@ export async function sendConfirmationCommande(commande: CommandeAvecItems) {
     .map(
       (item) => `
     <tr>
-      <td>${item.catalogue.nom}</td>
+      <td>${esc(item.catalogue.nom)}</td>
       <td>${item.quantite}</td>
       <td>${formatPrix(item.prixUnite)}</td>
       <td>${formatPrix(Number(item.prixUnite) * (item.quantite ?? 1))}</td>
@@ -75,13 +104,13 @@ export async function sendConfirmationCommande(commande: CommandeAvecItems) {
     )
     .join("");
 
-  await resend.emails.send({
+  await sendMail({
     from,
     replyTo: process.env.REPLY_TO_EMAIL,
     to: commande.mail,
     subject: `Confirmation de votre commande #${commande.id}`,
     html: `
-      <h2>Merci pour votre commande, ${commande.nom} !</h2>
+      <h2>Merci pour votre commande, ${esc(commande.nom)} !</h2>
       <p>Votre commande <strong>#${commande.id}</strong> a bien été enregistrée.</p>
 
       <h3>Récapitulatif</h3>
@@ -100,7 +129,7 @@ export async function sendConfirmationCommande(commande: CommandeAvecItems) {
       <p><strong>Total : ${formatPrix(commande.prixTotal)}</strong></p>
       <p><strong>Date de retrait : ${formatDate(commande.dateRetrait)}</strong></p>
       ${adresse ? `<p>Adresse : ${adresse}</p>` : ""}
-      ${commande.noteClient ? `<p>Votre note : ${commande.noteClient}</p>` : ""}
+      ${commande.noteClient ? `<p>Votre note : ${esc(commande.noteClient)}</p>` : ""}
 
       <p>À bientôt !</p>
     `,
@@ -117,7 +146,7 @@ export async function sendNouvelleCommandeAdmin(commande: CommandeAvecItems) {
     .map(
       (item) => `
     <tr>
-      <td>${item.catalogue.nom}</td>
+      <td>${esc(item.catalogue.nom)}</td>
       <td>${item.quantite}</td>
       <td>${formatPrix(item.prixUnite)}</td>
     </tr>
@@ -125,13 +154,13 @@ export async function sendNouvelleCommandeAdmin(commande: CommandeAvecItems) {
     )
     .join("");
 
-  await resend.emails.send({
+  await sendMail({
     from,
     to: adminEmail,
-    subject: `Nouvelle commande #${commande.id} — ${commande.nom}`,
+    subject: `Nouvelle commande #${commande.id} — ${esc(commande.nom)}`,
     html: `
       <h2>Nouvelle commande reçue</h2>
-      <p><strong>Client :</strong> ${commande.nom} (${commande.mail})</p>
+      <p><strong>Client :</strong> ${esc(commande.nom)} (${esc(commande.mail)})</p>
       <p><strong>Date de retrait :</strong> ${formatDate(commande.dateRetrait)}</p>
       <p><strong>Total :</strong> ${formatPrix(commande.prixTotal)}</p>
       <p><strong>Paiement :</strong> ${commande.paiementChoisi}</p>
@@ -144,7 +173,7 @@ export async function sendNouvelleCommandeAdmin(commande: CommandeAvecItems) {
         <tbody>${itemsHtml}</tbody>
       </table>
 
-      ${commande.noteClient ? `<p><strong>Note du client :</strong> ${commande.noteClient}</p>` : ""}
+      ${commande.noteClient ? `<p><strong>Note du client :</strong> ${esc(commande.noteClient)}</p>` : ""}
     `,
   });
 }
@@ -156,24 +185,24 @@ export async function sendNouvelleCommandeAdmin(commande: CommandeAvecItems) {
 export async function sendNouveauDevisClient(devis: DevisAvecItems) {
   const from = await getFromEmail();
 
-  await resend.emails.send({
+  await sendMail({
     from,
     replyTo: process.env.REPLY_TO_EMAIL,
     to: devis.mail,
     subject: `Votre demande de devis #${devis.id} a bien été reçue`,
     html: `
-      <h2>Merci pour votre demande, ${devis.nom} !</h2>
+      <h2>Merci pour votre demande, ${esc(devis.nom)} !</h2>
       <p>Votre demande de devis <strong>#${devis.id}</strong> a bien été reçue.</p>
       <p>Nous allons l'étudier et vous recontacterons dans les plus brefs délais.</p>
 
       <h3>Récapitulatif de votre demande</h3>
       <p><strong>Date souhaitée :</strong> ${formatDate(devis.dateSouhaitee)}</p>
-      ${devis.typeEvenement ? `<p><strong>Événement :</strong> ${devis.typeEvenement}</p>` : ""}
+      ${devis.typeEvenement ? `<p><strong>Événement :</strong> ${esc(devis.typeEvenement)}</p>` : ""}
       <p><strong>Montant estimé :</strong> ${formatPrix(devis.prixTotal)}</p>
       ${Number(devis.acompte) > 0 ? `<p><strong>Acompte prévu :</strong> ${formatPrix(devis.acompte)}</p>` : ""}
       <p><strong>Devis valable jusqu'au :</strong> ${devis.expireAt ? formatDate(devis.expireAt) : "Non défini"}</p>
 
-      ${devis.noteClient ? `<p><strong>Votre note :</strong> ${devis.noteClient}</p>` : ""}
+      ${devis.noteClient ? `<p><strong>Votre note :</strong> ${esc(devis.noteClient)}</p>` : ""}
 
       <p>À bientôt !</p>
     `,
@@ -190,7 +219,7 @@ export async function sendNouveauDevisAdmin(devis: DevisAvecItems) {
     .map(
       (item) => `
     <tr>
-      <td>${item.catalogue.nom}</td>
+      <td>${esc(item.catalogue.nom)}</td>
       <td>${item.quantite}</td>
       <td>${formatPrix(item.prixUnite)}</td>
     </tr>
@@ -198,16 +227,16 @@ export async function sendNouveauDevisAdmin(devis: DevisAvecItems) {
     )
     .join("");
 
-  await resend.emails.send({
+  await sendMail({
     from,
     to: adminEmail,
-    subject: `Nouveau devis #${devis.id} — ${devis.nom}`,
+    subject: `Nouveau devis #${devis.id} — ${esc(devis.nom)}`,
     html: `
       <h2>Nouvelle demande de devis</h2>
-      <p><strong>Client :</strong> ${devis.nom} (${devis.mail})</p>
-      <p><strong>Téléphone :</strong> ${devis.numeroTel}</p>
+      <p><strong>Client :</strong> ${esc(devis.nom)} (${esc(devis.mail)})</p>
+      <p><strong>Téléphone :</strong> ${esc(devis.numeroTel)}</p>
       <p><strong>Date souhaitée :</strong> ${formatDate(devis.dateSouhaitee)}</p>
-      ${devis.typeEvenement ? `<p><strong>Événement :</strong> ${devis.typeEvenement}</p>` : ""}
+      ${devis.typeEvenement ? `<p><strong>Événement :</strong> ${esc(devis.typeEvenement)}</p>` : ""}
       <p><strong>Total estimé :</strong> ${formatPrix(devis.prixTotal)}</p>
       <p><strong>Acompte :</strong> ${formatPrix(devis.acompte)}</p>
 
@@ -219,7 +248,7 @@ export async function sendNouveauDevisAdmin(devis: DevisAvecItems) {
         <tbody>${itemsHtml}</tbody>
       </table>
 
-      ${devis.noteClient ? `<p><strong>Note du client :</strong> ${devis.noteClient}</p>` : ""}
+      ${devis.noteClient ? `<p><strong>Note du client :</strong> ${esc(devis.noteClient)}</p>` : ""}
     `,
   });
 }
@@ -227,13 +256,13 @@ export async function sendNouveauDevisAdmin(devis: DevisAvecItems) {
 export async function sendDevisValide(devis: DevisAvecItems) {
   const from = await getFromEmail();
 
-  await resend.emails.send({
+  await sendMail({
     from,
     replyTo: process.env.REPLY_TO_EMAIL,
     to: devis.mail,
     subject: `Votre devis #${devis.id} a été accepté`,
     html: `
-      <h2>Bonne nouvelle, ${devis.nom} !</h2>
+      <h2>Bonne nouvelle, ${esc(devis.nom)} !</h2>
       <p>Votre devis <strong>#${devis.id}</strong> a été accepté.</p>
 
       <p><strong>Total :</strong> ${formatPrix(devis.prixTotal)}</p>
@@ -247,7 +276,7 @@ export async function sendDevisValide(devis: DevisAvecItems) {
       }
       <p><strong>Date de retrait confirmée :</strong> ${formatDate(devis.dateRetrait)}</p>
 
-      ${devis.noteAdmin ? `<p><strong>Message :</strong> ${devis.noteAdmin}</p>` : ""}
+      ${devis.noteAdmin ? `<p><strong>Message :</strong> ${esc(devis.noteAdmin)}</p>` : ""}
 
       <p>À bientôt !</p>
     `,
@@ -257,17 +286,17 @@ export async function sendDevisValide(devis: DevisAvecItems) {
 export async function sendDevisRefuse(devis: DevisAvecItems) {
   const from = await getFromEmail();
 
-  await resend.emails.send({
+  await sendMail({
     from,
     replyTo: process.env.REPLY_TO_EMAIL,
     to: devis.mail,
     subject: `Votre demande de devis #${devis.id}`,
     html: `
-      <h2>Bonjour ${devis.nom},</h2>
+      <h2>Bonjour ${esc(devis.nom)},</h2>
       <p>Nous avons bien étudié votre demande de devis <strong>#${devis.id}</strong>.</p>
       <p>Malheureusement, nous ne sommes pas en mesure de donner suite à votre demande pour le moment.</p>
 
-      ${devis.noteAdmin ? `<p><strong>Motif :</strong> ${devis.noteAdmin}</p>` : ""}
+      ${devis.noteAdmin ? `<p><strong>Motif :</strong> ${esc(devis.noteAdmin)}</p>` : ""}
 
       <p>N'hésitez pas à nous recontacter pour toute autre demande.</p>
       <p>Cordialement</p>
@@ -279,13 +308,13 @@ export async function sendDevisPret(devis: DevisAvecItems) {
   const from = await getFromEmail();
   const adresse = await getBoutiqueAdresse();
 
-  await resend.emails.send({
+  await sendMail({
     from,
     replyTo: process.env.REPLY_TO_EMAIL,
     to: devis.mail,
     subject: `Votre commande #${devis.id} est prête !`,
     html: `
-      <h2>Votre commande est prête, ${devis.nom} !</h2>
+      <h2>Votre commande est prête, ${esc(devis.nom)} !</h2>
       <p>Votre commande <strong>#${devis.id}</strong> est prête à être retirée.</p>
 
       <p><strong>Date de retrait :</strong> ${formatDate(devis.dateRetrait)}</p>

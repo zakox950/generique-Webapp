@@ -75,6 +75,7 @@ model CommandeDirect {
   mail           String
   noteClient     String?         @map("noteclient")
   paiementChoisi String?         @map("paiementchoisi") @db.VarChar(20)
+  prete          Boolean         @default(false)
   items          CatalogueItem[]
 
   @@map("commandedirect")

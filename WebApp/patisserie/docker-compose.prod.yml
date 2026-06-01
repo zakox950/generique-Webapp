@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:16
+    container_name: patisserie_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-patisserie}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est requis}
+      POSTGRES_DB: ${POSTGRES_DB:-patisserie}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Script SQL initial (schéma + seed) si la base est vide
+      - ./patisserie.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      # Migrations incrémentales
+      - ./prisma/migrations:/docker-entrypoint-initdb.d/migrations:ro
+    networks:
+      - patisserie_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-patisserie} -d ${POSTGRES_DB:-patisserie}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: patisserie_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-patisserie}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-patisserie}
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET est requis}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      DOMAINE_EMAIL: ${DOMAINE_EMAIL:-}
+      REPLY_TO_EMAIL: ${REPLY_TO_EMAIL:-}
+    ports:
+      - "${PORT:-3000}:3000"
+    networks:
+      - patisserie_net
+
+networks:
+  patisserie_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
