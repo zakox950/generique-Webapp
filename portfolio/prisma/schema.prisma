@@ -1,0 +1,34 @@
+// Spyfie — schéma Prisma. Modèle Target tel que décrit dans DA_SPYFIE.md §5.3.
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CaptureStatus {
+  PENDING
+  CAPTURING
+  CACHED
+  FAILED
+}
+
+model Target {
+  id          String        @id @default(cuid())
+  title       String
+  url         String
+  slug        String        @unique
+  desktopShot String? // chemin relatif preview desktop (sous STORAGE_DIR)
+  mobileShot  String? // chemin relatif preview mobile
+  status      CaptureStatus @default(PENDING)
+  capturedAt  DateTime?
+  order       Int           @default(0)
+  tags        String[]
+  description String?
+  createdAt   DateTime      @default(now())
+
+  @@index([status])
+  @@index([order])
+}
