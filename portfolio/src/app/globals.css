@@ -1,0 +1,173 @@
+/* ============================================================
+   SPYFIE — Design System (source: DESIGN_SYSTEM.md)
+   Console de reconnaissance. Verre = instrument. Un seul glow.
+   ============================================================ */
+
+:root {
+  /* Couleur */
+  --void: #07090f;
+  --slate-deep: #0e1320;
+  --glass: rgba(150, 180, 220, 0.06);
+  --glass-border: rgba(150, 180, 220, 0.14);
+  --signal: #4de2ff;
+  --interference: #9a6cff;
+  --trace: #6b7689;
+  --text: #f2f5fa;
+  --fail: #ff6b6b;
+
+  /* Type — variables alimentées par next/font dans layout.tsx */
+  --font-display: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  --text-xs: 0.72rem;
+  --text-sm: 0.82rem;
+  --text-base: 0.95rem;
+  --text-lg: 1.4rem;
+  --text-xl: 2.2rem;
+  --text-2xl: 3.2rem;
+
+  /* Mouvement */
+  --ease-deck: cubic-bezier(0.32, 1, 0.32, 1);
+  --ease-scan: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --dur-deck: 420ms;
+  --dur-scan: 900ms;
+  --dur-hover: 180ms;
+
+  --radius: 14px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Focus clavier visible — non négociable */
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------- Atmosphère : orbs de fond ---------- */
+.orbs {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.12;
+  background: var(--interference);
+}
+.orb-a {
+  width: 540px;
+  height: 540px;
+  top: -160px;
+  left: -120px;
+  animation: orb-drift-a 38s linear infinite;
+}
+.orb-b {
+  width: 420px;
+  height: 420px;
+  bottom: -140px;
+  right: -100px;
+  background: var(--signal);
+  opacity: 0.07;
+  animation: orb-drift-b 45s linear infinite;
+}
+
+@keyframes orb-drift-a {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(60px, 40px) scale(1.08); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+@keyframes orb-drift-b {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-50px, -30px) scale(1.05); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+/* ---------- Surface verre (console) ---------- */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+}
+
+/* ---------- Typo utilitaires ---------- */
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--trace);
+}
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--trace);
+}
+.display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Wordmark ---------- */
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.wordmark .dot {
+  color: var(--signal);
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .orb {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
