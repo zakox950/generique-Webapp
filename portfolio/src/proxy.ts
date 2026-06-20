@@ -4,7 +4,7 @@ import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
 // Routes accessibles sans session (sinon on ne pourrait jamais se connecter).
 const EXEMPT = ["/admin/login", "/api/admin/login"];
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (EXEMPT.some((p) => pathname === p)) {
