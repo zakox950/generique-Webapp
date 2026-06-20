@@ -171,3 +171,381 @@ button {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ============================================================
+   DECK PUBLIC — pile de cibles interceptées (élément signature)
+   ============================================================ */
+
+.deck-page {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.deck-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+.deck-header .left {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+}
+.deck-header .count {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--trace);
+}
+.btn-console {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: border-color var(--dur-hover) ease, color var(--dur-hover) ease;
+}
+.btn-console:hover {
+  border-color: var(--signal);
+  color: var(--signal);
+}
+
+/* Stage (pile) */
+.deck-stage {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.5rem 1rem;
+  perspective: 1400px;
+  outline: none;
+}
+.deck-viewport {
+  position: relative;
+  width: 100%;
+  max-width: 860px;
+  aspect-ratio: 16 / 10;
+}
+
+/* Carte */
+.deck-card {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--slate-deep);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.7);
+  transition:
+    transform var(--dur-deck) var(--ease-deck),
+    opacity var(--dur-deck) var(--ease-deck);
+  will-change: transform, opacity;
+  cursor: pointer;
+  transform-origin: center top;
+}
+.deck-card .shot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.deck-card .shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+.deck-card.is-active {
+  cursor: zoom-in;
+}
+.deck-card.is-active:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+
+/* Télémétrie (bande mono en haut de la carte active) */
+.telemetry-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 8px 12px;
+  background: linear-gradient(180deg, rgba(7, 9, 15, 0.92), rgba(7, 9, 15, 0));
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--trace);
+}
+.telemetry-bar .dotsig {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: 0 0 8px var(--signal);
+  flex: none;
+}
+.telemetry-bar .url {
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.telemetry-bar .vp {
+  margin-left: auto;
+  flex: none;
+}
+.telemetry-bar .status {
+  flex: none;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--trace);
+}
+
+/* Scan-line de révélation (une passe) */
+.scanline {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: hidden;
+}
+.scanline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 28%;
+  top: -28%;
+  background: linear-gradient(
+    180deg,
+    rgba(77, 226, 255, 0) 0%,
+    rgba(77, 226, 255, 0.18) 50%,
+    rgba(77, 226, 255, 0) 100%
+  );
+  border-bottom: 1px solid rgba(77, 226, 255, 0.6);
+  animation: scan var(--dur-scan) var(--ease-scan) 1 forwards;
+}
+@keyframes scan {
+  from { transform: translateY(0); }
+  to { transform: translateY(460%); }
+}
+
+/* Footer : nom de cible + progression */
+.deck-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem 1.6rem;
+  min-height: 92px;
+}
+.deck-footer .target-name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  letter-spacing: -0.01em;
+  transition: opacity var(--dur-deck) ease;
+}
+.deck-footer .target-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--trace);
+  margin-top: 4px;
+}
+.deck-footer .hint {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--trace);
+  text-align: right;
+}
+.deck-footer .tags {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.deck-footer .tag {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--trace);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+/* Progression latérale (dots) */
+.deck-dots {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  z-index: 20;
+}
+.deck-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: var(--glass-border);
+  transition: background var(--dur-hover) ease, transform var(--dur-hover) ease;
+}
+.deck-dot.on {
+  background: var(--signal);
+  box-shadow: 0 0 8px var(--signal);
+  transform: scale(1.3);
+}
+
+/* Vide */
+.deck-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+/* ---------- Grille « tout déplier » ---------- */
+.expanded-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  padding: 0 1.5rem 3rem;
+}
+.grid-card {
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--slate-deep);
+  border: 1px solid var(--glass-border);
+  cursor: zoom-in;
+  transition: border-color var(--dur-hover) ease, transform var(--dur-hover) ease;
+  text-align: left;
+  padding: 0;
+}
+.grid-card:hover {
+  border-color: var(--signal);
+  transform: translateY(-2px);
+}
+.grid-card .gshot {
+  aspect-ratio: 16 / 10;
+  width: 100%;
+}
+.grid-card .gshot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+.grid-card .gmeta {
+  padding: 10px 12px;
+}
+.grid-card .gname {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+}
+.grid-card .gurl {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--trace);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Lightbox full-page ---------- */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(7, 9, 15, 0.92);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  cursor: zoom-out;
+}
+.lightbox-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--trace);
+  flex: none;
+}
+.lightbox-head .lb-url {
+  color: var(--text);
+}
+.lightbox-close {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.lightbox-close:hover {
+  border-color: var(--signal);
+  color: var(--signal);
+}
+.lightbox-scroll {
+  flex: 1;
+  overflow: auto;
+  padding: 0 16px 24px;
+  cursor: default;
+}
+.lightbox-scroll img {
+  display: block;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--glass-border);
+}
+
+@media (max-width: 768px) {
+  .deck-viewport { aspect-ratio: 3 / 4; max-width: 420px; }
+  .deck-dots { right: 10px; }
+}
+
+/* Reduced motion : scan-line coupée */
+@media (prefers-reduced-motion: reduce) {
+  .scanline::after { animation: none; opacity: 0; }
+  .deck-card { transition: opacity 0.15s linear; }
+}
+
+/* Affichage conditionnel viewport (télémétrie) */
+.mobile-only { display: none; }
+.desktop-only { display: inline; }
+@media (max-width: 768px) {
+  .mobile-only { display: inline; }
+  .desktop-only { display: none; }
+}
