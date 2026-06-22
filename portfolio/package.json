@@ -1,37 +1,26 @@
 {
-  "name": "spyfie-portfolio",
+  "name": "portfolio",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3100",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start -p 3100",
-    "lint": "eslint",
-    "prisma:generate": "prisma generate",
-    "capture:test": "tsx scripts/capture-test.ts"
+    "lint": "next lint"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "7.8.0",
-    "@prisma/client": "7.8.0",
-    "dotenv": "^17.4.2",
-    "next": "16.2.6",
-    "pg": "8.20.0",
-    "playwright": "^1.56.0",
-    "prisma": "7.8.0",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "sharp": "0.34.5",
-    "zod": "4.4.3"
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.15.0",
+    "next": "15.3.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "3.2.0",
-    "@types/node": "20.19.41",
-    "@types/pg": "8.11.10",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
-    "eslint": "9.39.4",
-    "eslint-config-next": "16.2.6",
-    "tsx": "4.19.2",
-    "typescript": "5.9.3"
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.3",
+    "typescript": "^5"
   }
 }
