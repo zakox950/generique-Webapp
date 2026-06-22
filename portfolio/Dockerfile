@@ -16,6 +16,8 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+# S'assurer que /app/public existe même si le dossier est absent du repo
+RUN mkdir -p /app/public
 RUN npx prisma generate
 RUN NEXT_TELEMETRY_DISABLED=1 npm run build
 
