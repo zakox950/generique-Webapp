@@ -33,7 +33,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 # ---- Stage 3 : runtime avec Playwright/Chromium ----
-FROM mcr.microsoft.com/playwright:v1.52.0-jammy AS runner
+FROM mcr.microsoft.com/playwright:v1.56.0-jammy AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
