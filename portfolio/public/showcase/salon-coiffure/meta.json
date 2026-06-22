@@ -1,0 +1,9 @@
+{
+  "title": "NOIR Studio",
+  "category": "Coiffeur · Réservation",
+  "year": "2026",
+  "description": "Site one-page tech pour salon de coiffure avec prise de rendez-vous.",
+  "tags": ["Réservation", "Dark UI", "One-page"],
+  "accent": "#FACC15",
+  "order": 2
+}

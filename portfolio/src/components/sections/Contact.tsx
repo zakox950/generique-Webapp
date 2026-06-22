@@ -27,7 +27,7 @@ export default function Contact() {
           transition={{ duration: 0.9, ease }}
         >
           On discute<br />
-          de ton <span className="orange">projet&nbsp;?</span>
+          de ton <span className="serif-accent orange">projet</span>&nbsp;?
         </motion.h2>
 
         <div className="contact-grid">

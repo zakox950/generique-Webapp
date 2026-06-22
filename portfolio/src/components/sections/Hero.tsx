@@ -8,32 +8,39 @@ export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);
   const { scrollY } = useScroll();
 
-  /* Three parallax layers — the further back, the more it lags on scroll */
-  const glowY    = useTransform(scrollY, [0, 1000], [0, 340]); // slowest = deepest
-  const decoY    = useTransform(scrollY, [0, 1000], [0, 200]); // mid
-  const contentY = useTransform(scrollY, [0, 1000], [0, 80]);  // fastest = surface
-  const contentOpacity = useTransform(scrollY, [280, 700], [1, 0]);
+  /* Multi-layer parallax — deeper layers lag more on scroll */
+  const glowY    = useTransform(scrollY, [0, 1000], [0, 360]);
+  const decoY    = useTransform(scrollY, [0, 1000], [0, 210]);
+  const contentY = useTransform(scrollY, [0, 1000], [0, 80]);
+  const contentOpacity = useTransform(scrollY, [280, 720], [1, 0]);
 
   return (
     <section className="hero" id="home" ref={heroRef}>
 
-      {/* ─── Layer 1 — Background glow (slowest) ─── */}
+      {/* ─── Layer 1 — background glows (slowest) ─── */}
       <motion.div
         style={{ position: "absolute", inset: 0, pointerEvents: "none", y: glowY }}
         aria-hidden="true"
       >
         <div className="hero-glow" />
+        <div className="hero-glow hero-glow-2" />
       </motion.div>
 
-      {/* ─── Layer 2 — Decorative wordmark (mid speed) ─── */}
+      {/* ─── Layer 2 — decorative wordmark (mid, gently floating) ─── */}
       <motion.div
         style={{ position: "absolute", inset: 0, pointerEvents: "none", y: decoY }}
         aria-hidden="true"
       >
-        <div className="hero-deco">Spyfie.</div>
+        <motion.div
+          className="hero-deco"
+          animate={{ y: [0, -18, 0] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        >
+          Spyfie.
+        </motion.div>
       </motion.div>
 
-      {/* ─── Layer 3 — Foreground content (fastest) ─── */}
+      {/* ─── Layer 3 — foreground content (fastest) ─── */}
       <motion.div style={{ y: contentY, opacity: contentOpacity }}>
         <motion.p
           className="hero-eyebrow"
@@ -41,30 +48,32 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease }}
         >
-          Studio digital
+          <span className="dot-pulse" /> Studio digital — disponible
         </motion.p>
 
-        <motion.h1
-          className="hero-headline"
-          initial={{ opacity: 0, y: 48 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.1, ease }}
-        >
-          Spyfie<span className="orange">.</span>
-        </motion.h1>
+        <h1 className="hero-headline">
+          <motion.span
+            style={{ display: "inline-block" }}
+            initial={{ opacity: 0, y: 60, rotateX: 40 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            transition={{ duration: 1, delay: 0.1, ease }}
+          >
+            Spyfie<span className="orange">.</span>
+          </motion.span>
+        </h1>
 
         <motion.div
           className="hero-bottom"
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.25, ease }}
+          transition={{ duration: 0.8, delay: 0.3, ease }}
         >
           <p className="hero-tagline">
             On crée. On livre.<br />
-            <strong>On recommence.</strong>
+            On <span className="serif-accent orange">recommence</span>.
           </p>
           <div className="hero-actions">
-            <a href="#projects" className="btn-primary">Voir les projets →</a>
+            <a href="#projects" className="btn-primary magnetic">Voir les projets →</a>
             <a href="#contact" className="btn-ghost">Démarrer</a>
           </div>
         </motion.div>

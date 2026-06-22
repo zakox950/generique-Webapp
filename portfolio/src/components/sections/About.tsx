@@ -42,7 +42,7 @@ export default function About() {
               transition={{ duration: 0.8, ease }}
             >
               Code sharp.<br />
-              Design <span className="orange">bold.</span><br />
+              Design <span className="serif-accent orange">bold</span>.<br />
               Ship fast.
             </motion.p>
           </motion.div>

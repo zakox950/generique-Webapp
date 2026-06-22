@@ -1,14 +1,21 @@
 import Navbar from "@/components/ui/Navbar";
 import Hero from "@/components/sections/Hero";
-import Projects from "@/components/sections/Projects";
+import Work from "@/components/sections/Work";
 import Services from "@/components/sections/Services";
 import About from "@/components/sections/About";
 import Contact from "@/components/sections/Contact";
+import { getShowcaseSites } from "@/lib/showcase";
 import { stack } from "@/lib/data";
+
+// Re-read the showcase folder on every request so dropping a new
+// site folder + restart picks it up without code changes.
+export const dynamic = "force-dynamic";
 
 const doubled = [...stack, ...stack];
 
 export default function Home() {
+  const sites = getShowcaseSites();
+
   return (
     <>
       <Navbar />
@@ -16,7 +23,7 @@ export default function Home() {
       <main>
         <Hero />
 
-        <Projects />
+        <Work sites={sites} />
 
         {/* ─── Marquee strip ─── */}
         <div className="marquee-strip" aria-hidden="true">
