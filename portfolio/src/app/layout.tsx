@@ -2,8 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Portfolio — Développement Web & Design",
-  description: "Agence de développement web. Nous créons des applications modernes, performantes et sur-mesure.",
+  title: "Spyfie — Studio Digital",
+  description: "Studio de développement web sur-mesure. Applications Next.js, design UI/UX, backend scalable.",
+  openGraph: {
+    title: "Spyfie — Studio Digital",
+    description: "On crée. On livre. On recommence.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

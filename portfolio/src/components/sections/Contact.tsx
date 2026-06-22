@@ -1,5 +1,8 @@
 "use client";
 import { useState } from "react";
+import { motion } from "framer-motion";
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 export default function Contact() {
   const [sent, setSent] = useState(false);
@@ -15,58 +18,99 @@ export default function Contact() {
 
   return (
     <section id="contact">
-      <div className="contact-wrapper">
-        <div className="contact-info">
-          <div className="section-label">Contact</div>
-          <h3>On discute de votre projet ?</h3>
-          <p>
-            Une idée, un projet, une question ? Décrivez-nous ce que vous cherchez
-            et on revient vers vous sous 24h.
-          </p>
-          <div className="contact-links">
-            <a href="mailto:hello@devstudio.fr" className="contact-link">
-              → hello@devstudio.fr
-            </a>
-            <a href="https://linkedin.com" target="_blank" rel="noopener" className="contact-link">
-              → LinkedIn
-            </a>
-            <a href="https://github.com" target="_blank" rel="noopener" className="contact-link">
-              → GitHub
-            </a>
-          </div>
-        </div>
+      <div className="section">
+        <motion.h2
+          className="contact-hero"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.9, ease }}
+        >
+          On discute<br />
+          de ton <span className="orange">projet&nbsp;?</span>
+        </motion.h2>
 
-        {sent ? (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: "1rem" }}>
-            <div style={{ fontSize: "3rem" }}>✓</div>
-            <p style={{ color: "var(--blue-300)", fontFamily: "var(--font-mono)", textAlign: "center" }}>
-              Message reçu !<br />On revient vers vous rapidement.
-            </p>
-          </div>
-        ) : (
-          <form className="contact-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label" htmlFor="name">Nom</label>
-              <input id="name" className="form-input" type="text" placeholder="Jean Dupont" required />
+        <div className="contact-grid">
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, delay: 0.1, ease }}
+          >
+            <div className="contact-links">
+              <a href="mailto:hello@spyfie.fr" className="contact-link">
+                → hello@spyfie.fr
+              </a>
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="contact-link"
+              >
+                → LinkedIn
+              </a>
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="contact-link"
+              >
+                → GitHub
+              </a>
             </div>
-            <div className="form-group">
-              <label className="form-label" htmlFor="email">Email</label>
-              <input id="email" className="form-input" type="email" placeholder="jean@exemple.fr" required />
-            </div>
-            <div className="form-group">
-              <label className="form-label" htmlFor="message">Projet</label>
-              <textarea
-                id="message"
-                className="form-textarea"
-                placeholder="Décrivez votre projet, vos besoins, votre budget approximatif..."
-                required
-              />
-            </div>
-            <button type="submit" className="form-submit" disabled={busy}>
-              {busy ? "Envoi..." : "Envoyer le message →"}
-            </button>
-          </form>
-        )}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, delay: 0.18, ease }}
+          >
+            {sent ? (
+              <div style={{ padding: "2rem 0" }}>
+                <div style={{ fontSize: "2rem", color: "var(--orange)", marginBottom: "0.75rem" }}>✓</div>
+                <p style={{ color: "var(--muted)" }}>
+                  Message reçu — on revient vers vous rapidement.
+                </p>
+              </div>
+            ) : (
+              <form className="contact-form" onSubmit={handleSubmit}>
+                <div className="form-field">
+                  <label className="form-label" htmlFor="cf-name">Nom</label>
+                  <input
+                    id="cf-name"
+                    className="form-input"
+                    type="text"
+                    placeholder="Jean Dupont"
+                    required
+                  />
+                </div>
+                <div className="form-field">
+                  <label className="form-label" htmlFor="cf-email">Email</label>
+                  <input
+                    id="cf-email"
+                    className="form-input"
+                    type="email"
+                    placeholder="jean@exemple.fr"
+                    required
+                  />
+                </div>
+                <div className="form-field">
+                  <label className="form-label" htmlFor="cf-message">Projet</label>
+                  <textarea
+                    id="cf-message"
+                    className="form-textarea"
+                    placeholder="Décrivez votre projet..."
+                    required
+                  />
+                </div>
+                <button type="submit" className="form-submit" disabled={busy}>
+                  {busy ? "Envoi..." : "Envoyer →"}
+                </button>
+              </form>
+            )}
+          </motion.div>
+        </div>
       </div>
     </section>
   );

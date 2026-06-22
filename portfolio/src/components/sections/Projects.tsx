@@ -1,83 +1,60 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { projects } from "@/lib/data";
 
+const scenes = ["scene-1", "scene-2", "scene-3", "scene-4", "scene-5", "scene-6"] as const;
+const ease = [0.16, 1, 0.3, 1] as const;
+
 export default function Projects() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const cards = sectionRef.current?.querySelectorAll(".project-card");
-    if (!cards) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e, i) => {
-          if (e.isIntersecting) {
-            (e.target as HTMLElement).style.transitionDelay = `${i * 80}ms`;
-            e.target.classList.add("visible");
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-    cards.forEach((c) => io.observe(c));
-    return () => io.disconnect();
-  }, []);
-
   return (
-    <section id="projects" ref={sectionRef}>
-      <div className="section-label">Réalisations</div>
-      <h2 className="section-title">Nos derniers projets</h2>
-      <p className="section-sub">
-        Chaque projet est une opportunité de repousser les limites du web.
-        Voici une sélection de nos réalisations récentes.
-      </p>
-
-      <div className="projects-grid">
-        {projects.map((p) => (
-          <article
-            key={p.id}
-            className={`project-card reveal${p.featured ? " featured" : ""}`}
+    <section id="projects">
+      <div className="section">
+        <div className="section-header">
+          <motion.h2
+            className="section-title"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.7, ease }}
           >
-            <div className="project-image">
-              <div className="project-placeholder">◈</div>
-              <div className="project-overlay">
-                {p.url && (
-                  <a href={p.url} target="_blank" rel="noopener" className="overlay-link"
-                    onClick={(e) => e.stopPropagation()}>
-                    Voir le site ↗
-                  </a>
-                )}
-                {p.github && (
-                  <a href={p.github} target="_blank" rel="noopener" className="overlay-link ghost"
-                    onClick={(e) => e.stopPropagation()}>
-                    GitHub
-                  </a>
-                )}
-              </div>
-            </div>
-            <div className="project-body">
-              <h3 className="project-title">{p.title}</h3>
-              <p className="project-desc">{p.description}</p>
-              <div className="project-tags">
-                {p.tags.map((t) => <span className="tag" key={t}>{t}</span>)}
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
+            Réalisations
+          </motion.h2>
+          <a href="#contact" className="section-link">Nouveau projet ↗</a>
+        </div>
 
-      <style>{`
-        .project-card.reveal {
-          opacity: 0;
-          transform: translateY(30px);
-          transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        .project-card.reveal.visible {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      `}</style>
+        <div className="work-grid">
+          {projects.map((p, i) => (
+            <motion.article
+              key={p.id}
+              className="work-item"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.6, delay: i * 0.07, ease }}
+            >
+              <div className={`work-scene ${scenes[i % scenes.length]}`}>
+                <div className="work-scene-inner">
+                  <svg width="100" height="100" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+                    <rect x="16" y="16" width="68" height="68" rx="6" stroke="currentColor" strokeWidth="0.8" opacity="0.4" />
+                    <rect x="28" y="28" width="44" height="44" rx="3" stroke="currentColor" strokeWidth="0.5" opacity="0.25" />
+                    <circle cx="50" cy="50" r="8" stroke="currentColor" strokeWidth="0.6" opacity="0.3" />
+                  </svg>
+                </div>
+              </div>
+
+              <div className="work-info">
+                <div className="work-category">{p.tags[0]}</div>
+                <h3 className="work-name">{p.title}</h3>
+                <div className="work-tags">
+                  {p.tags.slice(0, 3).map((t) => (
+                    <span className="work-tag" key={t}>{t}</span>
+                  ))}
+                </div>
+              </div>
+            </motion.article>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

@@ -5,23 +5,23 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const fn = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", fn, { passive: true });
+    return () => window.removeEventListener("scroll", fn);
   }, []);
 
   return (
-    <nav className={`navbar${scrolled ? " scrolled" : ""}`}>
-      <div className="nav-logo">
-        dev<span>.</span>studio
-      </div>
+    <nav className={`nav${scrolled ? " scrolled" : ""}`}>
+      <a href="#home" className="nav-logo">
+        Spy<em>fie</em>
+      </a>
       <ul className="nav-links">
         <li><a href="#projects">Projets</a></li>
         <li><a href="#services">Services</a></li>
-        <li><a href="#about">À propos</a></li>
+        <li><a href="#about">Studio</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
-      <a href="#contact" className="nav-cta">Démarrer un projet</a>
+      <a href="#contact" className="nav-cta">Démarrer →</a>
     </nav>
   );
 }

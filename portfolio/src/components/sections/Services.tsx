@@ -1,73 +1,41 @@
 "use client";
-import { useEffect, useRef } from "react";
-import { services, stack } from "@/lib/data";
+import { motion } from "framer-motion";
+import { services } from "@/lib/data";
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 export default function Services() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const cards = sectionRef.current?.querySelectorAll(".service-card");
-    if (!cards) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e, i) => {
-          if (e.isIntersecting) {
-            setTimeout(() => e.target.classList.add("visible"), i * 100);
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.15 }
-    );
-    cards.forEach((c) => io.observe(c));
-    return () => io.disconnect();
-  }, []);
-
-  const doubled = [...stack, ...stack];
-
   return (
-    <section id="services" ref={sectionRef}>
-      <div className="section-label">Services</div>
-      <h2 className="section-title">Ce qu&apos;on fait</h2>
-      <p className="section-sub">
-        De l&apos;idée au déploiement, on couvre l&apos;ensemble du cycle de vie de votre produit digital.
-      </p>
+    <section id="services">
+      <div className="section">
+        <div className="section-header">
+          <motion.h2
+            className="section-title"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.7, ease }}
+          >
+            Services
+          </motion.h2>
+        </div>
 
-      <div className="services-grid">
-        {services.map((s) => (
-          <div key={s.title} className="service-card reveal-card">
-            <span className="service-icon">{s.icon}</span>
-            <h3 className="service-title">{s.title}</h3>
-            <p className="service-desc">{s.description}</p>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ marginTop: "4rem" }}>
-        <div className="section-label" style={{ marginBottom: "1.5rem" }}>Stack technique</div>
-        <div className="stack-track">
-          <div className="stack-inner">
-            {doubled.map((item, i) => (
-              <div key={i} className="stack-item">
-                <span style={{ color: "var(--blue-500)" }}>◆</span>
-                {item}
-              </div>
-            ))}
-          </div>
+        <div className="services-list">
+          {services.map((s, i) => (
+            <motion.div
+              key={s.title}
+              className="service-row"
+              initial={{ opacity: 0, x: -28 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.65, delay: i * 0.09, ease }}
+            >
+              <span className="service-name">{s.title}</span>
+              <p className="service-desc">{s.description}</p>
+            </motion.div>
+          ))}
         </div>
       </div>
-
-      <style>{`
-        .service-card.reveal-card {
-          opacity: 0;
-          transform: translateY(24px);
-          transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        .service-card.reveal-card.visible {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      `}</style>
     </section>
   );
 }

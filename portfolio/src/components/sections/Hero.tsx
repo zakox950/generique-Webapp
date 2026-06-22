@@ -1,80 +1,83 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 export default function Hero() {
-  const counterRefs = useRef<HTMLSpanElement[]>([]);
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollY } = useScroll();
 
-  useEffect(() => {
-    counterRefs.current.forEach((el) => {
-      if (!el) return;
-      const target = parseInt(el.dataset.target ?? "0", 10);
-      let current = 0;
-      const step = target / 60;
-      const timer = setInterval(() => {
-        current = Math.min(current + step, target);
-        el.textContent = Math.round(current).toString() + (el.dataset.suffix ?? "");
-        if (current >= target) clearInterval(timer);
-      }, 20);
-    });
-  }, []);
+  /* Three parallax layers — the further back, the more it lags on scroll */
+  const glowY    = useTransform(scrollY, [0, 1000], [0, 340]); // slowest = deepest
+  const decoY    = useTransform(scrollY, [0, 1000], [0, 200]); // mid
+  const contentY = useTransform(scrollY, [0, 1000], [0, 80]);  // fastest = surface
+  const contentOpacity = useTransform(scrollY, [280, 700], [1, 0]);
 
   return (
-    <section className="hero" id="home">
-      <div className="hero-badge">
-        <span className="dot" />
-        Disponible pour de nouveaux projets
-      </div>
+    <section className="hero" id="home" ref={heroRef}>
 
-      <h1 className="hero-title">
-        <span className="line">On construit</span>
-        <span className="line accent">l&apos;exceptionnel.</span>
-        <span className="line outline">En ligne.</span>
-      </h1>
+      {/* ─── Layer 1 — Background glow (slowest) ─── */}
+      <motion.div
+        style={{ position: "absolute", inset: 0, pointerEvents: "none", y: glowY }}
+        aria-hidden="true"
+      >
+        <div className="hero-glow" />
+      </motion.div>
 
-      <p className="hero-sub">
-        Studio de développement web spécialisé dans les applications Next.js performantes,
-        les designs qui convertissent et les architectures qui tiennent dans le temps.
-      </p>
+      {/* ─── Layer 2 — Decorative wordmark (mid speed) ─── */}
+      <motion.div
+        style={{ position: "absolute", inset: 0, pointerEvents: "none", y: decoY }}
+        aria-hidden="true"
+      >
+        <div className="hero-deco">Spyfie.</div>
+      </motion.div>
 
-      <div className="hero-actions">
-        <a href="#projects" className="btn-primary">Voir nos projets</a>
-        <a href="#contact" className="btn-outline">Nous contacter</a>
-      </div>
+      {/* ─── Layer 3 — Foreground content (fastest) ─── */}
+      <motion.div style={{ y: contentY, opacity: contentOpacity }}>
+        <motion.p
+          className="hero-eyebrow"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease }}
+        >
+          Studio digital
+        </motion.p>
 
-      <div className="hero-stats">
-        <div className="stat">
-          <span
-            className="stat-number"
-            ref={(el) => { if (el) counterRefs.current[0] = el; }}
-            data-target="32"
-            data-suffix="+"
-          >0+</span>
-          <span className="stat-label">Projets livrés</span>
-        </div>
-        <div className="stat">
-          <span
-            className="stat-number"
-            ref={(el) => { if (el) counterRefs.current[1] = el; }}
-            data-target="98"
-            data-suffix="%"
-          >0%</span>
-          <span className="stat-label">Clients satisfaits</span>
-        </div>
-        <div className="stat">
-          <span
-            className="stat-number"
-            ref={(el) => { if (el) counterRefs.current[2] = el; }}
-            data-target="4"
-            data-suffix=" ans"
-          >0 ans</span>
-          <span className="stat-label">D&apos;expérience</span>
-        </div>
-      </div>
+        <motion.h1
+          className="hero-headline"
+          initial={{ opacity: 0, y: 48 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.1, ease }}
+        >
+          Spyfie<span className="orange">.</span>
+        </motion.h1>
 
-      <div className="hero-scroll">
+        <motion.div
+          className="hero-bottom"
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.25, ease }}
+        >
+          <p className="hero-tagline">
+            On crée. On livre.<br />
+            <strong>On recommence.</strong>
+          </p>
+          <div className="hero-actions">
+            <a href="#projects" className="btn-primary">Voir les projets →</a>
+            <a href="#contact" className="btn-ghost">Démarrer</a>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* Scroll cue */}
+      <div className="hero-scroll-hint" aria-hidden="true">
         <span>scroll</span>
-        <div className="scroll-line" />
+        <div className="scroll-track">
+          <div className="scroll-bar" />
+        </div>
       </div>
+
     </section>
   );
 }
