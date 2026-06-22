@@ -10,9 +10,10 @@ echo "→ git pull..."
 git pull --ff-only
 
 echo "→ npm ci..."
-npm ci --omit=dev
+npm ci
 
 echo "→ Build..."
+rm -rf .next
 npm run build
 
 echo "→ Start..."
