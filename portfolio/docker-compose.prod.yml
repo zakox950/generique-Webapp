@@ -45,6 +45,7 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET is required}
       STORAGE_DIR: /app/data/shots
       PORT: "3100"
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
     volumes:
       # Captures persistées entre redéploiements
       - spyfie_shots:/app/data/shots

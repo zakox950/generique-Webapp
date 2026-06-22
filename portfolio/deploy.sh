@@ -27,6 +27,8 @@ if [ ! -f "$ENV_FILE" ]; then
 POSTGRES_PASSWORD=${PG_PASS}
 ADMIN_PASSWORD=${ADMIN_PASS}
 SESSION_SECRET=${SESSION_SEC}
+# Passer à "true" uniquement si le site est servi en HTTPS
+COOKIE_SECURE=false
 EOF
 
   echo ""
