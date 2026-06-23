@@ -40,7 +40,7 @@ export default function Lightbox({
       >
         <motion.div
           className="lightbox-bar"
-          initial={{ y: -24, opacity: 0 }}
+          initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.35, ease }}
           onClick={(e) => e.stopPropagation()}
@@ -52,7 +52,6 @@ export default function Lightbox({
           </div>
 
           <div className="lightbox-url">
-            <span style={{ color: site.accent }}>●</span>
             spyfie.studio/{site.slug}
           </div>
 
@@ -73,9 +72,9 @@ export default function Lightbox({
 
         <motion.div
           className="lightbox-stage"
-          initial={{ y: 16, opacity: 0 }}
+          initial={{ y: 12, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.05, ease }}
+          transition={{ duration: 0.4, delay: 0.06, ease }}
           onClick={(e) => e.stopPropagation()}
         >
           <iframe src={site.url} title={site.title} />

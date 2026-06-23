@@ -21,18 +21,18 @@ export default function Contact() {
       <div className="section">
         <motion.h2
           className="contact-hero"
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 36 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.9, ease }}
         >
           On discute<br />
-          de ton <span className="serif-accent orange">projet</span>&nbsp;?
+          de ton <span className="tan">projet</span>&nbsp;?
         </motion.h2>
 
         <div className="contact-grid">
           <motion.div
-            initial={{ opacity: 0, y: 28 }}
+            initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.7, delay: 0.1, ease }}
@@ -61,15 +61,15 @@ export default function Contact() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 28 }}
+            initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.7, delay: 0.18, ease }}
           >
             {sent ? (
               <div style={{ padding: "2rem 0" }}>
-                <div style={{ fontSize: "2rem", color: "var(--orange)", marginBottom: "0.75rem" }}>✓</div>
-                <p style={{ color: "var(--muted)" }}>
+                <div style={{ fontSize: "1.4rem", color: "var(--tan)", marginBottom: "0.75rem" }}>—</div>
+                <p style={{ color: "var(--muted)", fontWeight: 300 }}>
                   Message reçu — on revient vers vous rapidement.
                 </p>
               </div>

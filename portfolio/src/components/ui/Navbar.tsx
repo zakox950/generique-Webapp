@@ -19,9 +19,8 @@ export default function Navbar() {
         <li><a href="#projects">Projets</a></li>
         <li><a href="#services">Services</a></li>
         <li><a href="#about">Studio</a></li>
-        <li><a href="#contact">Contact</a></li>
+        <li><a href="#contact" className="nav-cta">Contact</a></li>
       </ul>
-      <a href="#contact" className="nav-cta">Démarrer →</a>
     </nav>
   );
 }

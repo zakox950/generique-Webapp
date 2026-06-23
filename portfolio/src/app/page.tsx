@@ -44,10 +44,10 @@ export default function Home() {
 
       <footer className="footer">
         <span className="footer-logo">
-          Spy<em style={{ color: "var(--orange)", fontStyle: "normal" }}>fie</em>
+          Spy<em>fie</em>
         </span>
         <span>© 2026 — Tous droits réservés</span>
-        <span style={{ color: "var(--muted)" }}>Next.js · TypeScript</span>
+        <span>Next.js · TypeScript</span>
       </footer>
     </>
   );

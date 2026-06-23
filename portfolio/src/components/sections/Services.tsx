@@ -11,9 +11,9 @@ export default function Services() {
         <div className="section-header">
           <motion.h2
             className="section-title"
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
+            viewport={{ once: true, amount: 0.5 }}
             transition={{ duration: 0.7, ease }}
           >
             Services
@@ -25,10 +25,10 @@ export default function Services() {
             <motion.div
               key={s.title}
               className="service-row"
-              initial={{ opacity: 0, x: -28 }}
+              initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.65, delay: i * 0.09, ease }}
+              transition={{ duration: 0.65, delay: i * 0.07, ease }}
             >
               <span className="service-name">{s.title}</span>
               <p className="service-desc">{s.description}</p>

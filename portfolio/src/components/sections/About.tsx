@@ -12,9 +12,8 @@ export default function About() {
     offset: ["start end", "end start"],
   });
 
-  /* Left and right columns move at different rates for depth */
-  const leftY  = useTransform(scrollYProgress, [0, 1], [40, -40]);
-  const rightY = useTransform(scrollYProgress, [0, 1], [60, -20]);
+  const leftY  = useTransform(scrollYProgress, [0, 1], [32, -32]);
+  const rightY = useTransform(scrollYProgress, [0, 1], [48, -16]);
 
   return (
     <section id="about" ref={ref}>
@@ -22,9 +21,9 @@ export default function About() {
         <div className="section-header">
           <motion.h2
             className="section-title"
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
+            viewport={{ once: true, amount: 0.5 }}
             transition={{ duration: 0.7, ease }}
           >
             Studio
@@ -32,49 +31,47 @@ export default function About() {
         </div>
 
         <div className="about-grid">
-          {/* Left: statement */}
           <motion.div style={{ y: leftY }}>
             <motion.p
               className="about-statement"
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.8, ease }}
             >
-              Code sharp.<br />
-              Design <span className="serif-accent orange">bold</span>.<br />
-              Ship fast.
+              Construit<br />
+              avec <span className="tan">soin</span>.<br />
+              <span className="stroke">Livré.</span>
             </motion.p>
           </motion.div>
 
-          {/* Right: body */}
           <motion.div className="about-body" style={{ y: rightY }}>
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.7, delay: 0.1, ease }}
+              transition={{ duration: 0.7, delay: 0.08, ease }}
             >
               Studio indépendant spécialisé dans la création d&apos;applications web sur-mesure.
               On travaille avec des <strong>startups, PME et agences</strong> qui veulent
-              des produits qui performent.
+              des produits qui performent durablement.
             </motion.p>
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.7, delay: 0.18, ease }}
+              transition={{ duration: 0.7, delay: 0.15, ease }}
             >
               Code propre, délais tenus, design qui convertit.
-              On ne fait pas de l&apos;à-peu-près.
+              Rien d&apos;à-peu-près.
             </motion.p>
 
             <motion.div
               className="about-tags"
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.7, delay: 0.25, ease }}
+              transition={{ duration: 0.7, delay: 0.22, ease }}
             >
               {stack.map((t) => (
                 <span className="about-tag" key={t}>{t}</span>
@@ -82,11 +79,11 @@ export default function About() {
             </motion.div>
 
             <motion.div
-              style={{ marginTop: "2.5rem" }}
-              initial={{ opacity: 0, y: 16 }}
+              style={{ marginTop: "2rem" }}
+              initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.7, delay: 0.32, ease }}
+              transition={{ duration: 0.7, delay: 0.3, ease }}
             >
               <a href="#contact" className="btn-primary">Travailler ensemble →</a>
             </motion.div>
