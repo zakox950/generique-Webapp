@@ -5,4 +5,4 @@
 .env
 .env*.local
 .env.prod
-portfolio/tsconfig.tsbuildinfo
+*.tsbuildinfo
