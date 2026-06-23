@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maison Douceurs — Pâtisserie Artisanale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#FAF7F2;--surface:#F2EDE6;--surface2:#EDE6DC;
+  --bordeaux:#7C2D3E;--bordeaux-dim:rgba(124,45,62,.09);--bordeaux-mid:rgba(124,45,62,.18);
+  --gold:#C5A55A;--ink:#1C1410;--muted:#8C7B72;--border:rgba(28,20,16,.08);
+  --serif:'Cormorant Garamond',Georgia,serif;--sans:'DM Sans',system-ui,sans-serif;
+  --max:1200px;--pad:clamp(1.2rem,5vw,3rem);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--cream);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%;object-fit:cover}
+:focus-visible{outline:2px solid var(--bordeaux);outline-offset:3px}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:100;background:rgba(250,247,242,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:.9rem var(--pad);display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.nav-logo{font-family:var(--serif);font-size:1.35rem;font-weight:600;letter-spacing:.03em;color:var(--bordeaux)}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{font-size:.82rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);transition:color .2s}
+.nav-links a:hover{color:var(--bordeaux)}
+.nav-btn{padding:.5rem 1.3rem;background:var(--bordeaux);color:#FAF7F2;border-radius:999px;font-size:.8rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;transition:background .2s}
+.nav-btn:hover{background:#9A3850}
+@media(max-width:700px){.nav-links{display:none}}
+
+/* ── HERO ── */
+.hero{min-height:92vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:3rem;padding:5rem var(--pad) 4rem;max-width:var(--max);margin:0 auto}
+.hero-text{display:flex;flex-direction:column;gap:1.5rem}
+.hero-eyebrow{font-size:.78rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.hero-title{font-family:var(--serif);font-size:clamp(3rem,6vw,5.5rem);font-weight:300;line-height:1.05;letter-spacing:-.01em;color:var(--ink)}
+.hero-title em{color:var(--bordeaux);font-style:italic}
+.hero-sub{font-size:1rem;color:var(--muted);max-width:36ch;line-height:1.75}
+.hero-ctas{display:flex;gap:1rem;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 2rem;background:var(--bordeaux);color:#FAF7F2;border-radius:999px;font-size:.85rem;font-weight:600;letter-spacing:.03em;transition:background .2s,transform .2s}
+.btn-primary:hover{background:#9A3850;transform:translateY(-2px)}
+.btn-ghost{display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 1.8rem;border:1px solid var(--bordeaux-mid);color:var(--bordeaux);border-radius:999px;font-size:.85rem;font-weight:600;transition:border-color .2s,background .2s}
+.btn-ghost:hover{border-color:var(--bordeaux);background:var(--bordeaux-dim)}
+.hero-img{border-radius:24px;overflow:hidden;aspect-ratio:4/5;background:linear-gradient(135deg,#c9a98a,#a07050)}
+.hero-img img{width:100%;height:100%;object-fit:cover;transition:transform 8s ease}
+.hero-img:hover img{transform:scale(1.04)}
+@media(max-width:900px){.hero{grid-template-columns:1fr;gap:2rem;min-height:auto;padding:3rem var(--pad)}.hero-img{aspect-ratio:16/9}}
+
+/* ── TRUST STRIP ── */
+.trust{background:var(--bordeaux);padding:2.5rem var(--pad)}
+.trust-inner{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:2rem}
+.trust-item{display:flex;align-items:center;gap:.9rem;color:rgba(250,247,242,.9)}
+.trust-icon{width:40px;height:40px;flex:none;opacity:.85}
+.trust-label{font-size:.85rem;font-weight:600;line-height:1.3}
+.trust-sub{font-size:.75rem;opacity:.65;margin-top:.15rem}
+@media(max-width:700px){.trust-inner{grid-template-columns:1fr 1fr}}
+
+/* ── SECTION SHELL ── */
+.section{padding:clamp(4rem,10vh,7rem) var(--pad);max-width:var(--max);margin:0 auto}
+.section-eyebrow{font-size:.75rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem}
+.section-title{font-family:var(--serif);font-size:clamp(2rem,4vw,3.2rem);font-weight:300;line-height:1.1;letter-spacing:-.01em;color:var(--ink);margin-bottom:1rem}
+.section-title em{color:var(--bordeaux);font-style:italic}
+.section-sub{font-size:.9rem;color:var(--muted);max-width:44ch;line-height:1.75;margin-bottom:2.5rem}
+
+/* ── CATALOGUE ── */
+.catalogue-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.5rem}
+.product-card{background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--border);transition:transform .3s,box-shadow .3s;cursor:default}
+.product-card:hover{transform:translateY(-6px);box-shadow:0 20px 50px -20px rgba(124,45,62,.25)}
+.product-img{aspect-ratio:4/3;overflow:hidden;background:linear-gradient(135deg,#e8d5c4,#c4a080)}
+.product-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.product-card:hover .product-img img{transform:scale(1.07)}
+.product-body{padding:1.2rem 1.3rem 1.4rem}
+.product-name{font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin-bottom:.35rem}
+.product-desc{font-size:.8rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem}
+.product-footer{display:flex;align-items:center;justify-content:space-between}
+.product-price{font-family:var(--serif);font-size:1.15rem;font-weight:600;color:var(--bordeaux)}
+
+/* ── FEATURED ── */
+.featured-bg{background:var(--surface);padding:clamp(3rem,8vh,6rem) var(--pad)}
+.featured-inner{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.featured-img{border-radius:20px;overflow:hidden;aspect-ratio:4/3;background:linear-gradient(135deg,#c9a98a,#a07050)}
+.featured-img img{width:100%;height:100%;object-fit:cover}
+@media(max-width:800px){.featured-inner{grid-template-columns:1fr}}
+
+/* ── REVIEWS ── */
+.reviews-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;margin-top:2.5rem}
+.review-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:1.6rem}
+.review-stars{display:flex;gap:3px;margin-bottom:.8rem}
+.review-stars span{color:var(--gold);font-size:1rem}
+.review-text{font-size:.88rem;color:var(--muted);line-height:1.75;margin-bottom:1rem;font-style:italic}
+.review-name{font-size:.8rem;font-weight:600;color:var(--ink)}
+
+/* ── CONTACT ── */
+.contact-bg{background:var(--surface2);padding:clamp(3rem,8vh,6rem) var(--pad)}
+.contact-inner{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+.contact-info h3{font-family:var(--serif);font-size:1.6rem;font-weight:400;margin-bottom:1rem}
+.contact-info p{font-size:.88rem;color:var(--muted);line-height:1.8}
+.hours{margin-top:1.5rem;display:flex;flex-direction:column;gap:.4rem;font-size:.85rem}
+.hours dt{font-weight:600;color:var(--ink)}
+.hours dd{color:var(--muted)}
+.contact-form{display:flex;flex-direction:column;gap:1rem}
+.form-group{display:flex;flex-direction:column;gap:.3rem}
+.form-label{font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.form-input,.form-textarea,.form-select{background:#fff;border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:var(--sans);font-size:.88rem;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--bordeaux);box-shadow:0 0 0 3px rgba(124,45,62,.1)}
+.form-textarea{min-height:110px;resize:vertical}
+.form-success{display:none;background:rgba(45,74,53,.08);border:1px solid rgba(45,74,53,.2);border-radius:10px;padding:1.2rem 1.4rem;font-size:.88rem;color:#2D4A35;font-weight:500}
+@media(max-width:800px){.contact-inner{grid-template-columns:1fr}}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);color:rgba(250,247,242,.7);text-align:center;padding:2rem var(--pad);font-size:.8rem}
+footer strong{font-family:var(--serif);font-size:1rem;color:#FAF7F2;font-weight:400;display:block;margin-bottom:.4rem}
+
+/* ── REVEAL ANIMATIONS ── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .65s cubic-bezier(.16,1,.3,1),transform .65s cubic-bezier(.16,1,.3,1)}
+.reveal.in{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.08s}
+.reveal-delay-2{transition-delay:.16s}
+.reveal-delay-3{transition-delay:.24s}
+.reveal-delay-4{transition-delay:.32s}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Maison Douceurs</div>
+  <ul class="nav-links">
+    <li><a href="#catalogue">Catalogue</a></li>
+    <li><a href="#commande">Commandes</a></li>
+    <li><a href="#avis">Avis</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-btn">Commander</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-text">
+    <p class="hero-eyebrow reveal">Pâtisserie artisanale depuis 1987</p>
+    <h1 class="hero-title reveal reveal-delay-1">L'art de la <em>douceur</em>, fait chaque matin.</h1>
+    <p class="hero-sub reveal reveal-delay-2">Des créations artisanales préparées à la main avec des ingrédients soigneusement sélectionnés. Sans compromis sur la qualité depuis trois générations.</p>
+    <div class="hero-ctas reveal reveal-delay-3">
+      <a href="#catalogue" class="btn-primary">Voir le catalogue</a>
+      <a href="#contact" class="btn-ghost">Passer commande</a>
+    </div>
+  </div>
+  <div class="hero-img reveal reveal-delay-2">
+    <img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&q=80&auto=format&fit=crop" alt="Gâteaux artisanaux Maison Douceurs" onerror="this.style.opacity=0">
+  </div>
+</div>
+
+<!-- TRUST STRIP -->
+<div class="trust">
+  <div class="trust-inner">
+    <div class="trust-item">
+      <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      <div><div class="trust-label">Fait chaque matin</div><div class="trust-sub">Préparé avant l'ouverture</div></div>
+    </div>
+    <div class="trust-item">
+      <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+      <div><div class="trust-label">Sans conservateurs</div><div class="trust-sub">Recettes 100% naturelles</div></div>
+    </div>
+    <div class="trust-item">
+      <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg>
+      <div><div class="trust-label">Retrait en boutique</div><div class="trust-sub">Commandez, on s'occupe du reste</div></div>
+    </div>
+    <div class="trust-item">
+      <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <div><div class="trust-label">Recettes familiales</div><div class="trust-sub">Transmises de génération en génération</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CATALOGUE -->
+<section id="catalogue" class="section">
+  <p class="section-eyebrow reveal">Notre sélection</p>
+  <h2 class="section-title reveal">Le catalogue <em>gourmand</em></h2>
+  <p class="section-sub reveal">Chaque pièce est préparée à la commande avec les meilleurs ingrédients du marché.</p>
+
+  <div class="catalogue-grid">
+    <!-- 1 -->
+    <div class="product-card reveal">
+      <div class="product-img"><img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&q=80&auto=format&fit=crop" alt="Croissant au beurre" onerror="this.style.opacity=0"></div>
+      <div class="product-body">
+        <div class="product-footer" style="margin-bottom:.5rem"><div class="product-name">Croissant au beurre</div></div>
+        <p class="product-desc">Feuilletage pur beurre AOP, croustillant dehors, fondant dedans.</p>
+        <div class="product-footer"><span class="product-price">1,80 €</span></div>
+      </div>
+    </div>
+    <!-- 2 -->
+    <div class="product-card reveal reveal-delay-1">
+      <div class="product-img"><img src="https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=600&q=80&auto=format&fit=crop" alt="Pain au chocolat" onerror="this.style.opacity=0"></div>
+      <div class="product-body">
+        <div class="product-name">Pain au chocolat</div>
+        <p class="product-desc">Deux barres de chocolat grand cru dans une pâte feuilletée dorée.</p>
+        <div class="product-footer"><span class="product-price">2,20 €</span></div>
+      </div>
+    </div>
+    <!-- 3 -->
+    <div class="product-card reveal reveal-delay-2">
+      <div class="product-img"><img src="https://images.unsplash.com/photo-1519869325930-281384150729?w=600&q=80&auto=format&fit=crop" alt="Éclair au café" onerror="this.style.opacity=0"></div>
+      <div class="product-body">
+        <div class="product-name">Éclair au café</div>
+        <p class="product-desc">Pâte à choux légère, crème mousseline café, glaçage moka.</p>
+        <div class="product-footer"><span class="product-price">4,50 €</span></div>
+      </div>
+    </div>
+    <!-- 4 -->
+    <div class="product-card reveal">
+      <div class="product-img"><img src="https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=600&q=80&auto=format&fit=crop" alt="Fraisier" onerror="this.style.opacity=0"></div>
+      <div class="product-body">
+        <div class="product-name">Fraisier</div>
+        <p class="product-desc">Génoise moelleuse, crème mousseline vanille, fraises fraîches de saison.</p>
+        <div class="product-footer"><span class="product-price">6,80 € / part</span></div>
+      </div>
+    </div>
+    <!-- 5 -->
+    <div class="product-card reveal reveal-delay-1">
+      <div class="product-img"><img src="https://images.unsplash.com/photo-1612203985729-70726954388c?w=600&q=80&auto=format&fit=crop" alt="Macarons" onerror="this.style.opacity=0"></div>
+      <div class="product-body">
+        <div class="product-name">Macarons (boîte ×6)</div>
+        <p class="product-desc">Coques amande moelleuses, ganaches : framboise, pistache, citron, chocolat.</p>
+        <div class="product-footer"><span class="product-price">14,50 €</span></div>
+      </div>
+    </div>
+    <!-- 6 -->
+    <div class="product-card reveal reveal-delay-2">
+      <div class="product-img"><img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&q=80&auto=format&fit=crop" alt="Tarte au citron meringuée" onerror="this.style.opacity=0"></div>
+      <div class="product-body">
+        <div class="product-name">Tarte citron meringuée</div>
+        <p class="product-desc">Pâte sablée croustillante, lemon curd acidulé, meringue italienne dorée.</p>
+        <div class="product-footer"><span class="product-price">5,90 € / part</span></div>
+      </div>
+    </div>
+    <!-- 7 -->
+    <div class="product-card reveal">
+      <div class="product-img"><img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80&auto=format&fit=crop" alt="Paris-Brest" onerror="this.style.opacity=0"></div>
+      <div class="product-body">
+        <div class="product-name">Paris-Brest</div>
+        <p class="product-desc">Couronne de choux, crème pralinée noisette, éclats de pralin croustillants.</p>
+        <div class="product-footer"><span class="product-price">6,50 € / part</span></div>
+      </div>
+    </div>
+    <!-- 8 -->
+    <div class="product-card reveal reveal-delay-1">
+      <div class="product-img"><img src="https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=600&q=80&auto=format&fit=crop" alt="Mille-feuille" onerror="this.style.opacity=0"></div>
+      <div class="product-body">
+        <div class="product-name">Mille-feuille</div>
+        <p class="product-desc">Feuilletage craquant caramélisé, crème pâtissière vanille Bourbon.</p>
+        <div class="product-footer"><span class="product-price">5,20 € / part</span></div>
+      </div>
+    </div>
+    <!-- 9 -->
+    <div class="product-card reveal reveal-delay-2">
+      <div class="product-img"><img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80&auto=format&fit=crop" alt="Opéra" onerror="this.style.opacity=0"></div>
+      <div class="product-body">
+        <div class="product-name">Opéra</div>
+        <p class="product-desc">Biscuit joconde, ganache chocolat, crème au beurre café. Un classique absolu.</p>
+        <div class="product-footer"><span class="product-price">6,20 € / part</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED -->
+<div id="commande" class="featured-bg">
+  <div class="featured-inner">
+    <div class="featured-img reveal">
+      <img src="https://images.unsplash.com/photo-1426869981800-95ebf51ce900?w=800&q=80&auto=format&fit=crop" alt="Gâteaux sur commande" onerror="this.style.opacity=0">
+    </div>
+    <div class="reveal reveal-delay-1">
+      <p class="section-eyebrow">Sur mesure</p>
+      <h2 class="section-title">Gâteaux <em>sur commande</em></h2>
+      <p style="color:var(--muted);font-size:.9rem;line-height:1.8;margin-bottom:1.5rem">Mariages, anniversaires, événements d'entreprise — nous créons des pièces montées et gâteaux personnalisés selon vos goûts et vos envies. Commande à passer au minimum 5 jours à l'avance.</p>
+      <a href="#contact" class="btn-primary">Nous contacter</a>
+    </div>
+  </div>
+</div>
+
+<!-- AVIS -->
+<section id="avis" class="section">
+  <p class="section-eyebrow reveal">Ce qu'ils en disent</p>
+  <h2 class="section-title reveal">Avis <em>clients</em></h2>
+  <div class="reviews-grid">
+    <div class="review-card reveal">
+      <div class="review-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+      <p class="review-text">« Des croissants sublimes, croustillants et beurrés à souhait. Je commande chaque semaine ! La qualité est vraiment au rendez-vous. »</p>
+      <div class="review-name">— Marie D.</div>
+    </div>
+    <div class="review-card reveal reveal-delay-1">
+      <div class="review-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+      <p class="review-text">« Le fraisier était absolument magnifique pour l'anniversaire de ma fille. Félicitations pour ce travail d'artiste. »</p>
+      <div class="review-name">— Thomas B.</div>
+    </div>
+    <div class="review-card reveal reveal-delay-2">
+      <div class="review-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+      <p class="review-text">« Qualité artisanale exceptionnelle. On sent vraiment la passion dans chaque gâteau. Mon adresse préférée à Paris. »</p>
+      <div class="review-name">— Isabelle C.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<div id="contact" class="contact-bg">
+  <div class="contact-inner">
+    <div class="reveal">
+      <p class="section-eyebrow">Nous trouver</p>
+      <h3 class="contact-info" style="font-family:var(--serif);font-size:1.8rem;font-weight:300;margin-bottom:1rem">Venez nous rendre visite</h3>
+      <p style="color:var(--muted);font-size:.88rem;line-height:1.8;margin-bottom:1.5rem">12 rue de la Paix, 75001 Paris<br>Tél. 01 42 60 00 00<br>contact@maison-douceurs.fr</p>
+      <dl class="hours">
+        <dt>Lundi – Vendredi</dt><dd>7h30 – 20h00</dd>
+        <dt>Samedi</dt><dd>7h00 – 20h30</dd>
+        <dt>Dimanche</dt><dd>7h30 – 14h00</dd>
+        <dt>Fermé</dt><dd>Mardi</dd>
+      </dl>
+    </div>
+    <div class="reveal reveal-delay-1">
+      <div class="form-success" id="form-success">✓ Votre commande a bien été reçue — nous vous rappelons sous 24h.</div>
+      <form class="contact-form" id="contact-form">
+        <div class="form-group">
+          <label class="form-label" for="cf-name">Nom complet</label>
+          <input id="cf-name" class="form-input" type="text" placeholder="Marie Dupont" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cf-email">Email</label>
+          <input id="cf-email" class="form-input" type="email" placeholder="marie@exemple.fr" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cf-type">Type de commande</label>
+          <select id="cf-type" class="form-select">
+            <option>Commande boutique</option>
+            <option>Gâteau sur mesure</option>
+            <option>Événement / mariage</option>
+            <option>Autre demande</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cf-msg">Message</label>
+          <textarea id="cf-msg" class="form-textarea" placeholder="Décrivez votre commande..." required></textarea>
+        </div>
+        <button type="submit" class="btn-primary" style="border:none;cursor:pointer;font-family:var(--sans)">Envoyer la commande</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <strong>Maison Douceurs</strong>
+  © 2026 — Pâtisserie artisanale depuis 1987
+</footer>
+
+<script>
+// Reveal on scroll
+(function(){
+  var els = document.querySelectorAll('.reveal');
+  if(!els.length) return;
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e,i){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  },{threshold:0.12});
+  els.forEach(function(el){ io.observe(el); });
+})();
+
+// Contact form
+document.getElementById('contact-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  this.style.display = 'none';
+  document.getElementById('form-success').style.display = 'block';
+});
+</script>
+</body>
+</html>

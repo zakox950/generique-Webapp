@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forêt Pâtisserie — Artisan Pâtissier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --forest: #1E3A2B;
+      --forest-mid: #2F5D3A;
+      --forest-light: #3D7A4E;
+      --sage: #6B9E7A;
+      --cream: #F5F0E8;
+      --cream-dark: #EAE2D5;
+      --gold: #B8966A;
+      --gold-light: #D4B483;
+      --ink: #1A2318;
+      --muted: #6B7A65;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Jost', system-ui, sans-serif;
+      --radius: 2px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── LEAF SVG MOTIF ── */
+    .leaf-motif {
+      position: absolute;
+      fill: none;
+      stroke: currentColor;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      height: 68px;
+      background: rgba(30,58,43,0.96);
+      backdrop-filter: blur(14px);
+    }
+
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      color: var(--cream);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-logo em {
+      font-style: italic;
+      color: var(--gold-light);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: rgba(245,240,232,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--cream); }
+
+    .nav-cta {
+      border: 1px solid rgba(184,150,106,0.5) !important;
+      color: var(--gold-light) !important;
+      padding: 9px 22px;
+      border-radius: 1px;
+      transition: background 0.2s, color 0.2s !important;
+    }
+
+    .nav-cta:hover {
+      background: var(--gold) !important;
+      color: var(--cream) !important;
+      border-color: var(--gold) !important;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: var(--forest);
+      overflow: hidden;
+      padding: 100px 48px 60px;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: url('https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=1600&q=80&auto=format&fit=crop') center/cover no-repeat;
+      opacity: 0.12;
+      mix-blend-mode: luminosity;
+    }
+
+    /* Botanical SVG decoration */
+    .hero-botanical {
+      position: absolute;
+      right: -60px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 520px;
+      height: 520px;
+      opacity: 0.09;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 700px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.78rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      font-weight: 500;
+      margin-bottom: 28px;
+    }
+
+    .hero-badge-line {
+      width: 40px;
+      height: 1px;
+      background: var(--gold-light);
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3.2rem, 8vw, 6.5rem);
+      line-height: 1.0;
+      color: var(--cream);
+      margin-bottom: 28px;
+      letter-spacing: -0.01em;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--gold-light);
+    }
+
+    .hero-title .underline-gold {
+      text-decoration: underline;
+      text-decoration-color: rgba(184,150,106,0.4);
+      text-underline-offset: 8px;
+    }
+
+    .hero-desc {
+      color: rgba(245,240,232,0.65);
+      font-size: 1.05rem;
+      max-width: 420px;
+      line-height: 1.75;
+      font-weight: 300;
+      margin-bottom: 40px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: var(--cream);
+      padding: 14px 34px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-block;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .btn-primary:hover {
+      background: var(--gold-light);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline {
+      border: 1px solid rgba(245,240,232,0.25);
+      color: var(--cream);
+      padding: 14px 28px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .btn-outline:hover {
+      border-color: rgba(245,240,232,0.6);
+      background: rgba(245,240,232,0.06);
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 36px;
+      left: 48px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.4);
+      z-index: 2;
+    }
+
+    .scroll-line {
+      width: 36px;
+      height: 1px;
+      background: rgba(245,240,232,0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scroll-line::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: var(--gold);
+      animation: scrollLine 1.8s ease-in-out infinite;
+    }
+
+    @keyframes scrollLine {
+      0%   { transform: translateX(-100%); }
+      50%  { transform: translateX(0); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* ── TRUST STRIP ── */
+    .trust-strip {
+      background: var(--forest-mid);
+      padding: 28px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.7);
+      font-weight: 500;
+    }
+
+    .trust-icon {
+      color: var(--gold-light);
+      font-size: 1rem;
+    }
+
+    /* ── SECTION BASE ── */
+    section { padding: 100px 48px; }
+
+    .container { max-width: 1140px; margin: 0 auto; }
+
+    .section-kicker {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .section-kicker::before {
+      content: '';
+      display: inline-block;
+      width: 28px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4.5vw, 3.5rem);
+      line-height: 1.08;
+      color: var(--ink);
+      margin-bottom: 18px;
+      letter-spacing: -0.01em;
+    }
+
+    .section-sub {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 500px;
+      line-height: 1.75;
+      font-weight: 300;
+    }
+
+    /* ── CATALOGUE ── */
+    #catalogue { background: var(--cream); }
+
+    .catalogue-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 56px;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .catalogue-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+
+    .pastry-card {
+      background: white;
+      cursor: default;
+      transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pastry-card:hover { transform: translateY(-4px); }
+    .pastry-card:hover .pastry-img img { transform: scale(1.06); }
+    .pastry-card:hover .pastry-overlay { opacity: 1; }
+
+    .pastry-img {
+      aspect-ratio: 4/3;
+      overflow: hidden;
+      position: relative;
+      background: var(--cream-dark);
+    }
+
+    .pastry-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .pastry-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(30,58,43,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .pastry-overlay span {
+      color: var(--cream);
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 600;
+      border: 1px solid rgba(245,240,232,0.5);
+      padding: 10px 20px;
+    }
+
+    .pastry-leaf {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: var(--forest-mid);
+      color: var(--cream);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 1px;
+    }
+
+    .pastry-body {
+      padding: 22px 24px 24px;
+      border-top: 2px solid var(--cream-dark);
+    }
+
+    .pastry-name {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .pastry-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+      font-weight: 300;
+      margin-bottom: 14px;
+    }
+
+    .pastry-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pastry-price {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .pastry-allergen {
+      font-size: 0.7rem;
+      color: var(--muted);
+      opacity: 0.7;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── FEATURED ── */
+    #signature {
+      background: var(--forest);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .signature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .signature-img {
+      aspect-ratio: 4/5;
+      overflow: hidden;
+      border-radius: var(--radius);
+      position: relative;
+    }
+
+    .signature-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .signature-img:hover img { transform: scale(1.04); }
+
+    .signature-badge {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      background: var(--gold);
+      color: var(--cream);
+      font-size: 0.7rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 8px 16px;
+    }
+
+    .signature-body { padding-right: 20px; }
+
+    .signature-body .section-kicker { color: var(--gold-light); }
+    .signature-body .section-kicker::before { background: var(--gold-light); }
+
+    .signature-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      color: var(--cream);
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .signature-title em { font-style: italic; color: var(--gold-light); }
+
+    .signature-body p {
+      color: rgba(245,240,232,0.65);
+      font-size: 0.95rem;
+      line-height: 1.75;
+      font-weight: 300;
+      margin-bottom: 32px;
+    }
+
+    .signature-details {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+
+    .sig-detail-val {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      color: var(--gold-light);
+      line-height: 1;
+    }
+
+    .sig-detail-label {
+      font-size: 0.72rem;
+      color: rgba(245,240,232,0.5);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* ── AVIS ── */
+    #avis { background: var(--cream-dark); }
+
+    .avis-header { margin-bottom: 52px; }
+
+    .avis-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .avis-card {
+      background: white;
+      padding: 32px;
+      border-left: 3px solid var(--forest-light);
+    }
+
+    .avis-stars {
+      color: var(--gold);
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+
+    .avis-text {
+      font-family: var(--font-display);
+      font-size: 0.98rem;
+      line-height: 1.65;
+      color: var(--ink);
+      font-style: italic;
+      margin-bottom: 20px;
+    }
+
+    .avis-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avis-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--forest-mid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--cream);
+    }
+
+    .avis-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .avis-date {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* ── CONTACT ── */
+    #contact { background: var(--cream); }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .contact-info h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      color: var(--ink);
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .contact-info p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.75;
+      font-weight: 300;
+      margin-bottom: 36px;
+    }
+
+    .contact-details {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .contact-detail {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .detail-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--forest-mid);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cream);
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .detail-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .detail-val {
+      font-size: 0.9rem;
+      color: var(--ink);
+    }
+
+    /* ── CONTACT FORM ── */
+    .contact-form {
+      background: var(--forest);
+      padding: 44px;
+      border-radius: var(--radius);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-form::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: rgba(61,122,78,0.15);
+      pointer-events: none;
+    }
+
+    .form-title-green {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      color: var(--cream);
+      margin-bottom: 28px;
+      position: relative;
+    }
+
+    .form-group { margin-bottom: 18px; position: relative; }
+
+    .form-label {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.55);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: rgba(245,240,232,0.07);
+      border: 1px solid rgba(245,240,232,0.15);
+      border-radius: var(--radius);
+      color: var(--cream);
+      padding: 13px 16px;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: rgba(184,150,106,0.6);
+      background: rgba(245,240,232,0.1);
+    }
+
+    .form-input::placeholder { color: rgba(245,240,232,0.3); }
+
+    .form-textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      background: rgba(245,240,232,0.07);
+      border: 1px solid rgba(245,240,232,0.15);
+      border-radius: var(--radius);
+      color: var(--cream);
+      padding: 13px 16px;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-textarea:focus { border-color: rgba(184,150,106,0.6); }
+    .form-textarea::placeholder { color: rgba(245,240,232,0.3); }
+
+    .form-submit {
+      width: 100%;
+      background: var(--gold);
+      color: var(--cream);
+      border: none;
+      border-radius: var(--radius);
+      padding: 15px 32px;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 8px;
+    }
+
+    .form-submit:hover {
+      background: var(--gold-light);
+      transform: translateY(-2px);
+    }
+
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 32px 0;
+    }
+
+    .success-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      color: var(--gold-light);
+    }
+
+    .success-title {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      color: var(--cream);
+      margin-bottom: 10px;
+    }
+
+    .success-text {
+      font-size: 0.9rem;
+      color: rgba(245,240,232,0.6);
+      font-weight: 300;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--forest);
+      padding: 40px 48px;
+    }
+
+    .footer-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      color: var(--cream);
+      letter-spacing: 0.02em;
+    }
+
+    .footer-logo em { font-style: italic; color: var(--gold-light); }
+
+    .footer-tagline {
+      font-size: 0.78rem;
+      color: rgba(245,240,232,0.4);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: rgba(245,240,232,0.5);
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--gold-light); }
+
+    .footer-copy {
+      font-size: 0.78rem;
+      color: rgba(245,240,232,0.3);
+    }
+
+    /* ── REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.75s cubic-bezier(0.16,1,0.3,1), transform 0.75s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .reveal.in { opacity: 1; transform: none; }
+    .reveal-delay-1 { transition-delay: 0.12s; }
+    .reveal-delay-2 { transition-delay: 0.22s; }
+    .reveal-delay-3 { transition-delay: 0.32s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      @keyframes scrollLine { from {} to {} }
+    }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 90px 20px 50px; }
+      section { padding: 70px 20px; }
+      .trust-strip { gap: 24px; padding: 20px; }
+      .catalogue-grid { grid-template-columns: repeat(2, 1fr); }
+      .signature-grid { grid-template-columns: 1fr; }
+      .avis-grid { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+      .contact-form { padding: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">Forêt <em>Pâtisserie</em></a>
+    <ul class="nav-links">
+      <li><a href="#catalogue">Catalogue</a></li>
+      <li><a href="#signature">Signature</a></li>
+      <li><a href="#avis">Avis</a></li>
+      <li><a href="#contact" class="nav-cta">Commande</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="accueil">
+    <div class="hero-bg"></div>
+
+    <!-- Botanical SVG -->
+    <svg class="hero-botanical" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" fill="none">
+      <ellipse cx="200" cy="200" rx="160" ry="80" stroke="#F5F0E8" stroke-width="0.8" transform="rotate(-30 200 200)" />
+      <ellipse cx="200" cy="200" rx="130" ry="60" stroke="#F5F0E8" stroke-width="0.6" transform="rotate(15 200 200)" />
+      <ellipse cx="200" cy="200" rx="100" ry="45" stroke="#F5F0E8" stroke-width="0.5" transform="rotate(60 200 200)" />
+      <line x1="200" y1="40" x2="200" y2="360" stroke="#F5F0E8" stroke-width="0.6" />
+      <line x1="40" y1="200" x2="360" y2="200" stroke="#F5F0E8" stroke-width="0.6" />
+      <circle cx="200" cy="200" r="6" fill="#F5F0E8" />
+      <circle cx="200" cy="200" r="22" stroke="#F5F0E8" stroke-width="0.5" />
+      <circle cx="200" cy="200" r="50" stroke="#F5F0E8" stroke-width="0.4" />
+    </svg>
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        <div class="hero-badge-line"></div>
+        Artisan Pâtissier · Depuis 2014
+      </div>
+      <h1 class="hero-title">
+        La Nature<br />
+        <em>dans chaque</em><br />
+        <span class="underline-gold">Création</span>
+      </h1>
+      <p class="hero-desc">
+        Pâtisseries artisanales inspirées de la forêt. Chaque recette naît de saisons, de cueillettes et d'une obsession pour la matière première.
+      </p>
+      <div class="hero-actions">
+        <a href="#catalogue" class="btn-primary">Découvrir le catalogue</a>
+        <a href="#signature" class="btn-outline">Notre pièce signature →</a>
+      </div>
+    </div>
+
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      Découvrir
+    </div>
+  </section>
+
+  <!-- TRUST STRIP -->
+  <div class="trust-strip">
+    <div class="trust-item"><span class="trust-icon">✦</span> Ingrédients locaux & bio</div>
+    <div class="trust-item"><span class="trust-icon">✦</span> Zéro conservateur</div>
+    <div class="trust-item"><span class="trust-icon">✦</span> Commandes sur mesure</div>
+    <div class="trust-item"><span class="trust-icon">✦</span> Livraison Paris & IDF</div>
+  </div>
+
+  <!-- CATALOGUE -->
+  <section id="catalogue">
+    <div class="container">
+      <div class="catalogue-header">
+        <div>
+          <div class="section-kicker reveal">Saison 2026</div>
+          <h2 class="section-title reveal reveal-delay-1">Notre Catalogue</h2>
+        </div>
+        <p class="section-sub reveal reveal-delay-2">Neuf créations qui changent au fil des saisons, toujours en phase avec ce que la nature nous offre de meilleur.</p>
+      </div>
+
+      <div class="catalogue-grid">
+
+        <div class="pastry-card reveal">
+          <div class="pastry-img">
+            <img src="https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&q=80&auto=format&fit=crop" alt="Tarte aux fraises" onerror="this.parentElement.style.background='#d4c9b8'" />
+            <div class="pastry-leaf">Printemps</div>
+            <div class="pastry-overlay"><span>Voir les détails</span></div>
+          </div>
+          <div class="pastry-body">
+            <div class="pastry-name">Tarte Fraise & Basilic</div>
+            <div class="pastry-desc">Fraises des bois, crème diplomate basilic, pâte sucrée amande</div>
+            <div class="pastry-footer">
+              <div class="pastry-price">6,80 €</div>
+              <div class="pastry-allergen">Gluten · Lait · Œuf</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pastry-card reveal reveal-delay-1">
+          <div class="pastry-img">
+            <img src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&q=80&auto=format&fit=crop" alt="Éclair chocolat" onerror="this.parentElement.style.background='#d4c9b8'" />
+            <div class="pastry-leaf">Classique</div>
+            <div class="pastry-overlay"><span>Voir les détails</span></div>
+          </div>
+          <div class="pastry-body">
+            <div class="pastry-name">Éclair Forêt Noire</div>
+            <div class="pastry-desc">Pâte à choux, ganache chocolat 70%, cerises griottines, chantilly légère</div>
+            <div class="pastry-footer">
+              <div class="pastry-price">5,90 €</div>
+              <div class="pastry-allergen">Gluten · Lait · Œuf</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pastry-card reveal reveal-delay-2">
+          <div class="pastry-img">
+            <img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&q=80&auto=format&fit=crop" alt="Tarte citron" onerror="this.parentElement.style.background='#d4c9b8'" />
+            <div class="pastry-leaf">Été</div>
+            <div class="pastry-overlay"><span>Voir les détails</span></div>
+          </div>
+          <div class="pastry-body">
+            <div class="pastry-name">Tarte Citron Verveine</div>
+            <div class="pastry-desc">Citron de Menton, crème verveine fraîche, meringue italienne torchée</div>
+            <div class="pastry-footer">
+              <div class="pastry-price">6,50 €</div>
+              <div class="pastry-allergen">Gluten · Lait · Œuf</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pastry-card reveal">
+          <div class="pastry-img">
+            <img src="https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=600&q=80&auto=format&fit=crop" alt="Mille feuille" onerror="this.parentElement.style.background='#d4c9b8'" />
+            <div class="pastry-leaf">Incontournable</div>
+            <div class="pastry-overlay"><span>Voir les détails</span></div>
+          </div>
+          <div class="pastry-body">
+            <div class="pastry-name">Mille-Feuille Vanille</div>
+            <div class="pastry-desc">Feuilletage caramélisé, crème mousseline vanille Bourbon, glaçage marbré</div>
+            <div class="pastry-footer">
+              <div class="pastry-price">7,20 €</div>
+              <div class="pastry-allergen">Gluten · Lait · Œuf</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pastry-card reveal reveal-delay-1">
+          <div class="pastry-img">
+            <img src="https://images.unsplash.com/photo-1550617931-e17a7b70dce2?w=600&q=80&auto=format&fit=crop" alt="Macaron" onerror="this.parentElement.style.background='#d4c9b8'" />
+            <div class="pastry-leaf">Best-seller</div>
+            <div class="pastry-overlay"><span>Voir les détails</span></div>
+          </div>
+          <div class="pastry-body">
+            <div class="pastry-name">Macarons Saison</div>
+            <div class="pastry-desc">6 parfums saisonniers, ganaches maison, coques amande extra-fine</div>
+            <div class="pastry-footer">
+              <div class="pastry-price">14,00 € / 6</div>
+              <div class="pastry-allergen">Gluten · Lait · Œuf · Fruits à coque</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pastry-card reveal reveal-delay-2">
+          <div class="pastry-img">
+            <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80&auto=format&fit=crop" alt="Gâteau chocolat" onerror="this.parentElement.style.background='#d4c9b8'" />
+            <div class="pastry-leaf">Automne</div>
+            <div class="pastry-overlay"><span>Voir les détails</span></div>
+          </div>
+          <div class="pastry-body">
+            <div class="pastry-name">Entremets Châtaigne</div>
+            <div class="pastry-desc">Mousse marron, insert poire, biscuit dacquoise noisette, glaçage velours</div>
+            <div class="pastry-footer">
+              <div class="pastry-price">7,80 €</div>
+              <div class="pastry-allergen">Gluten · Lait · Œuf · Fruits à coque</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pastry-card reveal">
+          <div class="pastry-img">
+            <img src="https://images.unsplash.com/photo-1530610476181-d83430b64dcd?w=600&q=80&auto=format&fit=crop" alt="Paris Brest" onerror="this.parentElement.style.background='#d4c9b8'" />
+            <div class="pastry-leaf">Classique</div>
+            <div class="pastry-overlay"><span>Voir les détails</span></div>
+          </div>
+          <div class="pastry-body">
+            <div class="pastry-name">Paris-Brest Noisette</div>
+            <div class="pastry-desc">Pâte à choux, pralinée noisette maison, éclats pralin, crème mousseline</div>
+            <div class="pastry-footer">
+              <div class="pastry-price">6,90 €</div>
+              <div class="pastry-allergen">Gluten · Lait · Œuf · Fruits à coque</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pastry-card reveal reveal-delay-1">
+          <div class="pastry-img">
+            <img src="https://images.unsplash.com/photo-1612203985729-70726954388c?w=600&q=80&auto=format&fit=crop" alt="Choux à la crème" onerror="this.parentElement.style.background='#d4c9b8'" />
+            <div class="pastry-leaf">Fraîcheur</div>
+            <div class="pastry-overlay"><span>Voir les détails</span></div>
+          </div>
+          <div class="pastry-body">
+            <div class="pastry-name">Religieuse Pistache</div>
+            <div class="pastry-desc">Double choux, crème pistache de Sicile, fondant vert pâle, pralin pistache</div>
+            <div class="pastry-footer">
+              <div class="pastry-price">5,50 €</div>
+              <div class="pastry-allergen">Gluten · Lait · Œuf · Fruits à coque</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pastry-card reveal reveal-delay-2">
+          <div class="pastry-img">
+            <img src="https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&q=80&auto=format&fit=crop" alt="Tarte aux pommes" onerror="this.parentElement.style.background='#d4c9b8'" />
+            <div class="pastry-leaf">Hiver</div>
+            <div class="pastry-overlay"><span>Voir les détails</span></div>
+          </div>
+          <div class="pastry-body">
+            <div class="pastry-name">Tarte Pomme & Sarrasin</div>
+            <div class="pastry-desc">Pommes Cox de Normandie, crème amande sarrasin, pâte brisée beurre AOP</div>
+            <div class="pastry-footer">
+              <div class="pastry-price">6,20 €</div>
+              <div class="pastry-allergen">Gluten · Lait · Œuf</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- SIGNATURE -->
+  <section id="signature">
+    <div class="container">
+      <div class="signature-grid">
+        <div class="signature-img reveal">
+          <img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=800&q=80&auto=format&fit=crop" alt="Pièce signature" onerror="this.style.background='#2f5d3a'" />
+          <div class="signature-badge">Pièce Signature</div>
+        </div>
+        <div class="signature-body">
+          <div class="section-kicker reveal">Notre fierté</div>
+          <h2 class="signature-title reveal reveal-delay-1">
+            Le Bois <em>Dormant</em><br />
+            — entremets<br />de saison
+          </h2>
+          <p class="reveal reveal-delay-2">
+            Notre création phare naît deux fois par an. Un entremets entièrement reformulé à chaque saison, inspiré d'une promenade forestière : champignons dorés en automne, fleurs de sureau au printemps, mousses de sous-bois l'hiver.
+          </p>
+          <div class="signature-details reveal reveal-delay-2">
+            <div>
+              <div class="sig-detail-val">12 h</div>
+              <div class="sig-detail-label">Préparation</div>
+            </div>
+            <div>
+              <div class="sig-detail-val">6</div>
+              <div class="sig-detail-label">Couches de goût</div>
+            </div>
+            <div>
+              <div class="sig-detail-val">100 %</div>
+              <div class="sig-detail-label">Fait maison</div>
+            </div>
+          </div>
+          <a href="#contact" class="btn-primary reveal reveal-delay-3">Commander cette pièce</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AVIS -->
+  <section id="avis">
+    <div class="container">
+      <div class="avis-header reveal">
+        <div class="section-kicker">Témoignages</div>
+        <h2 class="section-title">Ce qu'ils en disent</h2>
+      </div>
+      <div class="avis-grid">
+        <div class="avis-card reveal">
+          <div class="avis-stars">★★★★★</div>
+          <p class="avis-text">« Le Bois Dormant était la pièce maîtresse de notre mariage. Nos invités en parlent encore six mois après. Une création qui transcende la pâtisserie. »</p>
+          <div class="avis-author">
+            <div class="avis-avatar">S</div>
+            <div>
+              <div class="avis-name">Sophie & Laurent M.</div>
+              <div class="avis-date">Mars 2026</div>
+            </div>
+          </div>
+        </div>
+        <div class="avis-card reveal reveal-delay-1">
+          <div class="avis-stars">★★★★★</div>
+          <p class="avis-text">« La tarte fraise-basilic est une révélation. On sent que chaque ingrédient est choisi avec soin. Un niveau qui rivalise avec les meilleures maisons parisiennes. »</p>
+          <div class="avis-author">
+            <div class="avis-avatar">C</div>
+            <div>
+              <div class="avis-name">Claire D.</div>
+              <div class="avis-date">Avril 2026</div>
+            </div>
+          </div>
+        </div>
+        <div class="avis-card reveal reveal-delay-2">
+          <div class="avis-stars">★★★★★</div>
+          <p class="avis-text">« Commande de macarons pour un séminaire d'entreprise. Résultat spectaculaire, livraison parfaite, et des retours enthousiastes de toute l'équipe. Impeccable. »</p>
+          <div class="avis-author">
+            <div class="avis-avatar">T</div>
+            <div>
+              <div class="avis-name">Thomas B. — DRH</div>
+              <div class="avis-date">Juin 2026</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="container">
+      <div class="contact-grid">
+        <div class="contact-info">
+          <div class="section-kicker reveal">Commander</div>
+          <h2 class="reveal reveal-delay-1">Une commande<br />sur mesure ?</h2>
+          <p class="reveal reveal-delay-2">Pour des pièces de mariage, événements d'entreprise ou une idée originale, contactez-nous. Nous travaillons chaque commande individuellement.</p>
+          <div class="contact-details reveal reveal-delay-2">
+            <div class="contact-detail">
+              <div class="detail-icon">✦</div>
+              <div>
+                <div class="detail-label">Boutique</div>
+                <div class="detail-val">12 rue des Lilas, Paris 10e<br />Mar–Sam 9h–19h</div>
+              </div>
+            </div>
+            <div class="contact-detail">
+              <div class="detail-icon">→</div>
+              <div>
+                <div class="detail-label">Contact</div>
+                <div class="detail-val">contact@foret-patisserie.fr</div>
+              </div>
+            </div>
+            <div class="contact-detail">
+              <div class="detail-icon">◎</div>
+              <div>
+                <div class="detail-label">Livraison</div>
+                <div class="detail-val">Paris & petite couronne<br />48h minimum à l'avance</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="reveal reveal-delay-1">
+          <div class="contact-form">
+            <div class="form-title-green">Faites-nous part de votre projet</div>
+            <form id="contact-form" onsubmit="submitContact(event)">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div class="form-group">
+                  <label class="form-label" for="c-nom">Prénom</label>
+                  <input id="c-nom" class="form-input" type="text" placeholder="Élise" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="c-email">Email</label>
+                  <input id="c-email" class="form-input" type="email" placeholder="elise@exemple.fr" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="c-occasion">Occasion</label>
+                <input id="c-occasion" class="form-input" type="text" placeholder="Mariage, anniversaire, séminaire..." />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="c-msg">Votre projet</label>
+                <textarea id="c-msg" class="form-textarea" placeholder="Décrivez votre idée, nombre de personnes, date souhaitée..." required></textarea>
+              </div>
+              <button type="submit" class="form-submit">Envoyer ma demande →</button>
+            </form>
+            <div class="form-success" id="form-success">
+              <div class="success-icon">✦</div>
+              <div class="success-title">Message reçu</div>
+              <div class="success-text">Nous vous répondons sous 24 h pour construire votre projet ensemble.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">Forêt <em>Pâtisserie</em></div>
+        <div class="footer-tagline">Artisan Pâtissier · Paris 10e</div>
+      </div>
+      <ul class="footer-links">
+        <li><a href="#catalogue">Catalogue</a></li>
+        <li><a href="#signature">Signature</a></li>
+        <li><a href="#contact">Commande</a></li>
+      </ul>
+      <div class="footer-copy">© 2026 Forêt Pâtisserie</div>
+    </div>
+  </footer>
+
+  <script>
+    // Reveal on scroll
+    const reveals = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => io.observe(el));
+
+    // Contact form
+    function submitContact(e) {
+      e.preventDefault();
+      document.getElementById('contact-form').style.display = 'none';
+      document.querySelector('.form-title-green').textContent = 'Demande reçue';
+      document.getElementById('form-success').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
