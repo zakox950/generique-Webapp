@@ -63,22 +63,24 @@ function ShowcaseEntry({
         </div>
       </div>
 
-      {/* ── Preview panel — revealed on hover via clip-path ── */}
+      {/* ── Preview panel — 3D tilt, turns to face on hover ── */}
       <div className="showcase-entry-preview">
-        <div className="showcase-iframe-wrap">
-          {inView && (
-            <iframe
-              className="showcase-preview-iframe"
-              src={site.url}
-              title={site.title}
-              loading="lazy"
-              tabIndex={-1}
-              aria-hidden="true"
-              scrolling="no"
-            />
-          )}
+        <div className="showcase-entry-preview-inner">
+          <div className="showcase-iframe-wrap">
+            {inView && (
+              <iframe
+                className="showcase-preview-iframe"
+                src={site.url}
+                title={site.title}
+                loading="lazy"
+                tabIndex={-1}
+                aria-hidden="true"
+                scrolling="no"
+              />
+            )}
+          </div>
+          <div className="showcase-preview-veil" />
         </div>
-        <div className="showcase-preview-veil" />
       </div>
     </motion.li>
   );

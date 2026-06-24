@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Raleway:wght@300;400;600;700;800;900&display=swap');
 
 /* ─── OKLCH Design Tokens — Forest Studio ──────────────────────────── */
 :root {
@@ -20,6 +20,7 @@
   --deep:        oklch(0.29 0.068 74);   /* café noir #4C3D19 */
 
   /* Typography */
+  --font-brand:   'Raleway', system-ui, sans-serif;
   --font-display: 'Josefin Sans', system-ui, sans-serif;
   --font-body:    'Barlow', system-ui, sans-serif;
 
@@ -106,12 +107,12 @@ body::before {
 }
 
 .nav-logo {
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-family: var(--font-brand);
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
   color: var(--ink);
+  line-height: 1;
 }
 
 .nav-logo em {
@@ -185,27 +186,84 @@ body::before {
 }
 
 .botanical-left {
-  left: -60px;
-  bottom: 10vh;
-  width: 400px;
-  opacity: 0.14;
+  left: -40px;
+  bottom: 8vh;
+  width: 420px;
+  opacity: 0.26;
   animation: botanical-sway 18s ease-in-out infinite;
 }
 
 .botanical-right {
-  right: -40px;
-  top: 10vh;
-  width: 480px;
-  opacity: 0.10;
+  right: -30px;
+  top: 8vh;
+  width: 500px;
+  opacity: 0.20;
   animation: botanical-sway 22s ease-in-out infinite reverse;
 }
 
 .botanical-center {
-  right: 8vw;
-  top: 8vh;
-  width: 320px;
-  opacity: 0.07;
+  right: 10vw;
+  top: 10vh;
+  width: 340px;
+  opacity: 0.14;
   animation: botanical-drift 30s ease-in-out infinite;
+}
+
+/* ── Background atmosphere orbs — animated independently of scroll ── */
+.hero-atmo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.atmo-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(88px);
+  will-change: transform;
+}
+
+.atmo-orb-1 {
+  width: 560px; height: 560px;
+  background: oklch(0.32 0.062 140);
+  opacity: 0.30;
+  top: -160px; left: -90px;
+  animation: orb-drift-1 26s ease-in-out infinite;
+}
+
+.atmo-orb-2 {
+  width: 620px; height: 420px;
+  background: oklch(0.26 0.050 110);
+  opacity: 0.24;
+  bottom: -120px; right: -70px;
+  animation: orb-drift-2 32s ease-in-out infinite;
+}
+
+.atmo-orb-3 {
+  width: 380px; height: 380px;
+  background: oklch(0.44 0.064 126);
+  opacity: 0.16;
+  top: 38%; left: 42%;
+  animation: orb-drift-3 22s ease-in-out infinite;
+}
+
+@keyframes orb-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  35%       { transform: translate(110px, 70px) scale(1.08); }
+  70%       { transform: translate(50px, -50px) scale(0.92); }
+}
+
+@keyframes orb-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40%       { transform: translate(-100px, -55px) scale(1.12); }
+  70%       { transform: translate(-150px, 30px) scale(0.96); }
+}
+
+@keyframes orb-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(-70px, 50px) scale(1.25); }
 }
 
 @keyframes botanical-sway {
@@ -331,6 +389,30 @@ body::before {
   transition: border-color var(--dur-fast), color var(--dur-fast);
 }
 .btn-ghost:hover { border-color: var(--tan); color: var(--tan); }
+
+/* Brand hero name */
+.hero-brand-name {
+  font-family: var(--font-brand);
+  font-size: clamp(4.5rem, 16vw, 12rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+  color: var(--ink);
+  text-transform: uppercase;
+}
+
+.hero-brand-name .tan-char { color: var(--tan); }
+
+.hero-subtitle {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2.5rem;
+  margin-top: 1.2rem;
+}
 
 /* Status dot */
 .dot-pulse {
@@ -565,22 +647,35 @@ body::before {
   transform: translateX(0);
 }
 
-/* Preview panel — revealed on hover via clip-path */
+/* Preview panel — always visible, 3D tilt that "turns to face" on hover */
 .showcase-entry-preview {
   position: relative;
   height: 220px;
+  perspective: 900px;
+  flex: none;
+}
+
+.showcase-entry-preview-inner {
+  width: 100%;
+  height: 100%;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--border);
-  clip-path: inset(0 100% 0 0 round 10px);
-  transition: clip-path 0.65s var(--ease-out-expo),
-              border-color var(--dur-base);
+  position: relative;
+  transform: rotateY(-8deg) scale(0.95);
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  box-shadow: 6px 12px 32px oklch(0.06 0.028 142 / 0.55);
+  transition: transform 0.55s var(--ease-out-expo),
+              border-color 0.4s,
+              box-shadow 0.55s var(--ease-out-expo);
 }
 
-.showcase-entry:hover .showcase-entry-preview {
-  clip-path: inset(0 0% 0 0 round 10px);
+.showcase-entry:hover .showcase-entry-preview-inner {
+  transform: rotateY(0deg) scale(1);
   border-color: var(--border-hi);
+  box-shadow: 12px 24px 52px oklch(0.06 0.028 142 / 0.65);
 }
 
 /* Scaled live iframe inside preview */
@@ -606,7 +701,7 @@ body::before {
 .showcase-preview-veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 60%, oklch(0.14 0.048 142 / 0.5) 100%);
+  background: linear-gradient(to bottom, transparent 55%, oklch(0.14 0.048 142 / 0.55) 100%);
   pointer-events: none;
 }
 
@@ -1006,13 +1101,16 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   .botanical-left,
   .botanical-right,
-  .botanical-center { animation: none; }
+  .botanical-center,
+  .atmo-orb-1,
+  .atmo-orb-2,
+  .atmo-orb-3 { animation: none; }
   .dot-pulse::after { animation: none; }
   .scroll-bar { animation: none; }
   .marquee-track { animation: none; }
 
-  .showcase-entry-preview {
-    clip-path: inset(0 0% 0 0 round 10px);
+  .showcase-entry-preview-inner {
+    transform: none;
     transition: none;
   }
   .showcase-entry-cta {

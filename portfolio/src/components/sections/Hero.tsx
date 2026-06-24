@@ -4,14 +4,11 @@ import { motion, useScroll, useTransform } from "framer-motion";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-/* ── Botanical SVG: fern frond ── */
 function FernLeft() {
   return (
     <svg className="botanical-svg botanical-left" viewBox="0 0 260 600" xmlns="http://www.w3.org/2000/svg">
       <g strokeWidth="1" fill="none" stroke="currentColor" strokeLinecap="round">
-        {/* Central stem */}
         <path d="M130 590 Q125 450 110 300 Q95 150 120 10" />
-        {/* Frond pairs — large bottom, small top */}
         <path d="M125 530 Q80 500 40 510 Q60 490 125 520" />
         <path d="M125 530 Q160 495 200 500 Q180 485 125 520" />
         <path d="M120 470 Q75 440 38 448 Q56 428 120 460" />
@@ -35,34 +32,28 @@ function FernLeft() {
   );
 }
 
-/* ── Botanical SVG: pine branch ── */
 function PineBranch() {
   return (
     <svg className="botanical-svg botanical-right" viewBox="0 0 480 520" xmlns="http://www.w3.org/2000/svg">
       <g strokeWidth="0.8" fill="none" stroke="currentColor" strokeLinecap="round">
-        {/* Main branch */}
         <path d="M60 480 Q180 360 280 240 Q360 140 420 40" />
-        {/* Sub-branches right */}
         <path d="M140 430 Q200 400 260 380" />
         <path d="M185 380 Q255 345 320 325" />
         <path d="M235 325 Q305 288 365 268" />
         <path d="M280 270 Q345 235 398 218" />
         <path d="M325 218 Q382 185 425 172" />
         <path d="M365 168 Q410 140 440 130" />
-        {/* Sub-branches left */}
         <path d="M140 430 Q95 395 55 385" />
         <path d="M185 380 Q130 342 85 332" />
         <path d="M235 325 Q178 286 136 278" />
         <path d="M280 270 Q228 234 192 226" />
         <path d="M325 218 Q278 185 248 178" />
-        {/* Pine needle clusters — right */}
         <path d="M260 380 Q285 365 300 352 Q275 362 260 380" />
         <path d="M260 380 Q290 390 308 382 Q282 375 260 380" />
         <path d="M320 325 Q348 310 362 298 Q336 308 320 325" />
         <path d="M320 325 Q352 335 368 328 Q342 320 320 325" />
         <path d="M365 268 Q392 254 405 242 Q380 252 365 268" />
         <path d="M365 268 Q396 278 410 271 Q384 264 365 268" />
-        {/* Pine needle clusters — left */}
         <path d="M55 385 Q30 368 18 355 Q44 365 55 385" />
         <path d="M55 385 Q26 395 14 388 Q40 380 55 385" />
         <path d="M85 332 Q58 315 44 302 Q72 312 85 332" />
@@ -72,14 +63,11 @@ function PineBranch() {
   );
 }
 
-/* ── Botanical SVG: leaf cluster ── */
 function LeafCluster() {
   return (
     <svg className="botanical-svg botanical-center" viewBox="0 0 280 420" xmlns="http://www.w3.org/2000/svg">
       <g strokeWidth="0.9" fill="none" stroke="currentColor" strokeLinecap="round">
-        {/* Central stem */}
         <path d="M140 420 Q138 300 135 180 Q132 90 140 0" />
-        {/* Leaf pairs */}
         <path d="M136 360 Q90 320 62 308 Q100 295 136 348" />
         <path d="M136 360 Q178 318 202 305 Q168 292 136 348" />
         <path d="M135 290 Q92 252 66 240 Q100 228 135 278" />
@@ -90,7 +78,6 @@ function LeafCluster() {
         <path d="M136 158 Q168 123 184 112 Q160 103 136 148" />
         <path d="M137 98 Q110 68 96 60 Q118 52 137 90" />
         <path d="M137 98 Q162 66 174 58 Q155 50 137 90" />
-        {/* Leaf veins */}
         <path d="M99 324 Q90 320 62 308" strokeWidth="0.4" />
         <path d="M168 321 Q178 318 202 305" strokeWidth="0.4" />
         <path d="M100 265 Q92 252 66 240" strokeWidth="0.4" />
@@ -105,45 +92,52 @@ export default function Hero() {
   const { scrollY } = useScroll();
 
   /* Three-layer parallax — back layers lag, foreground leads */
-  const botanicalY  = useTransform(scrollY, [0, 1000], [0, 200]);   /* slowest */
-  const decoY       = useTransform(scrollY, [0, 1000], [0, 140]);   /* medium */
-  const contentY    = useTransform(scrollY, [0, 1000], [0, 70]);    /* fastest */
+  const botanicalY     = useTransform(scrollY, [0, 1000], [0, 220]);
+  const orbsY          = useTransform(scrollY, [0, 1000], [0, 160]);
+  const decoY          = useTransform(scrollY, [0, 1000], [0, 130]);
+  const contentY       = useTransform(scrollY, [0, 1000], [0, 65]);
   const contentOpacity = useTransform(scrollY, [240, 680], [1, 0]);
 
   return (
     <section className="hero" id="home" ref={heroRef}>
 
-      {/* ── Layer 1 — botanical illustrations (slowest, lives in bg) ── */}
-      <motion.div
-        style={{ y: botanicalY }}
-        className="hero-layer"
-        aria-hidden="true"
-      >
+      {/* ── Layer 0 — atmosphere orbs (slowest, purely ambient) ── */}
+      <motion.div style={{ y: orbsY }} className="hero-layer" aria-hidden="true">
+        <div className="hero-atmo">
+          <div className="atmo-orb atmo-orb-1" />
+          <div className="atmo-orb atmo-orb-2" />
+          <div className="atmo-orb atmo-orb-3" />
+        </div>
+      </motion.div>
+
+      {/* ── Layer 1 — botanical illustrations (slow) ── */}
+      <motion.div style={{ y: botanicalY }} className="hero-layer" aria-hidden="true">
         <FernLeft />
         <PineBranch />
         <LeafCluster />
       </motion.div>
 
-      {/* ── Layer 2 — decorative wordmark (medium speed) ── */}
+      {/* ── Layer 2 — decorative wordmark outline (medium) ── */}
       <motion.div
         style={{ position: "absolute", inset: 0, y: decoY, pointerEvents: "none" }}
         aria-hidden="true"
       >
         <motion.div
           className="hero-deco"
-          animate={{ y: [0, -14, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          animate={{ y: [0, -16, 0] }}
+          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
         >
           Spyfie
         </motion.div>
       </motion.div>
 
       {/* ── Layer 3 — foreground content (fastest) ── */}
-      <motion.div style={{ y: contentY, opacity: contentOpacity, position: "relative", zIndex: 2 }}>
-
+      <motion.div
+        style={{ y: contentY, opacity: contentOpacity, position: "relative", zIndex: 2 }}
+      >
         <motion.p
           className="hero-eyebrow"
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease }}
         >
@@ -151,40 +145,29 @@ export default function Hero() {
           Studio digital — disponible
         </motion.p>
 
-        <h1 className="hero-headline">
-          <motion.span
-            style={{ display: "block" }}
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.0, delay: 0.08, ease }}
-          >
-            Craft
-          </motion.span>
-          <motion.span
-            style={{ display: "block" }}
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.0, delay: 0.16, ease }}
-            className="tan"
-          >
-            &amp;
-          </motion.span>
-          <motion.span
-            style={{ display: "block" }}
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.0, delay: 0.24, ease }}
-            className="stroke"
-          >
-            Code
-          </motion.span>
-        </h1>
+        <motion.h1
+          className="hero-brand-name"
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.1, delay: 0.1, ease }}
+        >
+          Spy<span className="tan-char">fie</span>
+        </motion.h1>
+
+        <motion.p
+          className="hero-subtitle"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.28, ease }}
+        >
+          Studio de développement web sur-mesure
+        </motion.p>
 
         <motion.div
           className="hero-bottom"
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.4, ease }}
+          transition={{ duration: 0.9, delay: 0.42, ease }}
         >
           <p className="hero-tagline">
             On construit des produits web qui tiennent.<br />
