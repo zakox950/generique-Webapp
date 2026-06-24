@@ -1,6 +1,6 @@
 "use client";
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionTemplate } from "framer-motion";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -98,6 +98,11 @@ export default function Hero() {
   const contentY       = useTransform(scrollY, [0, 1000], [0, 65]);
   const contentOpacity = useTransform(scrollY, [240, 680], [1, 0]);
 
+  /* Spyfie deco: letters spread apart on scroll, then fade */
+  const rawGap            = useTransform(scrollY, [0, 650], [0.05, 0.85]);
+  const decoLetterSpacing = useMotionTemplate`${rawGap}em`;
+  const decoOpacity       = useTransform(scrollY, [0, 480], [0.48, 0.0]);
+
   return (
     <section className="hero" id="home" ref={heroRef}>
 
@@ -122,12 +127,24 @@ export default function Hero() {
         style={{ position: "absolute", inset: 0, y: decoY, pointerEvents: "none" }}
         aria-hidden="true"
       >
+        {/* Slow idle float on the container, scroll-driven spread + fade on the text */}
         <motion.div
           className="hero-deco"
-          animate={{ y: [0, -16, 0] }}
-          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+          style={{ letterSpacing: decoLetterSpacing, opacity: decoOpacity }}
+          animate={{ y: [0, -14, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
         >
-          Spyfie
+          {["S","p","y","f","i","e"].map((char, i) => (
+            <motion.span
+              key={i}
+              style={{ display: "inline-block" }}
+              initial={{ opacity: 0, y: 55, filter: "blur(22px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 1.1, delay: 0.18 + i * 0.09, ease }}
+            >
+              {char}
+            </motion.span>
+          ))}
         </motion.div>
       </motion.div>
 
