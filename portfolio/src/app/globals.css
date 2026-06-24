@@ -51,7 +51,7 @@
 
 /* ─── Reset ──────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; overflow-x: hidden; }
 
 body {
   background: var(--bg);
@@ -98,6 +98,7 @@ body::before {
   max-width: 820px;
   display: flex;
   align-items: center;
+  transition: transform 0.32s var(--ease-out-expo);
   justify-content: space-between;
   padding: 0.38rem 0.42rem 0.38rem 1.4rem;
   background: oklch(0.15 0.046 142 / 0.82);
@@ -816,52 +817,6 @@ body::before {
   font-style: italic;
 }
 
-/* ─── MARQUEE STRIP ──────────────────────────────────────────────────── */
-.marquee-strip {
-  position: relative;
-  z-index: 1;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 0.9rem 0;
-  overflow: hidden;
-  background: var(--surface);
-}
-
-.marquee-track {
-  display: flex;
-  gap: 3rem;
-  width: max-content;
-  animation: marquee 28s linear infinite;
-}
-
-.marquee-track:hover { animation-play-state: paused; }
-
-.marquee-item {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  font-family: var(--font-display);
-  font-size: var(--text-xs);
-  font-weight: 400;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: var(--muted);
-}
-
-.marquee-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--moss);
-  flex: none;
-}
-
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-
 /* ─── SERVICES ───────────────────────────────────────────────────────── */
 .services-list { display: grid; gap: 0; }
 
@@ -1188,13 +1143,18 @@ body::before {
     top: auto;
     bottom: 0.7rem;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(0);
     width: calc(100% - 1.4rem);
     max-width: 440px;
     padding: 0.4rem;
     justify-content: center;
     border-radius: 26px;
   }
+  /* Slide nav off-screen downward when scrolling down */
+  .nav.nav--hidden {
+    transform: translateX(-50%) translateY(130%);
+  }
+
   .nav-logo { display: none; }
 
   .nav-island {
@@ -1214,6 +1174,9 @@ body::before {
     letter-spacing: 0.08em;
   }
   .nav-island-icon svg { width: 16px; height: 16px; }
+
+  /* Hide scroll hint on mobile — touch users know to scroll */
+  .hero-scroll-hint { display: none; }
 
   /* Clear the floating bottom bar so content isn't hidden behind it */
   .footer {
@@ -1251,6 +1214,5 @@ body::before {
   .atmo-orb-3 { animation: none; }
   .dot-pulse::after { animation: none; }
   .scroll-bar { animation: none; }
-  .marquee-track { animation: none; }
   .deck-card { transition: none; }
 }

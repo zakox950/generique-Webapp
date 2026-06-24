@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 const LINKS = [
@@ -52,24 +52,38 @@ const SECTIONS = ["home", "projects", "services", "about", "contact"];
 
 export default function Navbar() {
   const [active, setActive] = useState("home");
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
 
   useEffect(() => {
     const onScroll = () => {
+      const y = window.scrollY;
       const mid = window.innerHeight * 0.38;
+
+      // Active section tracking
       let current = "home";
       for (const id of SECTIONS) {
         const el = document.getElementById(id);
         if (el && el.getBoundingClientRect().top <= mid) current = id;
       }
       setActive(current);
+
+      // Auto-hide on mobile: hide when scrolling down past 80px, show on scroll up
+      if (window.innerWidth <= 760) {
+        setHidden(y > lastY.current && y > 80);
+      } else {
+        setHidden(false);
+      }
+      lastY.current = y;
     };
+
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
-    <nav className="nav">
+    <nav className={`nav${hidden ? " nav--hidden" : ""}`}>
       <a href="#home" className="nav-logo">
         Spy<em>fie</em>
       </a>

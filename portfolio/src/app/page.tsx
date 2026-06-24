@@ -5,13 +5,10 @@ import Services from "@/components/sections/Services";
 import About from "@/components/sections/About";
 import Contact from "@/components/sections/Contact";
 import { getShowcaseSites } from "@/lib/showcase";
-import { stack } from "@/lib/data";
 
 // Re-read the showcase folder on every request so dropping a new
 // site folder + restart picks it up without code changes.
 export const dynamic = "force-dynamic";
-
-const doubled = [...stack, ...stack];
 
 export default function Home() {
   const sites = getShowcaseSites();
@@ -31,21 +28,7 @@ export default function Home() {
 
       <main>
         <Hero />
-
         <Work sites={sites} />
-
-        {/* ─── Marquee strip ─── */}
-        <div className="marquee-strip" aria-hidden="true">
-          <div className="marquee-track">
-            {doubled.map((item, i) => (
-              <div key={i} className="marquee-item">
-                <span className="marquee-dot" />
-                {item}
-              </div>
-            ))}
-          </div>
-        </div>
-
         <Services />
         <About />
         <Contact />
