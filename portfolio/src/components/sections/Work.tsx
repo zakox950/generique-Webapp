@@ -6,12 +6,13 @@ import Lightbox from "@/components/ui/Lightbox";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-// Stacking levels — active card + up to 3 behind
+// Fan layout — active card upright/centered on top, others fanned out
+// left & right behind it like a hand of playing cards.
 const STACK = [
-  { y: 0,  scale: 1,    opacity: 1,    zIndex: 30 },
-  { y: 18, scale: 0.94, opacity: 0.72, zIndex: 29 },
-  { y: 32, scale: 0.88, opacity: 0.48, zIndex: 28 },
-  { y: 44, scale: 0.82, opacity: 0.26, zIndex: 27 },
+  { x: 0,    y: 0,  rotate: 0,    scale: 1,    opacity: 1,    zIndex: 30 },
+  { x: 104,  y: 16, rotate: 7,    scale: 0.95, opacity: 0.82, zIndex: 29 },
+  { x: -96,  y: 24, rotate: -8,   scale: 0.91, opacity: 0.56, zIndex: 28 },
+  { x: 168,  y: 38, rotate: 13,   scale: 0.87, opacity: 0.30, zIndex: 27 },
 ];
 
 export default function Work({ sites }: { sites: ShowcaseSite[] }) {
@@ -93,8 +94,14 @@ export default function Work({ sites }: { sites: ShowcaseSite[] }) {
                 key={site.slug}
                 className={`deck-card${isActive ? " active" : ""}`}
                 style={{ zIndex: s.zIndex }}
-                animate={{ y: s.y, scale: s.scale, opacity: s.opacity }}
-                transition={{ duration: 0.52, ease }}
+                animate={{
+                  x: s.x,
+                  y: s.y,
+                  rotate: s.rotate,
+                  scale: s.scale,
+                  opacity: s.opacity,
+                }}
+                transition={{ duration: 0.55, ease }}
                 drag={isActive ? "x" : false}
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.18}
