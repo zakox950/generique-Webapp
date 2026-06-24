@@ -195,48 +195,41 @@ body::before {
   overflow: hidden;
 }
 
-/* Botanical parallax layer containers */
+/* Parallax layer containers */
 .hero-layer { position: absolute; inset: 0; pointer-events: none; }
 
-/* Botanical SVG layer */
-.hero-botanical {
+/* Real jungle photograph behind the hero, darkened so text stays readable */
+.hero-photo {
   position: absolute;
-  inset: 0;
+  inset: -8% 0 0 0;
+  z-index: 0;
   overflow: hidden;
 }
 
-.botanical-svg {
+.hero-photo img {
+  width: 100%;
+  height: 116%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+.hero-photo::after {
+  content: '';
   position: absolute;
-  color: var(--surface-hi);
-  fill: none;
-  stroke: currentColor;
+  inset: 0;
+  background:
+    linear-gradient(to bottom,
+      oklch(0.16 0.046 142 / 0.62) 0%,
+      oklch(0.19 0.050 142 / 0.62) 45%,
+      oklch(0.21 0.052 142 / 0.97) 100%),
+    linear-gradient(to right,
+      oklch(0.18 0.048 142 / 0.50) 0%,
+      transparent 38%,
+      transparent 62%,
+      oklch(0.18 0.048 142 / 0.45) 100%);
 }
 
-.botanical-left {
-  left: -40px;
-  bottom: 8vh;
-  width: 420px;
-  opacity: 0.36;
-  animation: botanical-sway 18s ease-in-out infinite;
-}
-
-.botanical-right {
-  right: -30px;
-  top: 8vh;
-  width: 500px;
-  opacity: 0.28;
-  animation: botanical-sway 22s ease-in-out infinite reverse;
-}
-
-.botanical-center {
-  right: 10vw;
-  top: 10vh;
-  width: 340px;
-  opacity: 0.20;
-  animation: botanical-drift 30s ease-in-out infinite;
-}
-
-/* ─── GLOBAL PAGE FLORA — fixed background layer ─────────────────────── */
+/* ─── GLOBAL PLANT PHOTO ACCENTS — fixed background layer ────────────── */
 .page-flora {
   position: fixed;
   inset: 0;
@@ -245,38 +238,34 @@ body::before {
   overflow: hidden;
 }
 
-.page-flora svg {
+.flora-img {
   position: absolute;
-  color: oklch(0.50 0.080 138);
-  fill: none;
-  stroke: currentColor;
+  object-fit: cover;
+  border-radius: 24px;
+  /* Soft radial fade so the rectangle dissolves into the forest bg */
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 30%, transparent 78%);
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 30%, transparent 78%);
 }
 
-.flora-l1 {
-  top: 28vh; left: -55px;
-  width: 340px; opacity: 0.28;
-  animation: botanical-sway 22s ease-in-out infinite;
+.flora-tl {
+  top: -60px; left: -70px;
+  width: 360px; height: 320px;
+  opacity: 0.34;
+  transform: scaleX(-1) rotate(-4deg);
+  animation: botanical-drift 32s ease-in-out infinite;
 }
-.flora-r1 {
-  top: 55vh; right: -45px;
-  width: 300px; opacity: 0.22;
-  animation: botanical-sway 28s ease-in-out infinite reverse;
+.flora-br {
+  bottom: -70px; right: -80px;
+  width: 420px; height: 360px;
+  opacity: 0.30;
+  transform: rotate(3deg);
+  animation: botanical-drift 38s ease-in-out infinite reverse;
 }
-.flora-l2 {
-  bottom: 12vh; left: -30px;
-  width: 260px; opacity: 0.18;
-  animation: botanical-drift 34s ease-in-out infinite;
-}
-.flora-r2 {
-  top: 82vh; right: 2vw;
-  width: 220px; opacity: 0.16;
-  animation: botanical-sway 19s ease-in-out infinite;
-}
-.flora-c {
-  top: 42vh; left: 50%;
-  transform: translateX(-50%);
-  width: 180px; opacity: 0.08;
-  animation: botanical-drift 26s ease-in-out infinite reverse;
+.flora-mr {
+  top: 46%; right: -60px;
+  width: 300px; height: 250px;
+  opacity: 0.24;
+  animation: botanical-sway 26s ease-in-out infinite;
 }
 
 /* ── Background atmosphere orbs — animated independently of scroll ── */
@@ -347,22 +336,24 @@ body::before {
   50%       { transform: translateX(-20px) rotate(2deg); }
 }
 
-/* Large decorative wordmark — middle layer.
-   letter-spacing and opacity are driven by Framer Motion (scroll + entrance). */
+/* Giant "Spyfie" backdrop word — vertically centred so its scroll-driven
+   spread + fade animation stays clearly in view as you scroll.
+   letter-spacing and opacity are driven by Framer Motion. */
 .hero-deco {
   position: absolute;
-  top: 14vh;
+  top: 50%;
   left: 0;
   right: 0;
+  transform: translateY(-50%);
   text-align: center;
   white-space: nowrap;
   font-family: var(--font-display);
-  font-size: clamp(7rem, 19vw, 21rem);
+  font-size: clamp(5rem, 15vw, 17rem);
   font-weight: 700;
   text-transform: uppercase;
   line-height: 1;
   color: transparent;
-  -webkit-text-stroke: 1px oklch(0.40 0.050 136);
+  -webkit-text-stroke: 1.5px oklch(0.52 0.060 130);
   pointer-events: none;
   user-select: none;
 }
@@ -1191,28 +1182,70 @@ body::before {
   .service-desc { text-align: left; }
 }
 
-@media (max-width: 640px) {
-  .nav { padding: 0.32rem 0.32rem 0.32rem 1rem; }
-  .nav-island-label { display: none; }   /* icons only on mobile */
-  .nav-island-link { padding: 0.48rem 0.72rem; }
-  .hero-deco { display: none; }
-  .footer { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+/* ── Mobile: navbar moves to the bottom as a tab bar ── */
+@media (max-width: 760px) {
+  .nav {
+    top: auto;
+    bottom: 0.7rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 1.4rem);
+    max-width: 440px;
+    padding: 0.4rem;
+    justify-content: center;
+    border-radius: 26px;
+  }
+  .nav-logo { display: none; }
+
+  .nav-island {
+    width: 100%;
+    justify-content: space-around;
+    gap: 0;
+  }
+  .nav-island-link {
+    flex-direction: column;
+    gap: 0.22rem;
+    padding: 0.45rem 0.5rem;
+    flex: 1;
+    justify-content: center;
+  }
+  .nav-island-label {
+    font-size: 0.5rem;
+    letter-spacing: 0.08em;
+  }
+  .nav-island-icon svg { width: 16px; height: 16px; }
+
+  /* Clear the floating bottom bar so content isn't hidden behind it */
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding-bottom: 6rem;
+  }
+  .hero { padding-bottom: clamp(5rem, 14vh, 8rem); }
 }
 
 @media (max-width: 640px) {
   .deck-stage-wrap { height: 440px; --scale: 0.30; }
   .deck-card-info { padding: 1rem 1.2rem 1.2rem; }
+  .hero-deco { font-size: clamp(4rem, 18vw, 8rem); }
+  .hero-tagline { font-size: var(--text-base); }
+  .hero-actions { width: 100%; }
+  .hero-actions .btn-primary,
+  .hero-actions .btn-ghost { flex: 1; justify-content: center; }
+  .section-header { flex-wrap: wrap; gap: 0.6rem; }
+  .flora-mr { display: none; }   /* keep mobile bg calm */
 }
 
 @media (max-width: 440px) {
-  .deck-stage-wrap { height: 420px; --scale: 0.23; }
+  .deck-stage-wrap { height: 400px; --scale: 0.22; }
 }
 
 /* ─── REDUCED MOTION ─────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .botanical-left,
-  .botanical-right,
-  .botanical-center,
+  .flora-tl,
+  .flora-br,
+  .flora-mr,
   .atmo-orb-1,
   .atmo-orb-2,
   .atmo-orb-3 { animation: none; }
