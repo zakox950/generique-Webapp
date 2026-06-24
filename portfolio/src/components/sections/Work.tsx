@@ -6,30 +6,34 @@ import Lightbox from "@/components/ui/Lightbox";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-// Fan layout — active card upright/centered on top, others fanned out
-// left & right behind it like a hand of playing cards.
-const STACK = [
-  { x: 0,    y: 0,  rotate: 0,    scale: 1,    opacity: 1,    zIndex: 30 },
-  { x: 104,  y: 16, rotate: 7,    scale: 0.95, opacity: 0.82, zIndex: 29 },
-  { x: -96,  y: 24, rotate: -8,   scale: 0.91, opacity: 0.56, zIndex: 28 },
-  { x: 168,  y: 38, rotate: 13,   scale: 0.87, opacity: 0.30, zIndex: 27 },
+// Fan levels by absolute distance from the active card. Sign (left/right)
+// is applied at render time so cards spread symmetrically around the center.
+const LEVELS = [
+  { dx: 0,   dr: 0,  scale: 1,    opacity: 1    }, // active — upright, on top
+  { dx: 215, dr: 8,  scale: 0.93, opacity: 0.78 },
+  { dx: 360, dr: 14, scale: 0.86, opacity: 0.46 },
+  { dx: 460, dr: 18, scale: 0.80, opacity: 0.24 },
 ];
 
 export default function Work({ sites }: { sites: ShowcaseSite[] }) {
   const [active, setActive] = useState(0);
+  const [spread, setSpread] = useState(1); // responsive fan-width multiplier
   const [lightbox, setLightbox] = useState<ShowcaseSite | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
-  const inView = useInView(sectionRef, { once: true, amount: 0.10 });
+  const inView = useInView(sectionRef, { once: true, amount: 0.1 });
 
-  // Scroll-driven expansion: stage grows from 0.72 → 1 as section enters viewport
+  const n = sites.length;
+
+  // Scroll-driven expansion: stage grows as the section enters the viewport.
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start 0.88", "start 0.15"],
   });
   const stageScale = useTransform(scrollYProgress, [0, 1], [0.72, 1.0]);
 
-  const prev = () => setActive((i) => Math.max(0, i - 1));
-  const next = () => setActive((i) => Math.min(sites.length - 1, i + 1));
+  // Looping navigation.
+  const prev = () => setActive((i) => (i - 1 + n) % n);
+  const next = () => setActive((i) => (i + 1) % n);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -38,9 +42,20 @@ export default function Work({ sites }: { sites: ShowcaseSite[] }) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [n]);
+
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      setSpread(w < 560 ? 0.42 : w < 900 ? 0.68 : w < 1180 ? 0.85 : 1);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
   }, []);
 
-  if (!sites.length) {
+  if (!n) {
     return (
       <section id="projects">
         <div className="section">
@@ -58,7 +73,7 @@ export default function Work({ sites }: { sites: ShowcaseSite[] }) {
 
   return (
     <section id="projects" ref={sectionRef}>
-      <div className="section">
+      <div className="section section--wide">
         {/* Header */}
         <div className="section-header">
           <motion.h2
@@ -73,7 +88,7 @@ export default function Work({ sites }: { sites: ShowcaseSite[] }) {
           <a href="#contact" className="section-link">Nouveau projet ↗</a>
         </div>
 
-        {/* Stacked card deck */}
+        {/* Stacked card deck — circular fan */}
         <motion.div
           className="deck-stage-wrap"
           style={{ scale: stageScale }}
@@ -82,24 +97,27 @@ export default function Work({ sites }: { sites: ShowcaseSite[] }) {
           transition={{ duration: 0.7, delay: 0.15, ease }}
         >
           {sites.map((site, i) => {
-            const offset = i - active;
-            // Only render: active card + up to 3 behind (never already-seen cards)
-            if (offset < 0 || offset > 3) return null;
+            // Shortest circular distance from the active card.
+            let off = i - active;
+            if (off > n / 2) off -= n;
+            if (off < -n / 2) off += n;
 
-            const s = STACK[Math.min(offset, STACK.length - 1)];
-            const isActive = offset === 0;
+            const mag = Math.abs(off);
+            const dir = Math.sign(off);
+            const lv = LEVELS[Math.min(mag, LEVELS.length - 1)];
+            const isActive = off === 0;
 
             return (
               <motion.div
                 key={site.slug}
                 className={`deck-card${isActive ? " active" : ""}`}
-                style={{ zIndex: s.zIndex }}
+                style={{ zIndex: 30 - mag }}
                 animate={{
-                  x: s.x,
-                  y: s.y,
-                  rotate: s.rotate,
-                  scale: s.scale,
-                  opacity: s.opacity,
+                  x: dir * lv.dx * spread,
+                  y: mag * 12,
+                  rotate: dir * lv.dr,
+                  scale: lv.scale,
+                  opacity: lv.opacity,
                 }}
                 transition={{ duration: 0.55, ease }}
                 drag={isActive ? "x" : false}
@@ -108,6 +126,9 @@ export default function Work({ sites }: { sites: ShowcaseSite[] }) {
                 onDragEnd={(_, info) => {
                   if (info.offset.x < -80) next();
                   else if (info.offset.x > 80) prev();
+                }}
+                onClick={() => {
+                  if (!isActive) setActive(i);
                 }}
               >
                 {/* Website preview */}
@@ -137,7 +158,10 @@ export default function Work({ sites }: { sites: ShowcaseSite[] }) {
                   {isActive && (
                     <button
                       className="deck-card-open"
-                      onClick={() => setLightbox(site)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightbox(site);
+                      }}
                     >
                       Ouvrir le projet ↗
                     </button>
@@ -166,15 +190,14 @@ export default function Work({ sites }: { sites: ShowcaseSite[] }) {
 
           <span className="deck-counter" aria-live="polite">
             {String(active + 1).padStart(2, "0")} /{" "}
-            {String(sites.length).padStart(2, "0")}
+            {String(n).padStart(2, "0")}
           </span>
 
-          {/* Arrow buttons */}
+          {/* Arrow buttons — loop, never disabled */}
           <div className="deck-arrows">
             <button
               className="deck-arrow-btn"
               onClick={prev}
-              disabled={active === 0}
               aria-label="Projet précédent"
             >
               ←
@@ -182,7 +205,6 @@ export default function Work({ sites }: { sites: ShowcaseSite[] }) {
             <button
               className="deck-arrow-btn"
               onClick={next}
-              disabled={active === sites.length - 1}
               aria-label="Projet suivant"
             >
               →

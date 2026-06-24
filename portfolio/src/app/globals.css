@@ -519,18 +519,33 @@ body::before {
 .section-link:hover { color: var(--tan); }
 
 /* ─── DECK (cartes empilées) ─────────────────────────────────────────── */
-.deck-stage-wrap {
-  position: relative;
-  height: 580px;
-  max-width: 900px;
-  margin: 0 auto clamp(2rem, 4vh, 3rem);
-  transform-origin: top center;
+/* Wider section so the fan can use the full horizontal space. */
+.section--wide {
+  max-width: 1320px;
 }
 
-/* One card */
+.deck-stage-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 1180px;
+  height: 560px;
+  margin: 0 auto clamp(2rem, 4vh, 3rem);
+  transform-origin: top center;
+  /* Single source of truth for card + iframe sizing. */
+  --scale: 0.5;
+  --card-w: calc(1440px * var(--scale));
+}
+
+/* One card — fixed width, centered via auto margins (no transform conflict
+   with Framer's x), so it can be fanned left/right freely. */
 .deck-card {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: var(--card-w);
+  height: 100%;
   border-radius: 20px;
   overflow: hidden;
   will-change: transform, opacity;
@@ -581,14 +596,14 @@ body::before {
   z-index: 1;
 }
 
-/* Scaled live iframe */
+/* Scaled live iframe — width matches the card via the shared --scale. */
 .deck-card-iframe {
   position: absolute;
   top: 0; left: 0;
   width: 1440px;
   height: 900px;
   border: 0;
-  transform: scale(0.625);
+  transform: scale(var(--scale));
   transform-origin: top left;
   pointer-events: none;
   background: #fff;
@@ -1089,8 +1104,7 @@ body::before {
 
 /* ─── RESPONSIVE ─────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .deck-stage-wrap { height: 500px; }
-  .deck-card-iframe { transform: scale(0.43); }
+  .deck-stage-wrap { height: 480px; --scale: 0.42; }
   .about-grid { grid-template-columns: 1fr; }
   .contact-grid { grid-template-columns: 1fr; }
 
@@ -1113,9 +1127,12 @@ body::before {
 }
 
 @media (max-width: 640px) {
-  .deck-stage-wrap { height: 460px; max-width: 100%; }
-  .deck-card-iframe { transform: scale(0.26); }
+  .deck-stage-wrap { height: 440px; --scale: 0.30; }
   .deck-card-info { padding: 1rem 1.2rem 1.2rem; }
+}
+
+@media (max-width: 440px) {
+  .deck-stage-wrap { height: 420px; --scale: 0.23; }
 }
 
 /* ─── REDUCED MOTION ─────────────────────────────────────────────────── */
